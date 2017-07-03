@@ -1,0 +1,10 @@
+81d650e8f743196e4d2676522e3e50a6 *DESCRIPTION
+fb7e10c9a227dfbadb677527fd64081b *NAMESPACE
+b7ece5ec5d2b846e0c51e3d0f7c02e18 *R/RcppExports.R
+af9ea9414c02ea5836e4f01b53213390 *R/Rfunctions.R
+eba3ec309f549fb2f027cedd2aec9a53 *man/IncDTW-package.Rd
+4078b5d8febf1e5f153a74999e14b45e *man/dtw.Rd
+f1d09eb58d64a04093811c12dd722e98 *man/idtw.Rd
+4622c77713f9f53522009d643e5a0b03 *src/GCM.cpp
+9ece3a58c8d27c4e45475438d5407d03 *src/RcppExports.cpp
+fc10b871d8b92ec2bc1ab54fc69c2f38 *src/init.c

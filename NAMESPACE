@@ -1,0 +1,4 @@
+export(dtw)
+export(idtw)
+importFrom(Rcpp, evalCpp)
+useDynLib(IncDTW, .registration = TRUE)
