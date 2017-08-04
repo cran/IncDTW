@@ -5,18 +5,17 @@
 dtw
 }
 \description{
-wrapper function for the C++ calculations and the BACKTRACK_cpp that finds the cheapest warping path.
+(LOCAL) wrapper function for the C++ calculations and the BACKTRACK_cpp that finds the cheapest warping path.
 }
 \usage{
 dtw(Q, C, ws = NULL, return_diffM = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{Q}{
-one dimensional numeriv vector
+  \item{Q}{one dimensional vector, query time series. Or Q can also be a matrix of differences/ costs (diffM, cm).
 }
 \item{C}{
-one dimensional numeriv vector
+one dimensional vector, time series to be fitted to C, and for which values are constantly observed. If Q is not a vector but a matrix, then C needs to be one of the following strings ('diffM', 'cm').
 }
 \item{ws}{
 integer, describes the window size for the sakoe chiba window. If NULL, then no window is applied. (default = NULL)
@@ -51,8 +50,18 @@ Maximilian Leodolter
 \examples{
 Q <- cumsum(rnorm(100))
 C <- Q[11:100] + rnorm(90, 0, 0.5)
-dtw(Q=Q, C=C, ws = 15, return_diffM = FALSE)
-dtw(Q=Q, C=C, ws = 15, return_diffM = TRUE)
+dtw(Q = Q, C = C, ws = 15, return_diffM = FALSE)
+
+# compare different input variations
+dtw_base <- dtw(Q = Q, C = C, ws = 15, return_diffM = TRUE)
+dtw_diffM <- dtw(Q = dtw_base$diffM, C = "diffM", ws = 15, return_diffM = TRUE)
+dtw_cm <- dtw(Q = abs(dtw_base$diffM), C = "cm", ws = 15, return_diffM = TRUE)
+
+identical(dtw_base$gcm, dtw_cm$gcm)
+identical(dtw_base$gcm, dtw_diffM$gcm)
+
+# of course no diffM is returned in the 'cm'-case
+dtw_cm$diffM
 }
 \keyword{ cluster }% use one of  RShowDoc("KEYWORDS")
 \keyword{ ts }% __ONLY ONE__ keyword per line

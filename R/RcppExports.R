@@ -2,22 +2,22 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 GCM_Sakoe_cpp <- function(cM, ws) {
-    .Call(IncDTW_GCM_Sakoe_cpp, cM, ws)
+    .Call(`_IncDTW_GCM_Sakoe_cpp`, cM, ws)
 }
 
 IGCM_Sakoe_cpp <- function(gcmN, dmN, cmN, ws) {
-    .Call(IncDTW_IGCM_Sakoe_cpp, gcmN, dmN, cmN, ws)
+    .Call(`_IncDTW_IGCM_Sakoe_cpp`, gcmN, dmN, cmN, ws)
 }
 
 GCM_cpp <- function(cM) {
-    .Call(IncDTW_GCM_cpp, cM)
+    .Call(`_IncDTW_GCM_cpp`, cM)
 }
 
 IGCM_cpp <- function(gcmN, dmN, cmN) {
-    .Call(IncDTW_IGCM_cpp, gcmN, dmN, cmN)
+    .Call(`_IncDTW_IGCM_cpp`, gcmN, dmN, cmN)
 }
 
 BACKTRACK_cpp <- function(dm) {
-    .Call(IncDTW_BACKTRACK_cpp, dm)
+    .Call(`_IncDTW_BACKTRACK_cpp`, dm)
 }
 

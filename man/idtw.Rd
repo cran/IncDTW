@@ -43,7 +43,7 @@ Maximilian Leodolter
 Q <- cumsum(rnorm(100))
 C <- Q[11:100] + rnorm(90, 0, 0.5)
 tmp <- dtw(Q=Q, C=C, ws = 15, return_diffM = FALSE) # the ordinary calculation
-# new Observation
+# new observation
 newObs <-  c(2,3)
 # the incremental step
 idtw(Q, C, newO = newObs, gcm=tmp$gcm, dm=tmp$dm, ws = 15, return_diffM = FALSE) 
