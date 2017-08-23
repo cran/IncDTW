@@ -30,7 +30,7 @@ Outline:
 ```{r, echo = FALSE, message=FALSE}
 library(IncDTW)
 library(dtw)
-library(microbenchmark)
+if(require(microbenchmark)){}
 ```
 
 

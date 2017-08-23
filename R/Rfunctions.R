@@ -209,8 +209,8 @@ plotWarp <- function(x, Q = NULL, C = NULL, ...){
    )
    text_yQ <- mean(Q)
    text_yC <- mean(C)
-   text_xwp <- length(Q)/2
-   text_ywp <- length(C)/2
+   text_xwp <- length(Q)
+   text_ywp <- length(C)
    
    gg_wp <- ggplot(tmp3, ...) +
       geom_line(aes_string(x='ii', y='jj')) +
@@ -225,9 +225,9 @@ plotWarp <- function(x, Q = NULL, C = NULL, ...){
             axis.ticks.y = element_blank(),
             axis.text.x = element_blank(),
             axis.ticks.x = element_blank())+
-         geom_text(label="Warping Path: ii", aes(y=1, x=text_xwp)) +
-         geom_text(label="Warping Path: jj", aes(x=1, y=text_ywp), angle = 90)
-   
+         geom_text(label="Warping Path: ii", aes(y=1, x = text_xwp), hjust = 1, vjust = 1) +
+         geom_text(label="Warping Path: jj", aes(x=1, y = text_ywp), hjust = 0, vjust = 1, angle = 90)
+
    gg_Q <- ggplot(tmp1[tmp1$id == "Q", ]) + 
       geom_line(aes_string(x = 'x', y = 'val')) + ylab("")+
       geom_point(aes_string(x = 'x', y = 'val')) +

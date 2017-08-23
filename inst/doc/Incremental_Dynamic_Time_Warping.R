@@ -1,7 +1,7 @@
 ## ---- echo = FALSE, message=FALSE----------------------------------------
 library(IncDTW)
 library(dtw)
-library(microbenchmark)
+if(require(microbenchmark)){}
 
 ## ------------------------------------------------------------------------
 set.seed(1090)
