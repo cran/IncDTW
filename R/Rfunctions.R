@@ -1,4 +1,4 @@
-dtw <- function(Q, C, ws = NULL, return_diffM = FALSE){
+dtw <- function(Q, C, ws = NULL, return_diffM = FALSE, return_QC = FALSE){
    # require(GCM)
    # wrapper function for the C++ implementation of
    # an calculation of the global cost matrix + direction matrix
@@ -60,11 +60,14 @@ dtw <- function(Q, C, ws = NULL, return_diffM = FALSE){
                       wp = rev(tmp$wp)))
 
    if(return_diffM) ret <- c(ret, list(diffM = diffM))
+   if(return_QC) ret <- c(ret, list(Q = Q, C = C))
+   class(ret) <- append(class(ret), "idtw")
    return(ret)
 }
 
 
-idtw <- function(Q, C, newO, gcm, dm, ws = NULL, return_diffM = FALSE){
+idtw <- function(Q, C, newO, gcm, dm, ws = NULL, 
+                 return_diffM = FALSE, return_QC = FALSE){
    # require(GCM)
    # wrapper function for the C++ implementation of
    # an incremental calculation of the global cost matrix + direction matrix
@@ -108,6 +111,8 @@ idtw <- function(Q, C, newO, gcm, dm, ws = NULL, return_diffM = FALSE){
                       wp = rev(tmp$wp)))
 
    if(return_diffM) ret <- c(ret, list(diffM = diffM))
+   if(return_QC) ret <- c(ret, list(Q = Q, C = C))
+   class(ret) <- append(class(ret), "idtw")
    return(ret)
 }
 
@@ -134,3 +139,128 @@ dec_dm <- function(dm, Ndec){
   }
   return(ret)
 }
+
+
+
+plot.idtw <- function(x, type = "QC", ...) {
+
+   pm <- pmatch(type, c("QC", "warp"))
+   if(is.na(pm)) stop("The Parameter type needs to be one of c('QC', 'warp')")
+
+   switch(pm,
+          plotQC(x, ...),
+          plotWarp(x, ...)
+   )
+}
+
+## an alias
+plot_idtw <- plot.idtw;
+
+
+
+plotQC <- function(x, Q = NULL, C = NULL, ...){
+   # Q <- sin(1:10)#+rnorm(20)
+   # # C <- sin(1:30)+rnorm(30)
+   # C <- sin(-2:10)#+rnorm(15)
+   # # C <- c(Q, cumsum(rnorm(20))) + rnorm(120, 0, 0.5)
+   # x <- dtw(Q = Q, C = C,  return_diffM = FALSE, return_QC = T)
+   
+   if(is.null(Q) & !is.null(x$Q)) Q <- x$Q
+   if(is.null(C) & !is.null(x$C)) C <- x$C
+   if(is.null(Q) | is.null(C)){
+      stop("Q and C either need to be returned from dtw() or idtw(), or defined manually")
+   }
+   tmp1 <- data.frame(val = c(Q, C),
+                      x = c(1:length(Q), 1:length(C)),
+                      id = c(rep("Q", length(Q)),
+                             rep("C", length(C))
+                      )
+   )
+   
+   tmp2 <- data.frame(x = c(x$ii, x$jj), 
+                         y = c(Q[x$ii], C[x$jj]),
+                         id = rep(1:length(x$ii), 2))
+   
+   gg1 <- ggplot(tmp1, ...) +
+      geom_line(aes_string(x = 'x', y = 'val', group = 'id', col = 'id')) + 
+      xlab("Index") + ylab("Value") +
+      geom_point(aes_string(x = 'x', y = 'val', col = 'id')) +
+      geom_line(data = tmp2, aes_string(x = 'x', y = 'y', group = 'id'), lty = 2) +
+      guides(col = guide_legend(title = NULL))
+   ret <- gg1
+   
+   return(ret)
+}
+
+
+plotWarp <- function(x, Q = NULL, C = NULL, ...){
+   if(is.null(Q) & !is.null(x$Q)) Q <- x$Q
+   if(is.null(C) & !is.null(x$C)) C <- x$C
+   if(is.null(Q) | is.null(C)){
+      stop("Q and C either need to be returned from dtw() or idtw(), or defined manually")
+   }
+   
+   tmp3 <- data.frame(ii=x$ii, jj = x$jj)
+   tmp1 <- data.frame(val = c(Q, C),
+                      x = c(1:length(Q), 1:length(C)),
+                      id = c(rep("Q", length(Q)),
+                             rep("C", length(C))
+                      )
+   )
+   text_yQ <- mean(Q)
+   text_yC <- mean(C)
+   text_xwp <- length(Q)/2
+   text_ywp <- length(C)/2
+   
+   gg_wp <- ggplot(tmp3, ...) +
+      geom_line(aes_string(x='ii', y='jj')) +
+      geom_point(aes_string(x = 'ii', y = 'jj')) + 
+      scale_x_continuous(position = "top", name = "", 
+                         breaks = scales::pretty_breaks(n=5),
+                         minor_breaks = NULL) +
+      scale_y_continuous(trans = "reverse", name = "", 
+                         breaks = scales::pretty_breaks(n=5),
+                         minor_breaks = NULL) +
+      theme(axis.text.y = element_blank(),
+            axis.ticks.y = element_blank(),
+            axis.text.x = element_blank(),
+            axis.ticks.x = element_blank())+
+         geom_text(label="Warping Path: ii", aes(y=1, x=text_xwp)) +
+         geom_text(label="Warping Path: jj", aes(x=1, y=text_ywp), angle = 90)
+   
+   gg_Q <- ggplot(tmp1[tmp1$id == "Q", ]) + 
+      geom_line(aes_string(x = 'x', y = 'val')) + ylab("")+
+      geom_point(aes_string(x = 'x', y = 'val')) +
+      theme(axis.text.y = element_blank(),
+            axis.ticks.y = element_blank(),
+            axis.title.x = element_blank()) +
+      theme(panel.grid.major.y =  element_line(colour = "#eaeaea"))+
+      theme(panel.grid.minor.y =  element_line(colour = "#eaeaea"))+
+      scale_x_continuous( breaks = scales::pretty_breaks(n=5),
+                          minor_breaks = NULL) +
+      geom_text(label="Q", aes(x=1, y=text_yQ))
+   
+   gg_C <- ggplot(tmp1[tmp1$id == "C", ]) + 
+      geom_line(aes_string(x = 'x', y = 'val')) + 
+      geom_point(aes_string(x = 'x', y = 'val')) +
+      theme(axis.text.x = element_blank(),
+            axis.ticks.x = element_blank())
+   gg_C <- gg_C + coord_flip() + 
+      scale_x_continuous(position = "top", trans = "reverse", name="", 
+                         breaks = scales::pretty_breaks(n=5), 
+                         minor_breaks = NULL) +
+      scale_y_continuous(name="", position="top")  +
+      theme(panel.grid.major.x =  element_line(colour = "#eaeaea"))+
+      theme(panel.grid.minor.x =  element_line(colour = "#eaeaea"))+
+      geom_text(label="C", aes(x=1, y=text_yC))
+   
+   
+   gg2 <- gridExtra::grid.arrange(gg_wp, gg_C, gg_Q,
+                                  layout_matrix = rbind(c(1,1,1,2), 
+                                                        c(1,1,1,2),
+                                                        c(1,1,1,2),
+                                                        c(3,3,3,NA)))
+   ret <- gg2
+   return(ret)
+}
+

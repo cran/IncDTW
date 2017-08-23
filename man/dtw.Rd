@@ -2,13 +2,13 @@
 \alias{dtw}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-dtw
+Dynamic Time Warping
 }
 \description{
-(LOCAL) wrapper function for the C++ calculations and the BACKTRACK_cpp that finds the cheapest warping path.
+Wrapper function for the C++ calculations of the global cost matrix and the BACKTRACK_cpp that finds the cheapest warping path.
 }
 \usage{
-dtw(Q, C, ws = NULL, return_diffM = FALSE)
+dtw(Q, C, ws = NULL, return_diffM = FALSE, return_QC = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -22,6 +22,9 @@ integer, describes the window size for the sakoe chiba window. If NULL, then no 
 }
 \item{return_diffM}{
 boolean, if TRUE then the Matrix of differences (not the absolute value) is returned. (default = FALSE)
+}
+\item{return_QC}{
+boolean, if TRUE then the input vectors Q and C are appended to the returned list. This is useful for the \code{\link{plot.idtw}} function.  (default = FALSE)
 }
 }
 \details{
@@ -39,6 +42,8 @@ The dynamic time warping distance is the element in the last row and last column
 \item{ii}{indices of C of the optimal path}
 \item{jj}{indices of Q of the optimal path}
 \item{diffM}{Matrix of differences}
+\item{Q}{input Q}
+\item{C}{input C}
 }
 \references{
 Sakoe, H.; Chiba, S., Dynamic programming algorithm optimization for spoken word recognition, Acoustics, Speech, and Signal Processing [see also IEEE Transactions on Signal Processing], IEEE Transactions on , vol.26, no.1, pp. 43-49, Feb 1978. http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1163055

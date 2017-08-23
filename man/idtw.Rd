@@ -2,13 +2,13 @@
 \alias{idtw}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-idtw
+Incremental Dynamic Time Warping
 }
 \description{
-wrapper function for the C++ calculations and the BACKTRACK_cpp that finds the cheapes warping path.
+Wrapper function for the incremental designed C++ calculations of the global cost matrix and the BACKTRACK_cpp that finds the cheapest warping path.
 }
 \usage{
-idtw(Q, C, newO, gcm, dm, ws = NULL, return_diffM = FALSE)
+idtw(Q, C, newO, gcm, dm, ws = NULL, return_diffM = FALSE, return_QC = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -19,6 +19,8 @@ idtw(Q, C, newO, gcm, dm, ws = NULL, return_diffM = FALSE)
 \item{dm}{direction matrix, output from dtw(Q=Q, C=C, ws=ws)}
 \item{ws}{integer, describes the window size for the sakoe chiba window. If NULL, then no window is applied. (default = NULL)}
 \item{return_diffM}{boolean, if TRUE then the Matrix of differences (not the absolute value) is returned. (default = FALSE)}
+\item{return_QC}{
+boolean, if TRUE then the input vectors Q and C are appended to the returned list. This is useful for the \code{\link{plot.idtw}} function.  (default = FALSE)}
 }
 \details{
 The dynamic time warping distance is the element in the last row and last column of the global cost matrix.
@@ -30,6 +32,8 @@ The dynamic time warping distance is the element in the last row and last column
 \item{ii}{indices of C of the optimal path}
 \item{jj}{indices of Q of the optimal path}
 \item{diffM}{Matrix of differences}
+\item{Q}{input Q}
+\item{C}{input C}
 }
 \references{
 Sakoe, H.; Chiba, S., Dynamic programming algorithm optimization for spoken word recognition, Acoustics, Speech, and Signal Processing [see also IEEE Transactions on Signal Processing], IEEE Transactions on , vol.26, no.1, pp. 43-49, Feb 1978.

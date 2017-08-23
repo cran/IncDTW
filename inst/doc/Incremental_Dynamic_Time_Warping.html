@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Leodolter Maximilian" />
+
+<meta name="date" content="2017-08-23" />
+
+<title>Incremental Dynamic Time Warping</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Incremental Dynamic Time Warping</h1>
+<h4 class="author"><em>Leodolter Maximilian</em></h4>
+<h4 class="date"><em>2017-08-23</em></h4>
+
+
+
+<p>Dynamic Time Warping is a well known and often applied technic to measure the distance between two time series. (<a href="https://www.google.at/search?q=dynamic+time+warpinig&amp;oq=dynamic+time+warpinig&amp;aqs=chrome..69i57j0l5.4553j0j7&amp;sourceid=chrome&amp;ie=UTF-8">Google</a>) finds about 750,000 matches for the term <em>Dynmic Time Warping</em>. Searching the scientific search engines for research articles for this subject results in:</p>
+<ul>
+<li>(<a href="https://scholar.google.at/scholar?hl=en&amp;q=dynamic+time+warping&amp;btnG=&amp;as_sdt=1%2C5&amp;as_sdtp=">scholar.google</a>) finds about 117,000 hits</li>
+<li>(<a href="http://dl.acm.org/results.cfm?query=Dynamic+Time+Warping&amp;Go.x=0&amp;Go.y=0">dl.acm.org</a>) more 130,000 hits</li>
+<li>(<a href="http://www.sciencedirect.com/search?qs=dynamic+time+warping&amp;origin=article&amp;zone=qSearch">sciencedirect</a>) about 16,000 hits</li>
+<li>(<a href="http://ieeexplore.ieee.org/search/searchresult.jsp?newsearch=true&amp;queryText=dynamic%20time%20warping">ieeexplore.org</a> about 2,000 hits</li>
+</ul>
+<p>To learn more about DTW interested readers may also read (<a href="https://en.wikipedia.org/wiki/Dynamic_time_warping">Wikipedia DTW</a>) or have look at this (<a href="http://www.phon.ox.ac.uk/jcoleman/old_SLP/Lecture_5/DTW_explanation.html">Dummy Example</a>). This (<a href="http://luthuli.cs.uiuc.edu/~daf/courses/cs-498-daf-ps/lecture%2018%20-%20time%20series,%20dtw.pdf">tutorial</a>) also explains the main idea of DTW, described in the original paper by (<a href="http://ieeexplore.ieee.org/document/1163055/">Sakoe and Chiba: Dynamic programming algorithm optimization for spoken word recognition</a>)</p>
+<p>Outline:</p>
+<ul>
+<li>Introduction to Dynamic Time Warping: dtw()</li>
+<li>Incremental Calculation of DTW: idtw()</li>
+<li>Calculation Time and Comparisons</li>
+<li>Decremental Dynamic Time Warping: dec_dm()</li>
+</ul>
+<div id="introduction-to-dynamic-time-warping-dtw" class="section level2">
+<h2>Introduction to Dynamic Time Warping: dtw()</h2>
+<p>In the following we will show with a toy example how to use the functions of IncDTW and what they are doing. We start with the basic function. Suppose we have two time series and we need to calculate the DTW distance of these:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">1090</span>)
+x &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">4</span>,<span class="dv">5</span>)
+h &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="fl">2.2</span>:<span class="fl">5.2</span>) 
+tmp &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> h, <span class="dt">C =</span> x, <span class="dt">return_diffM =</span> T, <span class="dt">return_QC =</span> <span class="ot">TRUE</span>)
+<span class="kw">names</span>(tmp)</code></pre></div>
+<pre><code>## [1] &quot;gcm&quot;   &quot;dm&quot;    &quot;ii&quot;    &quot;jj&quot;    &quot;wp&quot;    &quot;diffM&quot; &quot;Q&quot;     &quot;C&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(tmp, <span class="dt">type =</span> <span class="st">&quot;QC&quot;</span>)</code></pre></div>
+<div class="figure">
+<img src="data:image/png;base64,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" />
+
+</div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(tmp, <span class="dt">type =</span> <span class="st">&quot;warp&quot;</span>)</code></pre></div>
+<div class="figure">
+<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAABJlBMVEUAAAAAAAMAAAYAABAAABEAABgAA0UAA0sABjwABj0AEOoAEOsAEf8DAAADAwADEAMDEQMDRRADReoDResDS/8GAAAGPOoGPesQAAAQRQMQ6uoQ6+sRS/8R//8YAAAYgOsZAAAzMzM86uo9BgA96+tFAwBF60VF6+tLAwBNTU1NTW5NTY5NbqtNjshuTU1uTW5uTY5ubo5ubqtuq+SAGACA6uqA6+uOTU2OTW6OTY6Obk2ObquOyP+rbk2rbm6rbo6rjk2ryKur5OSr5P/Ijk3I///kq27k///qgBjq6hDq6jzq6oDq6urrEADrPQbrRQPrRRDrRUXrgBjr6xDr6z3r60Xr64Dr6+v/EQD/SwP/yI7/5Kv//xH//0v//4r//8j//+T///+XuywAAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAL+klEQVR4nO2dC5sbNxWGlW66ULYOlCbEsCSQUpO40C3NBgJlN0CTboHaXcDdznZNiP3//wQ60tw8upy5SJoZ63xPYnv9jWzptS4zmjkatiVZxfrOwNBFgBARIEQECBEBQkSAEBEgRAQIEQFCRIAQESBEBAgRAUJEgBARIEQECBEBQkSAEBEgRAQIEQFCRIAQESBEBAgRAUJEgBARIEQECBEBQoQASlLlL1QNzKoWYJHwf+Ih/wcPBIgAGSwChFi9AZreesyfZ+yAP15NDrSZvmTv6zJ9NWFCJfNfP1c25n/LtzwBmkEWfuwP0JIdi6ICpxU7bJLpq4nYfAafkMG4qwBqQqE5oKvJrccLnoUjP4A4+0v+2ZzMe1CsZblstQGt4BNCA+I5F0igAXAwM8DkHpBoIFDK5a1fwxP/Gl4+rkP+dIexn8KDeI+3kh/y9wVLxn4k60wJkEx1KR/uiC1T11MTg+/jSFbsBz77IAEIqEwPkxnvfviTqA680Vyy21A2dgz9kigj34y/D62QMyoDmsK7WSqoQXLLrIReAV3K3scroCVAgDogivnvx1mZ3oXno6yA2UvRZT3JAMlO+riU6m6eKBCgn3kdxaAlr6AAx1B1LkW5l2JggqLKYgpDlpE/QH1LvtupQUJFqmxL74AS/zWIE0qgYUHzSp9WMGpfNgVUThUGULIQgLI+6B/sfX+AZgfTw/xpCQCWOSDRWo5LgEQTu64CKqcKCkiMKwvR//kDdCl39eTTUlSFHFCpk5bF1nTSSZFqxXuusIA87wcJQCuxkyi+KoExifGdoqMUEB+xD5IyIDHM31H6oDQVfz7ItvQ7zGeAksXU6540s+bMtM93LVC2LWo7SwGUsBDHYo0BQWPaOWRzSsFijQVQAseGt31RsFiDBDQkiwAhFgFCLBVQwghQQoBqWwQIsQgQYhEgxNIAWjAC1CegFTtasVyHxpyFpGCxwgMSymrQsphD7pOCxWoIaH0yn591BwQTl0KX6vH5GAAxZgD05o8vt+tPXnYCxJsYG3cTY3LmXgfo5mP+8MpWhWpdHyS+Qby6Zg/qJBiQFkX2F9kb/OERV7oF1CKz6p/2EY1slE3MUoO4NuenNgIN+iCmH+uHD8jSB/H689zKp9nlL0zHaASA5MS0YRSzjmHNrw9SEY0aEMqnxQVUVUSjBnQxB3UYxbQ5221powCUmDtpRLUAwXm+ZGc3uoSIAOlzliMiQKacpS2NACWJvDCMMeVIFRCNAxAcbvsDdDUxngLk+/A9ULBYvQBKO2m9tHuPnilYrF4AXU0sgLbGg5B4AOnmyXZzpq9GQwJU2ld0PuVaSIepOKANR8FihQdUP9MKomgAqXvShkxXWhoB0mS6jGhQgIp9RdeAZnkXpL1gTMl0gSgSQMh+kCbTWUuLBlCLTMs5WvMJ2T4AZROvAY/FbJkuZvrdU7BYRkDF1L2PPenvXU2OSvFetTIdESDog6aHMpCgfqYjAzQ7qDfMlxRRHzS9DXRmzWpQPxfNmAHlx6seAEE8xZTpAw4IUPtMEyDEigXQ1LAHhGY6EkAQcv7ETCh6QBDqnLyeaHcSkUzHAUjsQL+eqJeW4ZkmQEimCRCSaQKEZDoWQPXOamgUB6AOmSZAiEWAEIsAIRYBQiwChFijALQ57x7tU4z0mlOHY59yvXARDiWWGluxQ91qHMZMj2PSfv3pZ10ASf2XvQtP1+xBk2ifIkaoTy2yh52YnzzaZ/PicydNTJx6XrLjJhGHo6hBF6cu+qC8iSWaExuj7oPWT790Aii5BvxHHJR6YmPUo5iM1bAFRNEw76YGESA7oDZXdyQjAYSo65X2BAjU9AqzTNEAwq60NykaQPiV9npFAyg/WKVOWg9or4d5AuQbUHn9IGpiGkAdMk2AECsiQE/k0XzDTMcDKJ8PapbpaAA1CYcqiwAhmY4GkLyZDzUxIyDrFTCjnpN2BKhdpkdxVsMNoHbTHREBajdhZo2o2y9AutNhNTLN+lg7zwjIZx/U9mBVWtpq1McothhYJ12yAq6dN05AAdfO6wdQy/NiO9ZuS+sFUDKsqGfVCrF2Xi+A2kU96yz/a+f1BqhF1LPWYp7XzusFUNuoZ4Plde08KyB5vOoBUMuoZ8tO9h4BEncqdF4eb4dp4QGJmF5LVG/r8vhZO68HQKDvzJA6lEdfjXwCym8J6RqQeDFzMYpVLOdr5/UFCO7XrA867No9OV47rx9AU8aMEx7d++9KSxsdIFjk7W5nCnbL3dp5CKDsjocOAYlDMG+7LblcrZ0XHpC4XfwDNxSsVtbSggLanM8/st2Ypf50h/Gmuy4rl4O181BAcmI681+dbW9++2VnQPzrZ4YjDcetzzrT76KTlh+f3x3qT1/YAdQLh5J6PQlx5yPXQVR5ONROUFQWDrV++lcnTczTnrROYWsQ3Jll/bRbE4M+2suxmEFB+yCA0/X2WX6O5m0H+p0+EAOU3lQ0td/8uTugDkUdPiAYxbo2sQ5FHQGgN8/nv7EOZLEDQkWACBAB2rEIEGIRIMQiQIhFgBCLACEWAUIsAoRYBAixCBBiESDEIkCItf+Awp72GR+gsJP2BGhPAXWIEdp7QF1jhBBA4++DMqttjBAGiFei/QCUtIwRiglQqxihuAC1iBGKDVDSNEYIB5SMfBTTWE1ihKIE1CRGKFJASe0YoXgB1YwRihlQrRihGoDgavI9BbTFY4SiB4TFCBEgkCVGiABJGWOECFAmQ4xQHUAJiwFQoo8RIkA7UmOECFBF1RihhoDWJ+O7yrWxtRMjVA9QFg4CF5FfuIn26ZuC1SrN9NcBVMTLiFAEa8RP/3cnciJzjFAl2kc88m3TaJ9YalDStgbBlfZWPvsCqG0ftP7k5fbG2kvvC6Bmo1i+Jw3hmKOL9gkJiGoQAmh7M3cTkjkwCharISBUBKgbIBIBQkSAEBEgRAQIEQFCRIAQESBEBAgRAUJEgBARIEQECBEBQkSAEO3LfJBp0p4ASRlP+xAgKQJksbIbD/UCaJEqf6GqT0veEit9lW4SFtBgqolqVQITDZP2cQLSRW0SoNQyRbQSoJoB0bECkmyanzj0DWhYQ1WdVIEBha0mqmUYqiyp9h9QhsQ2VFk+cO8B7e4XN//AOAB1+MC9BmStPTU/sA9AzyDP911R0FsFF7frB/kGxMfNrx6+/fvF9u/s+97G8mIYd/CBgQHxn+RXb/8Bfp9v7t3vXE1Uq+VQZbGCA5Jg+ItnAKpdpvVWh6HKYgUH9PVbH8qv/4944aY8XXtii9UjIPYLJ+WpfVTVzho1oFLF2RdAi8U/7/1EjhHP3vpgMEOVxQoMKJGj2Le/fOebe+80/VU7HlW1s8ID+vYhb2T/e8gMfbS/o6p2VnhAvBuS5Ww6inkcqixWH4DSr392v36mXRxVtbN6BFQ3066OqtpZgQE1HVl2x6o+JmoDA2ryq6otqo+J2oEC0nc3BAhk6YsJkIiv7oGCxRoOoKzixA3IMHyUB6uBXRkTGJDmp6t2OXHXoPRby4edQ6BgsXoB1M9hZzurP0BDomCxCBBiBQaUbfXIvN0jc7KBWJ1UMxTB8vXDtzqJACGiYBZEBAgRAUJEgBARIEQooPXv5ApfmvX0MutiPt9d73N9Mp+f6VMVlpLqJv9bSVVYSqrtdnNu+C4nwgDdpNmBXFx8rLW2r85208CycrB6miZVYSmpALfcVklVWEqqLTA7M+TQhRBArz76m6wmsJ5nVmMq1uZFZZW0G8imKImSqrCUVCC5rfpduaVJtf70szN9Dp2obhMTi55WFhxMLV61s2ZTSG6rS5W+oU0la4A2lbTUVJsXn8smpk3VXXUB6VZkzNjxJlP9ZTfnp6ZUqaVJtT6RK/ZpUmWWmuriNO2D8DUjW8lBDRLa7RvePD/dGlJlliZVjXqnpOLbbgZRg3Qt3AhofZL+pabKLTVV/oa+Nym2LaeCUW0+PzWm6qy6gKBhVMeIUuvb/KWUswKCkqqwlFRFE1FSFZaSapsP87ocOlAtQPDfsB8kRuDKcp/yVz3TpSpZ1VTpG9rvKiwllQRkyKED0Z40IgKEiAAhIkCICBAiAoSIACH6P67UTKEHXTf8AAAAAElFTkSuQmCC" />
+
+</div>
+<pre><code>## TableGrob (4 x 4) &quot;arrange&quot;: 3 grobs
+##   z     cells    name           grob
+## 1 1 (1-3,1-3) arrange gtable[layout]
+## 2 2 (1-3,4-4) arrange gtable[layout]
+## 3 3 (4-4,1-3) arrange gtable[layout]</code></pre>
+<p>The matrix of differences diffM simply stores the differences of the two time series x and h.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tmp$diffM</code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8]
+## [1,]  1.2  0.2 -0.8 -0.8 -0.8 -1.8 -1.8 -2.8
+## [2,]  2.2  1.2  0.2  0.2  0.2 -0.8 -0.8 -1.8
+## [3,]  3.2  2.2  1.2  1.2  1.2  0.2  0.2 -0.8
+## [4,]  4.2  3.2  2.2  2.2  2.2  1.2  1.2  0.2</code></pre>
+<p>The global cost matrix is calculated by walking through the matrix of absolute differences <code>abs(diffM)</code> from top left to bottom right applying the following rule:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cm &lt;-<span class="st"> </span><span class="kw">abs</span>(diffM) <span class="co"># cost matrix</span>
+gcm &lt;-<span class="st"> </span>cm <span class="co"># initialize the global cost matrix</span>
+for(j in <span class="dv">1</span>:m)
+for(i in <span class="dv">1</span>:n)
+gcm[ , <span class="dv">1</span>] &lt;-<span class="st"> </span>cm[ ,<span class="dv">1</span>]
+gcm[<span class="dv">1</span>,  ] &lt;-<span class="st"> </span>cm[<span class="dv">1</span>, ]
+gcm[i, j] &lt;-<span class="st"> </span>cm[i, j] +<span class="st"> </span><span class="kw">min</span>(<span class="kw">c</span>(gcm[i<span class="dv">-1</span>, j<span class="dv">-1</span>], 
+                              gcm[i  , j<span class="dv">-1</span>],
+                              gcm[i<span class="dv">-1</span>, j  ]))</code></pre></div>
+<p>The direction matrix dm is calculated simultaneously to the global cost matrix and stores for each position where to go next to make the cheapest step.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dm &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="ot">NA</span>, <span class="dt">ncol=</span><span class="kw">length</span>(x), <span class="dt">nrow =</span> <span class="kw">length</span>(h))
+dm[<span class="dv">1</span>,  ] &lt;-<span class="st"> </span><span class="dv">3</span>
+dm[ , <span class="dv">1</span>] &lt;-<span class="st"> </span><span class="dv">2</span>
+dm[<span class="dv">1</span>, <span class="dv">1</span>] &lt;-<span class="st"> </span><span class="ot">NA</span>
+
+for(j in <span class="dv">1</span>:m)
+for(i in <span class="dv">1</span>:n)
+min_index &lt;-<span class="st"> </span><span class="kw">which.min</span>(<span class="kw">c</span>(gcm[i<span class="dv">-1</span>, j<span class="dv">-1</span>], 
+                         gcm[i  , j<span class="dv">-1</span>], 
+                         gcm[i<span class="dv">-1</span>, j  ]))
+if( min_index ==<span class="st"> </span><span class="dv">1</span>){
+   dm[i, j] &lt;-<span class="st"> </span><span class="dv">1</span>
+} else if( min_index ==<span class="st"> </span><span class="dv">2</span>){
+   dm[i, j] &lt;-<span class="st"> </span><span class="dv">2</span>
+} else if( min_index ==<span class="st"> </span><span class="dv">3</span>){
+   dm[i, j] &lt;-<span class="st"> </span><span class="dv">3</span>
+}</code></pre></div>
+<p>In case the cost matrix, or the matrix of differences is already in storage, and you want to save calculation time, you can use these matrices also as input:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> tmp$diffM, <span class="dt">C =</span> <span class="st">&quot;diffM&quot;</span>)
+IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> <span class="kw">abs</span>(tmp$diffM), <span class="dt">C =</span> <span class="st">&quot;cm&quot;</span>)</code></pre></div>
+</div>
+<div id="incremental-calculation-of-dtw-idtw" class="section level2">
+<h2>Incremental Calculation of DTW: idtw()</h2>
+<p>The main intention of idtw() is to compare the DTW distance for different subsets of two time series. That is to compare the DTW(h, x_0) with DTW(h, x_1) where x_1 could be the extension of x_0 for couple of observations.</p>
+<p>Another possible application is a live data stream and you want to update the DTW calculation each time a set of values of x are observed. Of course this depends on the application and certainly does not make sense in any case, since a time warp of two time series where the lengths differ <em>too much</em> is questionable. A reasonable range for the ratio n/m depends on the application and purposes of the data analysis.</p>
+<p>Assume we already have calculated the DTW of x and h, when an update of x shows new observations:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">1030</span>)
+x0 &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">1000</span>))
+h &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">800</span>))
+tmp0 &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> h, <span class="dt">C =</span> x0)
+gcm0 &lt;-<span class="st"> </span>tmp0$gcm
+dm0 &lt;-<span class="st"> </span>tmp0$dm</code></pre></div>
+<p>To update the DTW distance for new observations of x we recycle as much from previous results as possible to keep calculation time low:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x_new &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">10</span>))
+x_update &lt;-<span class="st"> </span><span class="kw">c</span>(x0, x_new) 
+
+<span class="co"># result from incremental calculation</span>
+res_inc &lt;-<span class="st"> </span>IncDTW::<span class="kw">idtw</span>(<span class="dt">Q =</span> h, <span class="dt">C =</span> x_update, <span class="dt">newO =</span> x_new, 
+                    <span class="dt">gcm =</span> tmp0$gcm, <span class="dt">dm =</span> tmp0$dm)</code></pre></div>
+<p>Finally we compare the results from the incremental calculation with the one from scratch:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># result from scratch</span>
+res_scratch &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> h, <span class="dt">C =</span> x_update) 
+<span class="kw">sapply</span>(<span class="kw">names</span>(res_inc), function(x){<span class="kw">identical</span>(res_inc[[x]], res_scratch[[x]])})</code></pre></div>
+<pre><code>##  gcm   dm   ii   jj   wp 
+## TRUE TRUE TRUE TRUE TRUE</code></pre>
+</div>
+<div id="calculation-time-and-comparisons" class="section level2">
+<h2>Calculation Time and Comparisons</h2>
+<p>We compare the calculation time for these different functions</p>
+<ul>
+<li>IncDTW::dtw()</li>
+<li>IncDTW::idtw()</li>
+<li>dtw::dtw()</li>
+</ul>
+<p>where the last one is used as benchmark. Moreover we test calculation times for different ways of using these functions and different input parameters, respectively. To compare the calculation times we use the package microbenchmark, which uses the function <code>my_check()</code> to compare the values of the calculated DTW distances to be identical. First we define the functions with special settings to be tested. Then we test the computation times and compare implicitly the computed values (by the function <code>my_check()</code>), first without warping window, and then with the sakoe chiba window.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_check &lt;-<span class="st"> </span>function(values) {
+  <span class="kw">all</span>(<span class="kw">sapply</span>(values[-<span class="dv">1</span>], function(x) <span class="kw">identical</span>(values[[<span class="dv">1</span>]], x)))
+}
+
+<span class="co">#--- define 'benchmark' functions from package: dtw</span>
+dtw_0 &lt;-<span class="st"> </span>function(x,h){
+   dtw::<span class="kw">dtw</span>(x , h, <span class="dt">step.pattern =</span> symmetric1)$distance }
+
+dtw_sc &lt;-<span class="st"> </span>function(x,h){
+   dtw::<span class="kw">dtw</span>(x , h, <span class="dt">step.pattern =</span> symmetric1, 
+            <span class="dt">window.type =</span> <span class="st">&quot;sakoechiba&quot;</span>, <span class="dt">window.size =</span> <span class="dv">40</span>)$distance }
+
+dtw_cm&lt;-<span class="st"> </span>function(cm){
+   dtw::<span class="kw">dtw</span>(<span class="dt">x=</span>cm, <span class="dt">step.pattern =</span> symmetric1)$distance }
+
+<span class="co">#--- define functions to be tested from package: IncDTW</span>
+idtw_0 &lt;-<span class="st"> </span>function(x,h){
+   IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> h, <span class="dt">C =</span> x)$gcm[<span class="kw">length</span>(h), <span class="kw">length</span>(x)] }
+
+idtw_sc &lt;-<span class="st"> </span>function(x,h){
+   IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> h, <span class="dt">C =</span> x, <span class="dt">ws =</span> <span class="dv">40</span>)$gcm[<span class="kw">length</span>(h), <span class="kw">length</span>(x)] }
+
+idtw_diff &lt;-<span class="st"> </span>function(diffM){
+   IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> diffM, <span class="dt">C =</span> <span class="st">&quot;diffM&quot;</span>)$gcm[<span class="kw">nrow</span>(diffM), <span class="kw">ncol</span>(diffM)] }
+
+idtw_cm &lt;-<span class="st"> </span>function(cm){
+   IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> cm, <span class="dt">C =</span> <span class="st">&quot;cm&quot;</span>)$gcm[<span class="kw">nrow</span>(cm), <span class="kw">ncol</span>(cm)] }
+
+idtw_inc &lt;-<span class="st"> </span>function(x,h,gcm00, dm00){
+   IncDTW::<span class="kw">idtw</span>(<span class="dt">Q =</span> h, <span class="dt">C =</span> x, <span class="dt">newO =</span> x[(<span class="kw">length</span>(x)-<span class="dv">9</span>) :<span class="st"> </span><span class="kw">length</span>(x)],
+                <span class="dt">gcm =</span> gcm00, <span class="dt">dm =</span> dm00)$gcm[<span class="kw">length</span>(h), <span class="kw">length</span>(x)] }</code></pre></div>
+<p>After defining the functions, we execute them for many synthetic random walks inside of <code>lapply()</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tmp &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="dv">1</span>:<span class="dv">100</span>, function(pseudoseed){
+   <span class="kw">set.seed</span>(pseudoseed)
+   x &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">500</span>))
+   h &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">480</span>))
+   tmp00 &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> h, <span class="dt">C =</span> x[<span class="dv">1</span>:(<span class="kw">length</span>(x)-<span class="dv">10</span>)], <span class="dt">return_diffM =</span> <span class="ot">TRUE</span>)
+   gcm00 &lt;-<span class="st"> </span>tmp00$gcm
+   dm00 &lt;-<span class="st"> </span>tmp00$dm
+   tmp &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> h, <span class="dt">C =</span> x, <span class="dt">return_diffM =</span> <span class="ot">TRUE</span>)
+   diffM &lt;-<span class="st"> </span>tmp$diffM
+   cm &lt;-<span class="st"> </span><span class="kw">abs</span>(diffM)
+   
+   mic &lt;-<span class="st"> </span><span class="kw">microbenchmark</span>( <span class="kw">dtw_0</span>(x,h),
+                          <span class="kw">dtw_cm</span>(cm),
+                          <span class="co">#----</span>
+                          <span class="kw">idtw_0</span>(x,h),
+                          <span class="kw">idtw_diff</span>(diffM),
+                          <span class="kw">idtw_cm</span>(cm),
+                          <span class="kw">idtw_inc</span>(x,h,gcm00, dm00),
+                          <span class="dt">check =</span> my_check,
+                          <span class="dt">times =</span> <span class="dv">1</span>)
+                          
+   <span class="kw">return</span>(<span class="kw">as.data.frame</span>(mic))
+})
+mics &lt;-<span class="st"> </span><span class="kw">do.call</span>(rbind, tmp)
+<span class="kw">class</span>(mics) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;microbenchmark&quot;</span>, <span class="st">&quot;data.frame&quot;</span>)</code></pre></div>
+<p>Now we aggregate the results and print them as <code>microbenchmark</code> object. This table shows how much faster our proposed functions are than the baseline, and how much calculation time can be saved by recycling already existing calculation results. On average our proposed method in the most basic form <code>idtw_0</code> is about 3 times faster than the appropriate pendant <code>dtw_0</code>. Also the incremental way of calculating saves time, that is <code>idtw_inc</code> is about 4 times faster than calculating from scratch with <code>itdw_0</code> and about 3 times faster compared to the case when the difference matrix is already given <code>idtw_diff</code> or similar, when the cost matrix is given <code>idtw_cm</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(mics, <span class="dt">digits =</span> <span class="dv">2</span>, <span class="dt">unit =</span> <span class="st">&quot;ms&quot;</span>)</code></pre></div>
+<pre><code>## Unit: milliseconds
+##                         expr   min   lq mean median   uq  max neval
+##                  dtw_0(x, h) 15.91 18.1 21.2   20.7 21.8 93.0   100
+##                   dtw_cm(cm)  9.56 12.1 13.2   12.6 14.5 17.3   100
+##                 idtw_0(x, h)  5.54  6.2  6.6    6.3  6.5 10.0   100
+##             idtw_diff(diffM)  2.57  4.2  4.4    4.3  4.5  8.0   100
+##                  idtw_cm(cm)  2.11  3.6  3.7    3.7  3.8  7.9   100
+##  idtw_inc(x, h, gcm00, dm00)  0.71  1.3  1.4    1.3  1.3  8.8   100</code></pre>
+<p>Next we compare the functions with the sakoe chiba warping window. These need to be tested separately, since the return value can differ from the one without warping window, so the function <code>my_check()</code> would stop the execution. Nevertheless we simulate exactly (using the same seeds) the same time series as above, such that the computation times are comparable.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tmp &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="dv">1</span>:<span class="dv">100</span>, function(pseudoseed){
+   <span class="kw">set.seed</span>(pseudoseed)
+   x &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">500</span>))
+   h &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">480</span>))
+   tmp00 &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> h, <span class="dt">C =</span> x[<span class="dv">1</span>:(<span class="kw">length</span>(x)-<span class="dv">10</span>)], <span class="dt">return_diffM =</span> <span class="ot">TRUE</span>)
+   gcm00 &lt;-<span class="st"> </span>tmp00$gcm
+   dm00 &lt;-<span class="st"> </span>tmp00$dm
+   tmp &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> h, <span class="dt">C =</span> x, <span class="dt">return_diffM =</span> <span class="ot">TRUE</span>)
+   diffM &lt;-<span class="st"> </span>tmp$diffM
+   cm &lt;-<span class="st"> </span><span class="kw">abs</span>(diffM)
+   
+   mic &lt;-<span class="st"> </span><span class="kw">microbenchmark</span>( <span class="kw">dtw_sc</span>(x,h),
+                          <span class="co">#----</span>
+                          <span class="kw">idtw_sc</span>(x,h),
+                          <span class="dt">check =</span> my_check,
+                          <span class="dt">times =</span> <span class="dv">1</span>)
+
+   <span class="kw">return</span>(<span class="kw">as.data.frame</span>(mic))
+})
+mics_sc &lt;-<span class="st"> </span><span class="kw">do.call</span>(rbind, tmp)
+<span class="kw">class</span>(mics_sc) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;microbenchmark&quot;</span>, <span class="st">&quot;data.frame&quot;</span>)</code></pre></div>
+<p>Again the <code>idtw</code> function outperforms the baseline even by a factor of about 4 to 5. Both functions are about 3 milliseconds faster than the appropriate pendants without warping window <code>dtw_0</code> and <code>idtw_0</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(mics_sc, <span class="dt">digits =</span> <span class="dv">2</span>, <span class="dt">unit =</span> <span class="st">&quot;ms&quot;</span>)</code></pre></div>
+<pre><code>## Unit: milliseconds
+##           expr  min lq mean median   uq max neval
+##   dtw_sc(x, h) 13.8 15 15.2   15.1 15.6  18   100
+##  idtw_sc(x, h)  3.7  4  4.1    4.1  4.2   6   100</code></pre>
+</div>
+<div id="decremental-dynamic-time-warping-dec_dm" class="section level2">
+<h2>Decremental Dynamic Time Warping: dec_dm()</h2>
+<p>Now that we have understood the incremental approach and tested the calculation time and correctness of results, we want to introduce another concept, which is just the reverse: Instead of adding new observations to the time series x, in this section we introduce an easy and fast way of reducing most current observations, conditional to already existing calculation results including all observations of x.</p>
+<p>Of course this is only interesting if you are interested not only in the DTW distance, but also want to know about the warping path. Meanwhile the DTW distance could be directly taken from the global cost matrix from previous calculations (by selecting the value of the last row and last but k column, k is the number of reduced observations of x), we cannot update or modify the previous warping path but need to calculate it again from scratch. This is required, since adding or neglecting observations causes an updated alignment of the two updated time series, and in general the new alignment could be completely different from the original.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">1150</span>)
+Q &lt;-<span class="st"> </span><span class="kw">cos</span>(<span class="dv">1</span>:<span class="dv">100</span>)
+C &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">80</span>))
+Ndec &lt;-<span class="st"> </span><span class="dv">4</span>
+<span class="co"># the ordinary calculation</span>
+result_base &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<span class="dt">Q=</span>Q, <span class="dt">C=</span>C) 
+gcm0 &lt;-<span class="st"> </span>result_base$gcm</code></pre></div>
+<p>To update the DTW distance by decreasing x for some observations (say 4), again we recycle as much from previous results as possible to keep calculation time low:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># the ordinary calculation without the last 4 observations</span>
+result_decr1 &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<span class="dt">Q=</span>Q, <span class="dt">C=</span>C[<span class="dv">1</span>:(<span class="kw">length</span>(C) -<span class="st"> </span>Ndec)])
+gcm1 &lt;-<span class="st"> </span>result_decr1$gcm
+
+<span class="co"># the decremental step: reduce C for 4 observation</span>
+result_decr2 &lt;-<span class="st"> </span>IncDTW::<span class="kw">dec_dm</span>(result_base$dm, <span class="dt">Ndec =</span> Ndec) 
+
+<span class="co"># compare ii, jj and wp of result_decr and those of </span>
+<span class="kw">identical</span>(result_decr1$ii, result_decr2$ii)</code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">identical</span>(result_decr1$jj, result_decr2$jj)</code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">identical</span>(result_decr1$wp, result_decr2$wp)</code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">gcm1[<span class="kw">nrow</span>(gcm1), <span class="kw">ncol</span>(gcm1)] ==<span class="st"> </span>gcm0[<span class="kw">nrow</span>(gcm0), <span class="kw">ncol</span>(gcm0) -<span class="st"> </span>Ndec]</code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
