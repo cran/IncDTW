@@ -8,11 +8,11 @@ Dynamic Time Warping
 Wrapper function for the C++ calculations of the global cost matrix and the BACKTRACK_cpp that finds the cheapest warping path.
 }
 \usage{
-dtw(Q, C, ws = NULL, return_diffM = FALSE, return_QC = FALSE)
+dtw(Q, C, ws = NULL, return_diffM = FALSE, return_diffp = FALSE, return_QC = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{Q}{one dimensional vector, query time series. Or Q can also be a matrix of differences/ costs (diffM, cm).
+  \item{Q}{one dimensional vector, query time series. Alternatively Q can also be a matrix of differences/ costs (diffM, cm).
 }
 \item{C}{
 one dimensional vector, time series to be fitted to C, and for which values are constantly observed. If Q is not a vector but a matrix, then C needs to be one of the following strings ('diffM', 'cm').
@@ -22,6 +22,9 @@ integer, describes the window size for the sakoe chiba window. If NULL, then no 
 }
 \item{return_diffM}{
 boolean, if TRUE then the Matrix of differences (not the absolute value) is returned. (default = FALSE)
+}
+\item{return_diffp}{
+boolean, if TRUE then the path of differences (not the absolute value) is returned. (default = FALSE)
 }
 \item{return_QC}{
 boolean, if TRUE then the input vectors Q and C are appended to the returned list. This is useful for the \code{\link{plot.idtw}} function.  (default = FALSE)
@@ -42,6 +45,7 @@ The dynamic time warping distance is the element in the last row and last column
 \item{ii}{indices of C of the optimal path}
 \item{jj}{indices of Q of the optimal path}
 \item{diffM}{Matrix of differences}
+\item{diffp}{path of differences}
 \item{Q}{input Q}
 \item{C}{input C}
 }

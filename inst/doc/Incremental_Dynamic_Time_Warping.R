@@ -5,12 +5,20 @@ if(require(microbenchmark)){}
 
 ## ------------------------------------------------------------------------
 set.seed(1090)
-x <- c(1,2,3,3,3,4,4,5)
-h <- c(2.2:5.2) 
-tmp <- IncDTW::dtw(Q = h, C = x, return_diffM = T, return_QC = TRUE)
+Q <- c(1,2,3,3,3,4,4,5)
+C <- c(2.2:5.2)
+tmp <- IncDTW::dtw(Q = Q, C = C, return_diffM = T, return_QC = TRUE)
 names(tmp)
 
-## ---- fig.show=TRUE------------------------------------------------------
+## ---- echo=FALSE, eval=FALSE, results='hide'-----------------------------
+#  # dummy example rebuilt
+#  set.seed(1090)
+#  Q <- c(1, 1, 2, 3, 2, 0)
+#  C <- c(0, 1, 1, 2, 3, 2, 1)
+#  tmp <- IncDTW::dtw(Q = Q, C = C, return_diffM = T, return_QC = TRUE)
+#  names(tmp)
+
+## ---- fig.show=TRUE, results='hide', fig.align='center', fig.height=7, fig.width=7, echo=FALSE----
 plot(tmp, type = "QC")
 plot(tmp, type = "warp")
 
@@ -20,32 +28,32 @@ tmp$diffM
 ## ---- eval=FALSE---------------------------------------------------------
 #  cm <- abs(diffM) # cost matrix
 #  gcm <- cm # initialize the global cost matrix
-#  for(j in 1:m)
-#  for(i in 1:n)
-#  gcm[ , 1] <- cm[ ,1]
-#  gcm[1,  ] <- cm[1, ]
-#  gcm[i, j] <- cm[i, j] + min(c(gcm[i-1, j-1],
-#                                gcm[i  , j-1],
-#                                gcm[i-1, j  ]))
+#  for(j in 1:m){
+#     for(i in 1:n){
+#        gcm[ , 1] <- cm[ ,1]
+#        gcm[1,  ] <- cm[1, ]
+#        gcm[i, j] <- cm[i, j] + min(c(gcm[i-1, j-1],
+#                                      gcm[i  , j-1],
+#                                      gcm[i-1, j  ]))}}
 
 ## ---- eval=FALSE---------------------------------------------------------
-#  dm <- matrix(NA, ncol=length(x), nrow = length(h))
+#  dm <- matrix(NA, ncol=length(C), nrow = length(Q))
 #  dm[1,  ] <- 3
 #  dm[ , 1] <- 2
 #  dm[1, 1] <- NA
 #  
-#  for(j in 1:m)
-#  for(i in 1:n)
-#  min_index <- which.min(c(gcm[i-1, j-1],
-#                           gcm[i  , j-1],
-#                           gcm[i-1, j  ]))
-#  if( min_index == 1){
-#     dm[i, j] <- 1
-#  } else if( min_index == 2){
-#     dm[i, j] <- 2
-#  } else if( min_index == 3){
-#     dm[i, j] <- 3
-#  }
+#  for(j in 1:m){
+#     for(i in 1:n){
+#        min_index <- which.min(c(gcm[i-1, j-1],
+#                                 gcm[i  , j-1],
+#                                 gcm[i-1, j  ]))
+#        if( min_index == 1){
+#           dm[i, j] <- 1
+#        } else if( min_index == 2){
+#           dm[i, j] <- 2
+#        } else if( min_index == 3){
+#           dm[i, j] <- 3
+#        } } }
 
 ## ---- eval=FALSE---------------------------------------------------------
 #  IncDTW::dtw(Q = tmp$diffM, C = "diffM")
@@ -53,23 +61,23 @@ tmp$diffM
 
 ## ---- message = FALSE----------------------------------------------------
 set.seed(1030)
-x0 <- cumsum(rnorm(1000))
-h <- cumsum(rnorm(800))
-tmp0 <- IncDTW::dtw(Q = h, C = x0)
+C0 <- cumsum(rnorm(1000))
+Q <- cumsum(rnorm(800))
+tmp0 <- IncDTW::dtw(Q = Q, C = C0)
 gcm0 <- tmp0$gcm
 dm0 <- tmp0$dm
 
 ## ------------------------------------------------------------------------
-x_new <- cumsum(rnorm(10))
-x_update <- c(x0, x_new) 
+C_new <- cumsum(rnorm(10))
+C_update <- c(C0, C_new) 
 
 # result from incremental calculation
-res_inc <- IncDTW::idtw(Q = h, C = x_update, newO = x_new, 
+res_inc <- IncDTW::idtw(Q = Q, C = C_update, newO = C_new, 
                     gcm = tmp0$gcm, dm = tmp0$dm)
 
 ## ------------------------------------------------------------------------
 # result from scratch
-res_scratch <- IncDTW::dtw(Q = h, C = x_update) 
+res_scratch <- IncDTW::dtw(Q = Q, C = C_update) 
 sapply(names(res_inc), function(x){identical(res_inc[[x]], res_scratch[[x]])})
 
 ## ---- message=FALSE------------------------------------------------------
@@ -78,22 +86,22 @@ my_check <- function(values) {
 }
 
 #--- define 'benchmark' functions from package: dtw
-dtw_0 <- function(x,h){
-   dtw::dtw(x , h, step.pattern = symmetric1)$distance }
+dtw_0 <- function(C, Q){
+   dtw::dtw(C, Q, step.pattern = symmetric1)$distance }
 
-dtw_sc <- function(x,h){
-   dtw::dtw(x , h, step.pattern = symmetric1, 
+dtw_sc <- function(C, Q){
+   dtw::dtw(C, Q, step.pattern = symmetric1, 
             window.type = "sakoechiba", window.size = 40)$distance }
 
 dtw_cm<- function(cm){
    dtw::dtw(x=cm, step.pattern = symmetric1)$distance }
 
 #--- define functions to be tested from package: IncDTW
-idtw_0 <- function(x,h){
-   IncDTW::dtw(Q = h, C = x)$gcm[length(h), length(x)] }
+idtw_0 <- function(C, Q){
+   IncDTW::dtw(Q = Q, C = C)$gcm[length(Q), length(C)] }
 
-idtw_sc <- function(x,h){
-   IncDTW::dtw(Q = h, C = x, ws = 40)$gcm[length(h), length(x)] }
+idtw_sc <- function(C, Q){
+   IncDTW::dtw(Q = Q, C = C, ws = 40)$gcm[length(Q), length(C)] }
 
 idtw_diff <- function(diffM){
    IncDTW::dtw(Q = diffM, C = "diffM")$gcm[nrow(diffM), ncol(diffM)] }
@@ -101,30 +109,30 @@ idtw_diff <- function(diffM){
 idtw_cm <- function(cm){
    IncDTW::dtw(Q = cm, C = "cm")$gcm[nrow(cm), ncol(cm)] }
 
-idtw_inc <- function(x,h,gcm00, dm00){
-   IncDTW::idtw(Q = h, C = x, newO = x[(length(x)-9) : length(x)],
-                gcm = gcm00, dm = dm00)$gcm[length(h), length(x)] }
+idtw_inc <- function(C, Q, gcm00, dm00){
+   IncDTW::idtw(Q = Q, C = C, newO = C[(length(C)-9) : length(C)],
+                gcm = gcm00, dm = dm00)$gcm[length(Q), length(C)] }
 
 
 ## ------------------------------------------------------------------------
 tmp <- lapply(1:100, function(pseudoseed){
    set.seed(pseudoseed)
-   x <- cumsum(rnorm(500))
-   h <- cumsum(rnorm(480))
-   tmp00 <- IncDTW::dtw(Q = h, C = x[1:(length(x)-10)], return_diffM = TRUE)
+   C <- cumsum(rnorm(500))
+   Q <- cumsum(rnorm(480))
+   tmp00 <- IncDTW::dtw(Q = Q, C = C[1:(length(C)-10)], return_diffM = TRUE)
    gcm00 <- tmp00$gcm
    dm00 <- tmp00$dm
-   tmp <- IncDTW::dtw(Q = h, C = x, return_diffM = TRUE)
+   tmp <- IncDTW::dtw(Q = Q, C = C, return_diffM = TRUE)
    diffM <- tmp$diffM
    cm <- abs(diffM)
    
-   mic <- microbenchmark( dtw_0(x,h),
+   mic <- microbenchmark( dtw_0(C, Q),
                           dtw_cm(cm),
                           #----
-                          idtw_0(x,h),
+                          idtw_0(C, Q),
                           idtw_diff(diffM),
                           idtw_cm(cm),
-                          idtw_inc(x,h,gcm00, dm00),
+                          idtw_inc(C, Q, gcm00, dm00),
                           check = my_check,
                           times = 1)
                           
@@ -139,18 +147,18 @@ print(mics, digits = 2, unit = "ms")
 ## ------------------------------------------------------------------------
 tmp <- lapply(1:100, function(pseudoseed){
    set.seed(pseudoseed)
-   x <- cumsum(rnorm(500))
-   h <- cumsum(rnorm(480))
-   tmp00 <- IncDTW::dtw(Q = h, C = x[1:(length(x)-10)], return_diffM = TRUE)
+   C <- cumsum(rnorm(500))
+   Q <- cumsum(rnorm(480))
+   tmp00 <- IncDTW::dtw(Q = Q, C = C[1:(length(C)-10)], return_diffM = TRUE)
    gcm00 <- tmp00$gcm
    dm00 <- tmp00$dm
-   tmp <- IncDTW::dtw(Q = h, C = x, return_diffM = TRUE)
+   tmp <- IncDTW::dtw(Q = Q, C = C, return_diffM = TRUE)
    diffM <- tmp$diffM
    cm <- abs(diffM)
    
-   mic <- microbenchmark( dtw_sc(x,h),
+   mic <- microbenchmark( dtw_sc(C, Q),
                           #----
-                          idtw_sc(x,h),
+                          idtw_sc(C, Q),
                           check = my_check,
                           times = 1)
 
@@ -179,9 +187,12 @@ gcm1 <- result_decr1$gcm
 # the decremental step: reduce C for 4 observation
 result_decr2 <- IncDTW::dec_dm(result_base$dm, Ndec = Ndec) 
 
-# compare ii, jj and wp of result_decr and those of 
-identical(result_decr1$ii, result_decr2$ii)
-identical(result_decr1$jj, result_decr2$jj)
-identical(result_decr1$wp, result_decr2$wp)
-gcm1[nrow(gcm1), ncol(gcm1)] == gcm0[nrow(gcm0), ncol(gcm0) - Ndec]
+# compare the results: ii, jj, wp and the gcm of 
+# result_decr1 (conventional) and result_decr2 (recycling previous results)
+comparison_0 <- c(
+identical(result_decr1$ii, result_decr2$ii),
+identical(result_decr1$jj, result_decr2$jj),
+identical(result_decr1$wp, result_decr2$wp),
+identical(gcm1[nrow(gcm1), ncol(gcm1)], gcm0[nrow(gcm0), ncol(gcm0) - Ndec]))
+comparison_0
 

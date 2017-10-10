@@ -1,4 +1,4 @@
-dtw <- function(Q, C, ws = NULL, return_diffM = FALSE, return_QC = FALSE){
+dtw <- function(Q, C, ws = NULL, return_diffM = FALSE, return_diffp = FALSE, return_QC = FALSE){
    # require(GCM)
    # wrapper function for the C++ implementation of
    # an calculation of the global cost matrix + direction matrix
@@ -23,6 +23,7 @@ dtw <- function(Q, C, ws = NULL, return_diffM = FALSE, return_QC = FALSE){
          cm <- Q
          n <- nrow(cm)
          m <- ncol(cm)
+         return_diffp <- FALSE
          diffM <- NA
       } else{
          stop("C needs to be a vector or one of the two strings: 'diffM' for difference Matrix or 'cm' for cost Matrix")
@@ -54,20 +55,35 @@ dtw <- function(Q, C, ws = NULL, return_diffM = FALSE, return_QC = FALSE){
    } else {
       ret <- GCM_Sakoe_cpp(cm, ws)
    }
-   tmp <- BACKTRACK_cpp(ret$dm)
+   
+   #--- get warping path and diff-path
+   if(return_diffp){
+      if(is.integer(diffM[2,2])){
+         tmp <- BACKTRACK2II_cpp(ret$dm, diffM)   
+      }else{
+         tmp <- BACKTRACK2IN_cpp(ret$dm, diffM)
+      }
+   }else{
+      tmp <- BACKTRACK_cpp(ret$dm)
+   }
    ret <- c(ret, list(ii = rev(tmp$ii),
                       jj = rev(tmp$jj),
                       wp = rev(tmp$wp)))
 
    if(return_diffM) ret <- c(ret, list(diffM = diffM))
+   if(return_diffp) ret <- c(ret, list(diffp = tmp$diffp))
    if(return_QC) ret <- c(ret, list(Q = Q, C = C))
    class(ret) <- append(class(ret), "idtw")
    return(ret)
 }
 
 
-idtw <- function(Q, C, newO, gcm, dm, ws = NULL, 
-                 return_diffM = FALSE, return_QC = FALSE){
+##################################################################################
+##################################################################################
+
+
+idtw <- function(Q, C, newO, gcm, dm, diffM = NULL, ws = NULL, 
+                 return_diffM = FALSE, return_diffp = FALSE, return_QC = FALSE){
    # require(GCM)
    # wrapper function for the C++ implementation of
    # an incremental calculation of the global cost matrix + direction matrix
@@ -78,6 +94,7 @@ idtw <- function(Q, C, newO, gcm, dm, ws = NULL,
    # newO ... one dimensional vector, new observation, to be appended to C
    # gcm ... global cost matrix, output from dtw(Q,C)
    # dm ... direction matrix, output from dtw(Q,C)
+   # diffM ... differences matrix, output from dtw(Q,C) (only important if return_diffp == TRUE)
 
    #--- initial checking
    n <- length(Q)
@@ -96,8 +113,8 @@ idtw <- function(Q, C, newO, gcm, dm, ws = NULL,
    dm  <- cbind(dm, matrix(NA, nrow = n, ncol = o))
    mQ <- matrix(Q, ncol = o, nrow = n, byrow = F)
    mC <- matrix(newO, ncol = o, nrow = n, byrow = T)
-   diffM <- matrix((mQ - mC), ncol = length(newO))
-   cm <- abs(diffM)
+   diffMo <- matrix((mQ - mC), ncol = length(newO))
+   cm <- abs(diffMo)
 
    #--- calculation in C++
    if(is.null(ws)){
@@ -105,19 +122,35 @@ idtw <- function(Q, C, newO, gcm, dm, ws = NULL,
    } else {
       ret <- IGCM_Sakoe_cpp(gcmN = gcm, dmN = dm, cmN = cm, ws = ws)
    }
-   tmp <- BACKTRACK_cpp(ret$dm)
+   
+   #--- get warping path and diff-path
+   if(return_diffp | return_diffM) diffM <- cbind(diffM, diffMo)
+   if(return_diffp){
+      if( is.integer(diffM[2,2]) & is.integer(diffMo[2,1]) ){
+         tmp <- BACKTRACK2II_cpp(ret$dm, diffM)   
+      }else{
+         tmp <- BACKTRACK2IN_cpp(ret$dm, diffM)
+      }
+   }else{
+      tmp <- BACKTRACK_cpp(ret$dm)
+   }
    ret <- c(ret, list(ii = rev(tmp$ii),
                       jj = rev(tmp$jj),
                       wp = rev(tmp$wp)))
-
+   
    if(return_diffM) ret <- c(ret, list(diffM = diffM))
+   if(return_diffp) ret <- c(ret, list(diffp = tmp$diffp))
    if(return_QC) ret <- c(ret, list(Q = Q, C = C))
    class(ret) <- append(class(ret), "idtw")
    return(ret)
 }
 
 
-dec_dm <- function(dm, Ndec){
+##################################################################################
+##################################################################################
+
+
+dec_dm <- function(dm, Ndec, diffM = NULL){
   # wrapper function for the C++ implementation of
   # an decremental calculation of the warping path subject to a given
   # direction matrix for dynamic time warping
@@ -125,6 +158,10 @@ dec_dm <- function(dm, Ndec){
   # dm ... direction matrix, output from dtw(Q,C)
   # Ndec ... integer, number of observations (columns) to be reduced
   
+   if(!is.integer(dm[2,2])){
+      warning("The direction matrix is no integer matrix -> takes longer to process")
+   }
+   
   Nnew <- ncol(dm) - Ndec
   if(Nnew == 1){
      warning("Nnew = 1, calculation is maybe meaningless")
@@ -132,14 +169,31 @@ dec_dm <- function(dm, Ndec){
                  jj = rep(1, nrow(dm)),
                  wp = rep(3, nrow(dm)-1) )
   } else {
-     tmp <- BACKTRACK_cpp(dm[, 1:Nnew])
-     ret <- list(ii = rev(tmp$ii),
-                 jj = rev(tmp$jj),
-                 wp = rev(tmp$wp))
+     if(is.null(diffM)){
+        tmp <- BACKTRACK_cpp(dm[, 1:Nnew])
+        ret <- list(ii = rev(tmp$ii),
+                    jj = rev(tmp$jj),
+                    wp = rev(tmp$wp))   
+     }else{
+        if(is.integer(diffM[2,2])){
+           tmp <- BACKTRACK2II_cpp(dm[, 1:Nnew], diffM)
+        }else{
+           tmp <- BACKTRACK2IN_cpp(dm[, 1:Nnew], diffM)
+        }
+        # tmp <- BACKTRACK_cpp2(dm[, 1:Nnew], diffM[, 1:Nnew])# should not make any difference
+        ret <- list(ii = rev(tmp$ii),
+                    jj = rev(tmp$jj),
+                    wp = rev(tmp$wp),
+                    diffp = rev(tmp$diffp))   
+     }
+     
   }
   return(ret)
 }
 
+
+##################################################################################
+##################################################################################
 
 
 plot.idtw <- function(x, type = "QC", ...) {
@@ -153,9 +207,17 @@ plot.idtw <- function(x, type = "QC", ...) {
    )
 }
 
+
+##################################################################################
+##################################################################################
+
+
 ## an alias
 plot_idtw <- plot.idtw;
 
+
+##################################################################################
+##################################################################################
 
 
 plotQC <- function(x, Q = NULL, C = NULL, ...){
@@ -191,6 +253,10 @@ plotQC <- function(x, Q = NULL, C = NULL, ...){
    
    return(ret)
 }
+
+
+##################################################################################
+##################################################################################
 
 
 plotWarp <- function(x, Q = NULL, C = NULL, ...){

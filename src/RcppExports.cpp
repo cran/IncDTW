@@ -18,13 +18,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // IGCM_Sakoe_cpp
-List IGCM_Sakoe_cpp(Rcpp::NumericMatrix gcmN, Rcpp::NumericMatrix dmN, Rcpp::NumericMatrix cmN, int ws);
+List IGCM_Sakoe_cpp(Rcpp::NumericMatrix gcmN, Rcpp::IntegerMatrix dmN, Rcpp::NumericMatrix cmN, int ws);
 RcppExport SEXP _IncDTW_IGCM_Sakoe_cpp(SEXP gcmNSEXP, SEXP dmNSEXP, SEXP cmNSEXP, SEXP wsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type gcmN(gcmNSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type dmN(dmNSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type dmN(dmNSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type cmN(cmNSEXP);
     Rcpp::traits::input_parameter< int >::type ws(wsSEXP);
     rcpp_result_gen = Rcpp::wrap(IGCM_Sakoe_cpp(gcmN, dmN, cmN, ws));
@@ -43,26 +43,50 @@ BEGIN_RCPP
 END_RCPP
 }
 // IGCM_cpp
-List IGCM_cpp(Rcpp::NumericMatrix gcmN, Rcpp::NumericMatrix dmN, Rcpp::NumericMatrix cmN);
+List IGCM_cpp(Rcpp::NumericMatrix gcmN, Rcpp::IntegerMatrix dmN, Rcpp::NumericMatrix cmN);
 RcppExport SEXP _IncDTW_IGCM_cpp(SEXP gcmNSEXP, SEXP dmNSEXP, SEXP cmNSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type gcmN(gcmNSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type dmN(dmNSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type dmN(dmNSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type cmN(cmNSEXP);
     rcpp_result_gen = Rcpp::wrap(IGCM_cpp(gcmN, dmN, cmN));
     return rcpp_result_gen;
 END_RCPP
 }
 // BACKTRACK_cpp
-List BACKTRACK_cpp(Rcpp::NumericMatrix dm);
+List BACKTRACK_cpp(Rcpp::IntegerMatrix dm);
 RcppExport SEXP _IncDTW_BACKTRACK_cpp(SEXP dmSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type dm(dmSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type dm(dmSEXP);
     rcpp_result_gen = Rcpp::wrap(BACKTRACK_cpp(dm));
+    return rcpp_result_gen;
+END_RCPP
+}
+// BACKTRACK2IN_cpp
+List BACKTRACK2IN_cpp(Rcpp::IntegerMatrix dm, Rcpp::NumericMatrix diffM);
+RcppExport SEXP _IncDTW_BACKTRACK2IN_cpp(SEXP dmSEXP, SEXP diffMSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type dm(dmSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type diffM(diffMSEXP);
+    rcpp_result_gen = Rcpp::wrap(BACKTRACK2IN_cpp(dm, diffM));
+    return rcpp_result_gen;
+END_RCPP
+}
+// BACKTRACK2II_cpp
+List BACKTRACK2II_cpp(Rcpp::IntegerMatrix dm, Rcpp::IntegerMatrix diffM);
+RcppExport SEXP _IncDTW_BACKTRACK2II_cpp(SEXP dmSEXP, SEXP diffMSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type dm(dmSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type diffM(diffMSEXP);
+    rcpp_result_gen = Rcpp::wrap(BACKTRACK2II_cpp(dm, diffM));
     return rcpp_result_gen;
 END_RCPP
 }

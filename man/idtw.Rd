@@ -8,7 +8,10 @@ Incremental Dynamic Time Warping
 Wrapper function for the incremental designed C++ calculations of the global cost matrix and the BACKTRACK_cpp that finds the cheapest warping path.
 }
 \usage{
-idtw(Q, C, newO, gcm, dm, ws = NULL, return_diffM = FALSE, return_QC = FALSE)
+idtw(Q, C, newO, gcm, dm, diffM = NULL, ws = NULL, 
+     return_diffM = FALSE, 
+     return_diffp = FALSE, 
+     return_QC = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -17,8 +20,12 @@ idtw(Q, C, newO, gcm, dm, ws = NULL, return_diffM = FALSE, return_QC = FALSE)
 \item{newO}{one dimensional numeric vector of new observations to be appended to C}
 \item{gcm}{global cost matrix, output from dtw(Q=Q, C=C, ws=ws)}
 \item{dm}{direction matrix, output from dtw(Q=Q, C=C, ws=ws)}
+\item{diffM}{differences matrix, output from dtw(Q=Q, C=C, ws=ws)}
 \item{ws}{integer, describes the window size for the sakoe chiba window. If NULL, then no window is applied. (default = NULL)}
 \item{return_diffM}{boolean, if TRUE then the Matrix of differences (not the absolute value) is returned. (default = FALSE)}
+\item{return_diffp}{
+boolean, if TRUE then the path of differences (not the absolute value) is returned. (default = FALSE)
+}
 \item{return_QC}{
 boolean, if TRUE then the input vectors Q and C are appended to the returned list. This is useful for the \code{\link{plot.idtw}} function.  (default = FALSE)}
 }
@@ -32,6 +39,7 @@ The dynamic time warping distance is the element in the last row and last column
 \item{ii}{indices of C of the optimal path}
 \item{jj}{indices of Q of the optimal path}
 \item{diffM}{Matrix of differences}
+\item{diffp}{path of differences}
 \item{Q}{input Q}
 \item{C}{input C}
 }
@@ -46,12 +54,23 @@ Maximilian Leodolter
 \examples{
 Q <- cumsum(rnorm(100))
 C <- Q[11:100] + rnorm(90, 0, 0.5)
-tmp <- dtw(Q=Q, C=C, ws = 15, return_diffM = FALSE) # the ordinary calculation
+tmp <- dtw(Q=Q, C=C, ws = 15, return_diffM = TRUE) # the ordinary calculation
 # new observation
 newObs <-  c(2,3)
 # the incremental step
-idtw(Q, C, newO = newObs, gcm=tmp$gcm, dm=tmp$dm, ws = 15, return_diffM = FALSE) 
+idtw(Q, C, newO = newObs, gcm=tmp$gcm, dm=tmp$dm, diffM = tmp$diffM, 
+return_diffp = TRUE, ws = 15, return_diffM = TRUE) 
 
+# now with integers
+Q <- 1:10
+C <- 2:20
+tmp <- dtw(Q=Q, C=C, ws = 15, return_diffM = TRUE) # the ordinary calculation
+# new observation
+newObs <-  c(2L,3L)
+# the incremental step
+tmpnew <- idtw(Q, C, newO = newObs, gcm=tmp$gcm, dm=tmp$dm, diffM = tmp$diffM, 
+      return_diffp = TRUE, ws = 15, return_diffM = TRUE) 
+str(tmpnew)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

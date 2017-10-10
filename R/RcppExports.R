@@ -21,3 +21,11 @@ BACKTRACK_cpp <- function(dm) {
     .Call(`_IncDTW_BACKTRACK_cpp`, dm)
 }
 
+BACKTRACK2IN_cpp <- function(dm, diffM) {
+    .Call(`_IncDTW_BACKTRACK2IN_cpp`, dm, diffM)
+}
+
+BACKTRACK2II_cpp <- function(dm, diffM) {
+    .Call(`_IncDTW_BACKTRACK2II_cpp`, dm, diffM)
+}
+
