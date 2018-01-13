@@ -30,7 +30,8 @@ Outline:
 ```{r, echo = FALSE, message=FALSE}
 library(IncDTW)
 library(dtw)
-if(require(microbenchmark)){}
+benchmark_replications <- c(100,100)
+# if(require(microbenchmark)){}
 ```
 
 
@@ -44,30 +45,43 @@ The distance measure DTW calcuates the minimal costs of the shortest non-linear 
 
 Remark: The DTW distance measure is not a distance metric in the conventional sense, since it does not fulfill the triangle inequality. 
 
-In the following we will show with a toy example how to use the functions of IncDTW and what they are doing. We start with the basic function. Suppose we have two time series and we need to calculate the DTW distance of these:
+In the following we show by aid of toy example how to use the functions of IncDTW and what they are doing. We start with the basic functions. Suppose we have two time series and we need to calculate the DTW distance of these:
 
 ```{r}
 set.seed(1090)
-Q <- c(1,2,3,3,3,4,4,5)
-C <- c(2.2:5.2)
-tmp <- IncDTW::dtw(Q = Q, C = C, return_diffM = T, return_QC = TRUE)
+Q <- sin(1:10)#+rnorm(20)
+C <- sin(-2:10)#+rnorm(15)
+tmp <- IncDTW::dtw(Q = Q, C = C, return_diffM = TRUE, return_wp = TRUE, return_QC = TRUE, return_cm = TRUE, return_diffp = TRUE)
 names(tmp)
 ```
 
-```{r, echo=FALSE, eval=FALSE, results='hide'}
-# dummy example rebuilt
-set.seed(1090)
-Q <- c(1, 1, 2, 3, 2, 0)
-C <- c(0, 1, 1, 2, 3, 2, 1)
-tmp <- IncDTW::dtw(Q = Q, C = C, return_diffM = T, return_QC = TRUE)
-names(tmp)
+
+```{r, fig.show=TRUE, results='hide', fig.align='center', fig.height=3.5, fig.width=7, echo=FALSE}
+plot(x=tmp, type = "QC")
 ```
 
 ```{r, fig.show=TRUE, results='hide', fig.align='center', fig.height=7, fig.width=7, echo=FALSE}
-plot(tmp, type = "QC")
-plot(tmp, type = "warp")
+plot(x=tmp, type = "warp")
 ```
 
+
+Another toy example:
+```{r}
+set.seed(1090)
+Q <- c(1, 1, 2, 3, 2, 0)
+C <- c(0, 1, 1, 2, 3, 2, 1)
+
+tmp <- IncDTW::dtw(Q = Q, C = C, return_diffM = TRUE, return_wp = TRUE, return_QC = TRUE, return_cm = TRUE, return_diffp = TRUE)
+names(tmp)
+```
+
+```{r, fig.show=TRUE, results='hide', fig.align='center', fig.height=3.5, fig.width=7, echo=FALSE}
+plot(x=tmp, type = "QC")
+```
+
+```{r, fig.show=TRUE, results='hide', fig.align='center', fig.height=7, fig.width=7, echo=FALSE}
+plot(x=tmp, type = "warp")
+```
 
 The matrix of differences diffM simply stores the differences of the two time series $Q$ and $C$. 
 ```{r}
@@ -159,7 +173,13 @@ We compare the calculation time for these different functions
 + IncDTW::idtw()
 + dtw::dtw()
 
-where the last one is used as benchmark. Moreover we test calculation times for different ways of using these functions and different input parameters, respectively. To compare the calculation times  we use the package microbenchmark, which uses the function `my_check()` to compare the values of the calculated DTW distances to be identical. First we define the functions with special settings to be tested. Then we test the computation times and compare implicitly the computed values (by the function `my_check()`), first without warping window, and then with the sakoe chiba window.
+
+
+where the last one is used as benchmark. Moreover we test calculation times for different ways of using these functions and different input parameters, respectively. To compare the calculation times  we use the package rbenchmark. 
+
+I can not use the package microbenchmark here in the official vignette on CRAN because it has currently the status of 'currently-unstated OS requirements', and does not run reliably on some OSes. For interested readers/ users please visit my github page <https://github.com/maxar/IncDTW/blob/master/vignettes/Incremental_Dynamic_Time_Warping.Rmd> where you will find more detailed run-time comparisons with the help of the microbenchmark package. Also there the function my_check()` is applied to compare the values of the calculated DTW distances to be identical. 
+
+First we define the functions with special settings to be tested. Then we test the computation times and compare implicitly the computed values (by the function `my_check()`), first without warping window, and then with the sakoe chiba window.
 
 ```{r, message=FALSE}
 my_check <- function(values) {
@@ -179,27 +199,27 @@ dtw_cm<- function(cm){
 
 #--- define functions to be tested from package: IncDTW
 idtw_0 <- function(C, Q){
-   IncDTW::dtw(Q = Q, C = C)$gcm[length(Q), length(C)] }
+   IncDTW::dtw(Q = Q, C = C)$distance }
 
 idtw_sc <- function(C, Q){
-   IncDTW::dtw(Q = Q, C = C, ws = 40)$gcm[length(Q), length(C)] }
+   IncDTW::dtw(Q = Q, C = C, ws = 40)$distance }
 
 idtw_diff <- function(diffM){
-   IncDTW::dtw(Q = diffM, C = "diffM")$gcm[nrow(diffM), ncol(diffM)] }
+   IncDTW::dtw(Q = diffM, C = "diffM")$distane }
 
 idtw_cm <- function(cm){
-   IncDTW::dtw(Q = cm, C = "cm")$gcm[nrow(cm), ncol(cm)] }
+   IncDTW::dtw(Q = cm, C = "cm")$distance }
 
 idtw_inc <- function(C, Q, gcm00, dm00){
    IncDTW::idtw(Q = Q, C = C, newO = C[(length(C)-9) : length(C)],
-                gcm = gcm00, dm = dm00)$gcm[length(Q), length(C)] }
+                gcm = gcm00, dm = dm00)$distance }
 
 ```
 
 After defining the functions, we execute them for many synthetic random walks inside of  `lapply()`. 
 
 ```{r}
-tmp <- lapply(1:100, function(pseudoseed){
+tmp <- lapply(1:20, function(pseudoseed){
    set.seed(pseudoseed)
    C <- cumsum(rnorm(500))
    Q <- cumsum(rnorm(480))
@@ -210,27 +230,31 @@ tmp <- lapply(1:100, function(pseudoseed){
    diffM <- tmp$diffM
    cm <- abs(diffM)
    
-   mic <- microbenchmark( dtw_0(C, Q),
+   
+   mic <- rbenchmark::benchmark( dtw_0(C, Q),
                           dtw_cm(cm),
                           #----
                           idtw_0(C, Q),
                           idtw_diff(diffM),
                           idtw_cm(cm),
                           idtw_inc(C, Q, gcm00, dm00),
-                          check = my_check,
-                          times = 1)
+                          replications = benchmark_replications[1]
+                        )
                           
    return(as.data.frame(mic))
 })
 mics <- do.call(rbind, tmp)
-class(mics) <- c("microbenchmark", "data.frame")
+# class(mics) <- c("microbenchmark", "data.frame")
 ```
 
-Now we aggregate the results and print them as `microbenchmark` object. This table shows how much faster our proposed functions are than the baseline, and how much calculation time can be saved by recycling already existing calculation results. On average our proposed method in the most basic form `idtw_0` is about 3 times faster than the appropriate pendant `dtw_0`. Also the incremental way of calculating saves time, that is  `idtw_inc` is about 4 times faster than calculating from scratch with `itdw_0` and about 3 times faster compared to the case when the difference matrix is already given `idtw_diff` or similar, when the cost matrix is given `idtw_cm`.
+Now we aggregate the results and print them. This table shows how much faster our proposed functions are than the baseline, and how much calculation time can be saved by recycling already existing calculation results. On average our proposed method in the most basic form `idtw_0` is about 3 times faster than the appropriate pendant `dtw_0`. Also the incremental way of calculating saves time, that is  `idtw_inc` is about 5 times faster than calculating from scratch with `itdw_0` and about 2-3 times faster compared to the case when the difference matrix is already given `idtw_diff` or similar, when the cost matrix is given `idtw_cm`.
 
 
 ```{r}
-print(mics, digits = 2, unit = "ms")
+head(mics)
+tmp <- aggregate(mics$elapsed, by = list(mics$test), mean)
+tmp$xrel <- tmp$x/min(tmp$x)
+tmp
 ```
 
 
@@ -238,7 +262,7 @@ Next we compare the functions with the sakoe chiba warping window. These need to
 
 
 ```{r}
-tmp <- lapply(1:100, function(pseudoseed){
+tmp <- lapply(1:20, function(pseudoseed){
    set.seed(pseudoseed)
    C <- cumsum(rnorm(500))
    Q <- cumsum(rnorm(480))
@@ -249,22 +273,24 @@ tmp <- lapply(1:100, function(pseudoseed){
    diffM <- tmp$diffM
    cm <- abs(diffM)
    
-   mic <- microbenchmark( dtw_sc(C, Q),
+   mic <- rbenchmark::benchmark( dtw_sc(C, Q),
                           #----
                           idtw_sc(C, Q),
-                          check = my_check,
-                          times = 1)
+                          replications = benchmark_replications[1])
 
    return(as.data.frame(mic))
 })
 mics_sc <- do.call(rbind, tmp)
-class(mics_sc) <- c("microbenchmark", "data.frame")
 ```
 
 Again the `idtw` function outperforms the baseline even by a factor of about 4 to 5. Both functions are about 3 milliseconds faster than the appropriate pendants without warping window `dtw_0` and `idtw_0`.
 
 ```{r}
-print(mics_sc, digits = 2, unit = "ms")
+head(mics_sc)
+tmp <- aggregate(mics_sc$elapsed, by = list(mics_sc$test), mean)
+tmp$xrel <- tmp$x/min(tmp$x)
+tmp
+
 ```
 
 

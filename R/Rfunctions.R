@@ -1,4 +1,8 @@
-dtw <- function(Q, C, ws = NULL, return_diffM = FALSE, return_diffp = FALSE, return_QC = FALSE){
+dtw <- function(Q, C, ws = NULL, return_cm = FALSE,
+                                 return_diffM = FALSE,
+                                 return_wp = FALSE,
+                                 return_diffp = FALSE,
+                                 return_QC = FALSE){
    # require(GCM)
    # wrapper function for the C++ implementation of
    # an calculation of the global cost matrix + direction matrix
@@ -11,6 +15,8 @@ dtw <- function(Q, C, ws = NULL, return_diffM = FALSE, return_diffp = FALSE, ret
    #           if Q is not a vector C needs to be one 
    #           of the following strings ('diffM', 'cm')
   
+   if(return_diffp) return_wp <- TRUE
+   
    if(is.character(C)){
       if(C == "diffM"){
          cm <- abs(Q)
@@ -57,21 +63,27 @@ dtw <- function(Q, C, ws = NULL, return_diffM = FALSE, return_diffp = FALSE, ret
    }
    
    #--- get warping path and diff-path
-   if(return_diffp){
-      if(is.integer(diffM[2,2])){
-         tmp <- BACKTRACK2II_cpp(ret$dm, diffM)   
-      }else{
-         tmp <- BACKTRACK2IN_cpp(ret$dm, diffM)
+   if(return_wp){
+      if(return_diffp){
+         if(is.integer(diffM[2,2])){
+            tmp <- BACKTRACK2II_cpp(ret$dm, diffM)   
+         }else{
+            tmp <- BACKTRACK2IN_cpp(ret$dm, diffM)
+         }
+         ret <- c(ret, list(diffp = tmp$diffp))
+      }else {
+         tmp <- BACKTRACK_cpp(ret$dm)
       }
-   }else{
-      tmp <- BACKTRACK_cpp(ret$dm)
+      ret <- c(ret, list(ii = rev(tmp$ii),
+                         jj = rev(tmp$jj),
+                         wp = rev(tmp$wp)))
    }
-   ret <- c(ret, list(ii = rev(tmp$ii),
-                      jj = rev(tmp$jj),
-                      wp = rev(tmp$wp)))
+   
+   #--- add dtw_distance
+   ret <- c(list(distance = ret$gcm[n, m]), ret)
 
+   if(return_cm) ret <- c(ret, list(cm = cm))
    if(return_diffM) ret <- c(ret, list(diffM = diffM))
-   if(return_diffp) ret <- c(ret, list(diffp = tmp$diffp))
    if(return_QC) ret <- c(ret, list(Q = Q, C = C))
    class(ret) <- append(class(ret), "idtw")
    return(ret)
@@ -83,7 +95,11 @@ dtw <- function(Q, C, ws = NULL, return_diffM = FALSE, return_diffp = FALSE, ret
 
 
 idtw <- function(Q, C, newO, gcm, dm, diffM = NULL, ws = NULL, 
-                 return_diffM = FALSE, return_diffp = FALSE, return_QC = FALSE){
+                 return_cm = FALSE,
+                 return_diffM = FALSE,
+                 return_wp = FALSE,
+                 return_diffp = FALSE,
+                 return_QC = FALSE){
    # require(GCM)
    # wrapper function for the C++ implementation of
    # an incremental calculation of the global cost matrix + direction matrix
@@ -95,11 +111,43 @@ idtw <- function(Q, C, newO, gcm, dm, diffM = NULL, ws = NULL,
    # gcm ... global cost matrix, output from dtw(Q,C)
    # dm ... direction matrix, output from dtw(Q,C)
    # diffM ... differences matrix, output from dtw(Q,C) (only important if return_diffp == TRUE)
-
+   
+   if(return_diffp) return_wp <- TRUE
+   
+   
+   if(is.character(C)){
+      return_QC <- FALSE
+      if(C == "diffM_add"){
+         cm_add <- abs(Q)
+         n <- nrow(cm_add)#should be equal nrow(gcm)
+         m <- ncol(gcm)
+         o <- ncol(cm_add)
+         
+         if(return_diffM) diffM <- Q
+         rm(list=c("Q"))
+         
+      } else if(C == "cm_add"){
+         cm_add <- Q
+         n <- nrow(cm_add)#should be equal nrow(gcm)
+         m <- ncol(gcm)
+         o <- ncol(cm_add)
+         
+         rm(list=c("Q"))
+         return_diffp <- FALSE
+         diffM <- NA
+      } else{
+         stop("C needs to be a vector or one of the two strings: 
+               'diffM_add' for difference Matrix or
+              'cm_add' for cost Matrix")
+      }
+   } else {
+      n <- length(Q)
+      m <- ncol(gcm)
+      o <- length(newO)
+   }
+   
+   
    #--- initial checking
-   n <- length(Q)
-   m <- length(C)
-   o <- length(newO)
    m2 <- o+m
    if(!is.null(ws)){
       if(abs(n-m2)>ws){
@@ -108,39 +156,47 @@ idtw <- function(Q, C, newO, gcm, dm, diffM = NULL, ws = NULL,
    }
 
    #--- preparation
-   C <- c(C, newO)
    gcm <- cbind(gcm, matrix(NA, nrow = n, ncol = o))
    dm  <- cbind(dm, matrix(NA, nrow = n, ncol = o))
-   mQ <- matrix(Q, ncol = o, nrow = n, byrow = F)
-   mC <- matrix(newO, ncol = o, nrow = n, byrow = T)
-   diffMo <- matrix((mQ - mC), ncol = length(newO))
-   cm <- abs(diffMo)
+   if(!is.character(C)){
+      mQ <- matrix(Q, ncol = o, nrow = n, byrow = F)
+      mC <- matrix(newO, ncol = o, nrow = n, byrow = T)
+      diffM_add <- matrix((mQ - mC), ncol = length(newO))
+      cm_add <- abs(diffM_add)
+   }
 
    #--- calculation in C++
    if(is.null(ws)){
-      ret <- IGCM_cpp(gcmN = gcm, dmN = dm, cmN = cm)
+      ret <- IGCM_cpp(gcmN = gcm, dmN = dm, cmN = cm_add)
    } else {
-      ret <- IGCM_Sakoe_cpp(gcmN = gcm, dmN = dm, cmN = cm, ws = ws)
+      ret <- IGCM_Sakoe_cpp(gcmN = gcm, dmN = dm, cmN = cm_add, ws = ws)
    }
    
    #--- get warping path and diff-path
-   if(return_diffp | return_diffM) diffM <- cbind(diffM, diffMo)
-   if(return_diffp){
-      if( is.integer(diffM[2,2]) & is.integer(diffMo[2,1]) ){
-         tmp <- BACKTRACK2II_cpp(ret$dm, diffM)   
-      }else{
-         tmp <- BACKTRACK2IN_cpp(ret$dm, diffM)
+   if(return_diffp | return_diffM) diffM <- cbind(diffM, diffM_add)
+   if(return_wp){
+      if(return_diffp){
+         if( is.integer(diffM[2,2]) & is.integer(diffM_add[2,1]) ){
+            tmp <- BACKTRACK2II_cpp(ret$dm, diffM)   
+         }else{
+            tmp <- BACKTRACK2IN_cpp(ret$dm, diffM)
+         }
+         ret <- c(ret, list(diffp = tmp$diffp))
+      }else {
+         tmp <- BACKTRACK_cpp(ret$dm)
       }
-   }else{
-      tmp <- BACKTRACK_cpp(ret$dm)
+      ret <- c(ret, list(ii = rev(tmp$ii),
+                         jj = rev(tmp$jj),
+                         wp = rev(tmp$wp)))
    }
-   ret <- c(ret, list(ii = rev(tmp$ii),
-                      jj = rev(tmp$jj),
-                      wp = rev(tmp$wp)))
    
+   
+   #--- add dtw_distance
+   ret <- c(list(distance = ret$gcm[n, m2]), ret)
+   
+   if(return_cm) ret <- c(ret, list(cm = cm_add))
    if(return_diffM) ret <- c(ret, list(diffM = diffM))
-   if(return_diffp) ret <- c(ret, list(diffp = tmp$diffp))
-   if(return_QC) ret <- c(ret, list(Q = Q, C = C))
+   if(return_QC) ret <- c(ret, list(Q = Q, C = c(C, newO)))
    class(ret) <- append(class(ret), "idtw")
    return(ret)
 }

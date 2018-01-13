@@ -1,26 +1,35 @@
 ## ---- echo = FALSE, message=FALSE----------------------------------------
 library(IncDTW)
 library(dtw)
-if(require(microbenchmark)){}
+benchmark_replications <- c(100,100)
+# if(require(microbenchmark)){}
 
 ## ------------------------------------------------------------------------
 set.seed(1090)
-Q <- c(1,2,3,3,3,4,4,5)
-C <- c(2.2:5.2)
-tmp <- IncDTW::dtw(Q = Q, C = C, return_diffM = T, return_QC = TRUE)
+Q <- sin(1:10)#+rnorm(20)
+C <- sin(-2:10)#+rnorm(15)
+tmp <- IncDTW::dtw(Q = Q, C = C, return_diffM = TRUE, return_wp = TRUE, return_QC = TRUE, return_cm = TRUE, return_diffp = TRUE)
 names(tmp)
 
-## ---- echo=FALSE, eval=FALSE, results='hide'-----------------------------
-#  # dummy example rebuilt
-#  set.seed(1090)
-#  Q <- c(1, 1, 2, 3, 2, 0)
-#  C <- c(0, 1, 1, 2, 3, 2, 1)
-#  tmp <- IncDTW::dtw(Q = Q, C = C, return_diffM = T, return_QC = TRUE)
-#  names(tmp)
+## ---- fig.show=TRUE, results='hide', fig.align='center', fig.height=3.5, fig.width=7, echo=FALSE----
+plot(x=tmp, type = "QC")
 
 ## ---- fig.show=TRUE, results='hide', fig.align='center', fig.height=7, fig.width=7, echo=FALSE----
-plot(tmp, type = "QC")
-plot(tmp, type = "warp")
+plot(x=tmp, type = "warp")
+
+## ------------------------------------------------------------------------
+set.seed(1090)
+Q <- c(1, 1, 2, 3, 2, 0)
+C <- c(0, 1, 1, 2, 3, 2, 1)
+
+tmp <- IncDTW::dtw(Q = Q, C = C, return_diffM = TRUE, return_wp = TRUE, return_QC = TRUE, return_cm = TRUE, return_diffp = TRUE)
+names(tmp)
+
+## ---- fig.show=TRUE, results='hide', fig.align='center', fig.height=3.5, fig.width=7, echo=FALSE----
+plot(x=tmp, type = "QC")
+
+## ---- fig.show=TRUE, results='hide', fig.align='center', fig.height=7, fig.width=7, echo=FALSE----
+plot(x=tmp, type = "warp")
 
 ## ------------------------------------------------------------------------
 tmp$diffM
@@ -98,24 +107,24 @@ dtw_cm<- function(cm){
 
 #--- define functions to be tested from package: IncDTW
 idtw_0 <- function(C, Q){
-   IncDTW::dtw(Q = Q, C = C)$gcm[length(Q), length(C)] }
+   IncDTW::dtw(Q = Q, C = C)$distance }
 
 idtw_sc <- function(C, Q){
-   IncDTW::dtw(Q = Q, C = C, ws = 40)$gcm[length(Q), length(C)] }
+   IncDTW::dtw(Q = Q, C = C, ws = 40)$distance }
 
 idtw_diff <- function(diffM){
-   IncDTW::dtw(Q = diffM, C = "diffM")$gcm[nrow(diffM), ncol(diffM)] }
+   IncDTW::dtw(Q = diffM, C = "diffM")$distane }
 
 idtw_cm <- function(cm){
-   IncDTW::dtw(Q = cm, C = "cm")$gcm[nrow(cm), ncol(cm)] }
+   IncDTW::dtw(Q = cm, C = "cm")$distance }
 
 idtw_inc <- function(C, Q, gcm00, dm00){
    IncDTW::idtw(Q = Q, C = C, newO = C[(length(C)-9) : length(C)],
-                gcm = gcm00, dm = dm00)$gcm[length(Q), length(C)] }
+                gcm = gcm00, dm = dm00)$distance }
 
 
 ## ------------------------------------------------------------------------
-tmp <- lapply(1:100, function(pseudoseed){
+tmp <- lapply(1:20, function(pseudoseed){
    set.seed(pseudoseed)
    C <- cumsum(rnorm(500))
    Q <- cumsum(rnorm(480))
@@ -126,26 +135,30 @@ tmp <- lapply(1:100, function(pseudoseed){
    diffM <- tmp$diffM
    cm <- abs(diffM)
    
-   mic <- microbenchmark( dtw_0(C, Q),
+   
+   mic <- rbenchmark::benchmark( dtw_0(C, Q),
                           dtw_cm(cm),
                           #----
                           idtw_0(C, Q),
                           idtw_diff(diffM),
                           idtw_cm(cm),
                           idtw_inc(C, Q, gcm00, dm00),
-                          check = my_check,
-                          times = 1)
+                          replications = benchmark_replications[1]
+                        )
                           
    return(as.data.frame(mic))
 })
 mics <- do.call(rbind, tmp)
-class(mics) <- c("microbenchmark", "data.frame")
+# class(mics) <- c("microbenchmark", "data.frame")
 
 ## ------------------------------------------------------------------------
-print(mics, digits = 2, unit = "ms")
+head(mics)
+tmp <- aggregate(mics$elapsed, by = list(mics$test), mean)
+tmp$xrel <- tmp$x/min(tmp$x)
+tmp
 
 ## ------------------------------------------------------------------------
-tmp <- lapply(1:100, function(pseudoseed){
+tmp <- lapply(1:20, function(pseudoseed){
    set.seed(pseudoseed)
    C <- cumsum(rnorm(500))
    Q <- cumsum(rnorm(480))
@@ -156,19 +169,21 @@ tmp <- lapply(1:100, function(pseudoseed){
    diffM <- tmp$diffM
    cm <- abs(diffM)
    
-   mic <- microbenchmark( dtw_sc(C, Q),
+   mic <- rbenchmark::benchmark( dtw_sc(C, Q),
                           #----
                           idtw_sc(C, Q),
-                          check = my_check,
-                          times = 1)
+                          replications = benchmark_replications[1])
 
    return(as.data.frame(mic))
 })
 mics_sc <- do.call(rbind, tmp)
-class(mics_sc) <- c("microbenchmark", "data.frame")
 
 ## ------------------------------------------------------------------------
-print(mics_sc, digits = 2, unit = "ms")
+head(mics_sc)
+tmp <- aggregate(mics_sc$elapsed, by = list(mics_sc$test), mean)
+tmp$xrel <- tmp$x/min(tmp$x)
+tmp
+
 
 ## ---- message = FALSE----------------------------------------------------
 set.seed(1150)
