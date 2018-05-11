@@ -5,6 +5,98 @@
 
 using namespace Rcpp;
 
+// cpp_dtw2vec
+double cpp_dtw2vec(NumericVector x, NumericVector y);
+RcppExport SEXP _IncDTW_cpp_dtw2vec(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_dtw2vec(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_dtw2vec_inc
+List cpp_dtw2vec_inc(NumericVector x, NumericVector newObs, NumericVector gcm_lc);
+RcppExport SEXP _IncDTW_cpp_dtw2vec_inc(SEXP xSEXP, SEXP newObsSEXP, SEXP gcm_lcSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type newObs(newObsSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type gcm_lc(gcm_lcSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_dtw2vec_inc(x, newObs, gcm_lc));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_dtw2vec_inc_ws
+List cpp_dtw2vec_inc_ws(NumericVector x, NumericVector newObs, NumericVector gcm_lc, int ws, int ny);
+RcppExport SEXP _IncDTW_cpp_dtw2vec_inc_ws(SEXP xSEXP, SEXP newObsSEXP, SEXP gcm_lcSEXP, SEXP wsSEXP, SEXP nySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type newObs(newObsSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type gcm_lc(gcm_lcSEXP);
+    Rcpp::traits::input_parameter< int >::type ws(wsSEXP);
+    Rcpp::traits::input_parameter< int >::type ny(nySEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_dtw2vec_inc_ws(x, newObs, gcm_lc, ws, ny));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_dtw2vec_ws
+double cpp_dtw2vec_ws(NumericVector x, NumericVector y, int ws);
+RcppExport SEXP _IncDTW_cpp_dtw2vec_ws(SEXP xSEXP, SEXP ySEXP, SEXP wsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< int >::type ws(wsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_dtw2vec_ws(x, y, ws));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_dtw2vec_ea
+double cpp_dtw2vec_ea(NumericVector x, NumericVector y, double threshold);
+RcppExport SEXP _IncDTW_cpp_dtw2vec_ea(SEXP xSEXP, SEXP ySEXP, SEXP thresholdSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_dtw2vec_ea(x, y, threshold));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_dtw2vec_ws_ea
+double cpp_dtw2vec_ws_ea(NumericVector x, NumericVector y, int ws, double threshold);
+RcppExport SEXP _IncDTW_cpp_dtw2vec_ws_ea(SEXP xSEXP, SEXP ySEXP, SEXP wsSEXP, SEXP thresholdSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< int >::type ws(wsSEXP);
+    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_dtw2vec_ws_ea(x, y, ws, threshold));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_dtw2vec_v32
+double cpp_dtw2vec_v32(NumericVector x, NumericVector y);
+RcppExport SEXP _IncDTW_cpp_dtw2vec_v32(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_dtw2vec_v32(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
 // GCM_Sakoe_cpp
 List GCM_Sakoe_cpp(Rcpp::NumericMatrix cM, int ws);
 RcppExport SEXP _IncDTW_GCM_Sakoe_cpp(SEXP cMSEXP, SEXP wsSEXP) {

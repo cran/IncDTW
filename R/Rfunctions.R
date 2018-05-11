@@ -90,8 +90,8 @@ dtw <- function(Q, C, ws = NULL, return_cm = FALSE,
 }
 
 
-##################################################################################
-##################################################################################
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 idtw <- function(Q, C, newO, gcm, dm, diffM = NULL, ws = NULL, 
@@ -202,8 +202,8 @@ idtw <- function(Q, C, newO, gcm, dm, diffM = NULL, ws = NULL,
 }
 
 
-##################################################################################
-##################################################################################
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 dec_dm <- function(dm, Ndec, diffM = NULL){
@@ -248,8 +248,83 @@ dec_dm <- function(dm, Ndec, diffM = NULL){
 }
 
 
-##################################################################################
-##################################################################################
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+dtw2vec <- function(Q, C, ws = NULL, threshold = NULL){
+   # wrapper function for the C++ implementation
+   if(is.null(ws) & is.null(threshold)){
+      # fastest implementation for unrestricted warp
+      ret <- cpp_dtw2vec_v32(Q,C)
+      
+   }else if (!is.null(ws) & is.null(threshold)){
+      # sakoe chiba warping window
+      ret <- cpp_dtw2vec_ws(x=Q,y=C, ws = ws)
+      
+   }else if (is.null(ws) & !is.null(threshold)){
+      # early abandoning if the costs exceeds threshold
+      ret <- cpp_dtw2vec_ea(x=Q, y=C, threshold = threshold)
+      
+   }else{
+      # ea and sakoe chiba
+      ret <- cpp_dtw2vec_ws_ea(x=Q, y=C, ws = ws, threshold = threshold)
+      
+   }
+   return(ret)
+}
+
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+idtw2vec <- function(Q, newObs, gcm_lc = NULL, nC = NULL, ws = NULL){
+   # wrapper function for the C++ implementation
+   if(is.null(gcm_lc)){
+      # initial case
+      if(length(newObs) <= 1){
+         stop("ERROR: in the initial calculation the time 
+              series newObs needs to be at least 2 observations long")
+         return(NA)
+      }
+      if(is.null(ws)){
+         ret <- cpp_dtw2vec_inc(x=Q, newObs = newObs[-1], 
+                                gcm_lc = cumsum(abs(Q-newObs[1])))
+         
+      }else if (!is.null(ws) & !is.null(nC)){
+         # sakoe chiba warping window
+         ret <- cpp_dtw2vec_inc_ws(x=Q, newObs = newObs[-1], 
+                                   gcm_lc = cumsum(abs(Q-newObs[1])), 
+                                   ws = ws, ny = nC)
+         
+      }else {
+         stop("ERROR: if ws is not NULL, then nC must not be NULL")
+         return(NA)
+      }
+      
+      
+   }else{
+      # running case
+      if(is.null(ws)){
+         ret <- cpp_dtw2vec_inc(x=Q, newObs = newObs, gcm_lc = gcm_lc )
+         
+      }else if (!is.null(ws) & !is.null(nC)){
+         # sakoe chiba warping window
+         ret <- cpp_dtw2vec_inc_ws(x=Q, newObs = newObs, gcm_lc = gcm_lc,
+                                   ws=ws, ny = nC)
+         
+      }else {
+         stop("ERROR: if ws is not NULL, then nC must not be NULL")
+         return(NA)
+      }   
+   }
+   return(ret)
+}
+
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 plot.idtw <- function(x, type = "QC", ...) {
@@ -264,16 +339,16 @@ plot.idtw <- function(x, type = "QC", ...) {
 }
 
 
-##################################################################################
-##################################################################################
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 ## an alias
 plot_idtw <- plot.idtw;
 
 
-##################################################################################
-##################################################################################
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 plotQC <- function(x, Q = NULL, C = NULL, ...){
@@ -311,8 +386,8 @@ plotQC <- function(x, Q = NULL, C = NULL, ...){
 }
 
 
-##################################################################################
-##################################################################################
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 plotWarp <- function(x, Q = NULL, C = NULL, ...){

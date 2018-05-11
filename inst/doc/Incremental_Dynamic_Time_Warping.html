@@ -12,7 +12,7 @@
 
 <meta name="author" content="Leodolter Maximilian" />
 
-<meta name="date" content="2018-01-13" />
+<meta name="date" content="2018-05-11" />
 
 <title>Incremental Dynamic Time Warping</title>
 
@@ -20,46 +20,256 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
-div.sourceCode { overflow-x: auto; }
-table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
-  margin: 0; padding: 0; vertical-align: baseline; border: none; }
-table.sourceCode { width: 100%; line-height: 100%; }
-td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
-td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code > span.dt { color: #902000; } /* DataType */
-code > span.dv { color: #40a070; } /* DecVal */
-code > span.bn { color: #40a070; } /* BaseN */
-code > span.fl { color: #40a070; } /* Float */
-code > span.ch { color: #4070a0; } /* Char */
-code > span.st { color: #4070a0; } /* String */
-code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code > span.ot { color: #007020; } /* Other */
-code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code > span.fu { color: #06287e; } /* Function */
-code > span.er { color: #ff0000; font-weight: bold; } /* Error */
-code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-code > span.cn { color: #880000; } /* Constant */
-code > span.sc { color: #4070a0; } /* SpecialChar */
-code > span.vs { color: #4070a0; } /* VerbatimString */
-code > span.ss { color: #bb6688; } /* SpecialString */
-code > span.im { } /* Import */
-code > span.va { color: #19177c; } /* Variable */
-code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code > span.op { color: #666666; } /* Operator */
-code > span.bu { } /* BuiltIn */
-code > span.ex { } /* Extension */
-code > span.pp { color: #bc7a00; } /* Preprocessor */
-code > span.at { color: #7d9029; } /* Attribute */
-code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; position: absolute; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; }
+pre.numberSource a.sourceLine:empty
+  { position: absolute; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: absolute; left: -5em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
 
-<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
 
 </head>
 
@@ -70,7 +280,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Incremental Dynamic Time Warping</h1>
 <h4 class="author"><em>Leodolter Maximilian</em></h4>
-<h4 class="date"><em>2018-01-13</em></h4>
+<h4 class="date"><em>2018-05-11</em></h4>
 
 
 
@@ -99,28 +309,28 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul>
 <p>Remark: The DTW distance measure is not a distance metric in the conventional sense, since it does not fulfill the triangle inequality.</p>
 <p>In the following we show by aid of toy example how to use the functions of IncDTW and what they are doing. We start with the basic functions. Suppose we have two time series and we need to calculate the DTW distance of these:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">1090</span>)
-Q &lt;-<span class="st"> </span><span class="kw">sin</span>(<span class="dv">1</span>:<span class="dv">10</span>)<span class="co">#+rnorm(20)</span>
-C &lt;-<span class="st"> </span><span class="kw">sin</span>(-<span class="dv">2</span>:<span class="dv">10</span>)<span class="co">#+rnorm(15)</span>
-tmp &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C, <span class="dt">return_diffM =</span> <span class="ot">TRUE</span>, <span class="dt">return_wp =</span> <span class="ot">TRUE</span>, <span class="dt">return_QC =</span> <span class="ot">TRUE</span>, <span class="dt">return_cm =</span> <span class="ot">TRUE</span>, <span class="dt">return_diffp =</span> <span class="ot">TRUE</span>)
-<span class="kw">names</span>(tmp)</code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">set.seed</span>(<span class="dv">1090</span>)</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2">Q &lt;-<span class="st"> </span><span class="kw">sin</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)<span class="co">#+rnorm(20)</span></a>
+<a class="sourceLine" id="cb1-3" data-line-number="3">C &lt;-<span class="st"> </span><span class="kw">sin</span>(<span class="op">-</span><span class="dv">2</span><span class="op">:</span><span class="dv">10</span>)<span class="co">#+rnorm(15)</span></a>
+<a class="sourceLine" id="cb1-4" data-line-number="4">tmp &lt;-<span class="st"> </span>IncDTW<span class="op">::</span><span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C, <span class="dt">return_diffM =</span> <span class="ot">TRUE</span>, <span class="dt">return_wp =</span> <span class="ot">TRUE</span>, <span class="dt">return_QC =</span> <span class="ot">TRUE</span>, <span class="dt">return_cm =</span> <span class="ot">TRUE</span>, <span class="dt">return_diffp =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="kw">names</span>(tmp)</a></code></pre></div>
 <pre><code>##  [1] &quot;distance&quot; &quot;gcm&quot;      &quot;dm&quot;       &quot;diffp&quot;    &quot;ii&quot;       &quot;jj&quot;      
 ##  [7] &quot;wp&quot;       &quot;cm&quot;       &quot;diffM&quot;    &quot;Q&quot;        &quot;C&quot;</code></pre>
 <p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
 <p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
 <p>Another toy example:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">1090</span>)
-Q &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">0</span>)
-C &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>)
-
-tmp &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C, <span class="dt">return_diffM =</span> <span class="ot">TRUE</span>, <span class="dt">return_wp =</span> <span class="ot">TRUE</span>, <span class="dt">return_QC =</span> <span class="ot">TRUE</span>, <span class="dt">return_cm =</span> <span class="ot">TRUE</span>, <span class="dt">return_diffp =</span> <span class="ot">TRUE</span>)
-<span class="kw">names</span>(tmp)</code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw">set.seed</span>(<span class="dv">1090</span>)</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">Q &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">0</span>)</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3">C &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb3-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">tmp &lt;-<span class="st"> </span>IncDTW<span class="op">::</span><span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C, <span class="dt">return_diffM =</span> <span class="ot">TRUE</span>, <span class="dt">return_wp =</span> <span class="ot">TRUE</span>, <span class="dt">return_QC =</span> <span class="ot">TRUE</span>, <span class="dt">return_cm =</span> <span class="ot">TRUE</span>, <span class="dt">return_diffp =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb3-6" data-line-number="6"><span class="kw">names</span>(tmp)</a></code></pre></div>
 <pre><code>##  [1] &quot;distance&quot; &quot;gcm&quot;      &quot;dm&quot;       &quot;diffp&quot;    &quot;ii&quot;       &quot;jj&quot;      
 ##  [7] &quot;wp&quot;       &quot;cm&quot;       &quot;diffM&quot;    &quot;Q&quot;        &quot;C&quot;</code></pre>
 <p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAqAAAAFQCAMAAABXmDxzAAAAz1BMVEUAAAAAADoAAGYAOpAAZrYAv8QzMzM6AAA6ADo6AGY6OpA6kNtNTU1NTW5NTY5NbqtNjshmAABmADpmOpBmZrZmtv9uTU1uTW5uTY5ubo5ubqtuq+SOTU2OTW6OTY6Obk2ObquOyP+QOgCQOjqQkGaQtpCQ2/+rbk2rbm6rjk2ryKur5OSr5P+2ZgC2tma2/7a2///Ijk3I///bkDrb/7bb///kq27k///r6+vy8vL4dm3/tmb/tpD/yI7/25D/5Kv//7b//8j//9v//+T///8899SQAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAWhklEQVR4nO2dCXvbxhGGacfI0SiH2tpJc7S12zg97Na2Goela0uy8f9/UwFKpAACuzuzc2B2Md+TJ3LE+NUO5xWIc3fTejyGs1l6AB5PLC6ox3RcUI/puKAe03FBPabjgnpMByzoNpTwK4QUAy1moMpQF9QItJiBuqA6hVuDFjNQF1SncGvQYgbqguoUbg1azEBdUJ3CrUGLGagLqlO4NWgxA3VBdQq3Bi1moC6oTuHWoMUM1AXVKdwatJiB1ijo27OzL1+5oOrMGqAagl5++6p9/bULGkvTNPzQ3W7HD61Q0IOkLmgwTSNg6G4nYmidgt5sQT/uwvYTa0rTbLr0f+L82guqW4fhRAW9fPTFs8Ofjfxm2oL6FjT4goqgbXv948FQI4XbgrqgwReUBG1fPnZBg2n2TGZDd3sov6H1Cfr2q199CxpLc8tkNXR3C2U3tD5B29dnZ74PGk5zZDIaujtCuQ2tUNBRjBRuB9oMmGyG7gZQZkNdUJXCzUCbEZPJ0N0IymuoC6pSuBXowcj25L9JORjZnvw3S1xQlcKNQI8+tpPv5OfoYzv5DkNcUJXCbUDvbGxnvpeZOxvbme+R44KqFG4COnCxnf1uTgYutrPfJcYFVSncAnRoYhv4PjpDE9vA90lxQVUKNwAdedgGX8Fl5GEbfIUQF1Sl8OWhYwvbyGuIjC1sI69lxwVVKXxx6ImDbfRVaE4cbKOvZsYFVSl8aeipgafMLENPDTyFshjqgqoUvjB04t+EmWHoxL8JlMNQF1Sl8GWhU/umTLShU/umUAZDXVCVwheFzrg3w0QaOuPeDJRuqAuqUviS0Dnz5pgoQ+fMm4OSDXVBVQpfEDrr3SwTYeisd7NQqqEuqErh1qDzTLCh89bNQ4mGuqAqhS8HnZcuwAQaGnAuAKUZ6oKqFL4YNKBciAkyNGRcCEoy1AVVKXwpaEi4IBNgaNC3IJRiqAuqUvhC0KBuYWbS0LBtYSjBUBdUpfBloGHZIsyEoRHXItB8Q11QlcIXgUZUizGjhsZMi0GzDXVBVQpfAhoTLcqM/MWoZ1ForqEuqErhC0CjG8I4M/hX45bFoZmGuqAqhetD47uSCWbgLyccS0DzDHVBVQpXhyYOdVLM2b+eMiwFzTLUBVUpXBuaOlmUZM4Akn4loTmGuqAqhStDkycz08wJIm1XGpphqAuqUrguNH05CMA8gQDcAkDxhrqgKoWrQgGXKyHMEQZiFgSKNtQFVSlcEwq54QPEHIBAXoGgWENdUJXCFaGgG5JgzCMKZhUMijTUBVUpXA8Ku6UTyLyFAZ0CQnGGuqAqhatBgbccQ5l7HNQoKBRlqAuqUrgWFPrQBpjZIHwCQzGGuqAqhStBwQ8VwZkN3CY4FGFo7YKuKs3SA/Ac4lvQmSAeG0Zs7OBURPUSm2VEDG1BjRSuAcVMvIDZXRTYb5DYscXEBV0AipoYBHXAzX7kdSRzQ6FxQfWhuKmVcKcsmc9djdi8UGBcUHUocuov5EUf1rP/EzonFBYXVBuKnTwRe9mc8frpLJ8PCooLqgxFT+6JvvGI7Q6U4E/ggkLigupC8dMj42/dZLqHL/ozeKCAuKCq0Izpu9MDnbjDchd08qdwQNNxQTWhOQsgJAc6Yw7DcySgn0OHJuOCKkKzFuhIDXTWG/KTeOCfRIWm4oLqQfOWOEoMNGAN8Vlm1M+iQRNxQdWgmUtwxQcadIY0GwT6p1Gg8bigWtDcRQyjA40YQ5hPJ+vnuaBKhQtBsxfZjA006kv2jGSx5E6Zlx0XVAeav0xxZKCJfcLMOR3jyZt0ND8uqAqUsIx2eKDJ8z5Zs+KmkjNtMyEuqAaU4Gd4oIBrOxnziqeDn/ieEhdUAUrxMzhQ0P0b6JUZIMEuHUKKCyoPJfkZGijwHk3k2jaw4BZfosUFFYfS/AwMFPwcBmp1MGgwy9cR44Jah84yEQ8DwxcARQS+ACg1Lqg0lLgBnWWiJvyALqGMCnQJZXJcUGEo1c85JnJSL9gi9MjAFqGnxwWVhZL9nGGiJ+6cDoKh+ukoXFCVwlmhdD+nzIzJuSfD4Kh+Mg4XVKVwTiiDnxNm1gIcpwNhqf50JC6oSuGMUA4/T5mZi2ydDIWn+pOxuKAqhfNBWfw8YWYvpDkeDFP149G4oCqFs0F5/BwzCYtlj4bDVf1oPC6oSuFcUCY/R0yCn+MBsVU/HJELqlI4E5TLzyGT5OdoSHzVD8bkgqoUzgNl83PAJPo5HBRj9XejckFVCmeB8vl5xyT7ORgWZ/XHcbmgKoVzQBn9PDIZ/LwbGGv1h5G5oCqFM0A5/TwwWfw8Do23+p0EdJuAuqDZUFY/b5lMfh4Gx1z9TgK6jUNd0Fwor583TDY/b4fHXf1OArqNQl3QTCizn3smo583A2SvficB3cagKoJePjo7e1yXoNx+9kxWP/dD5K9+V6Og1z8+ay+/eVaNoE0XbuauCzdTYpwiA90uLOjbr7t/vTxsQvFjFCk8P41A43dSgor8JgkYuvg+aL8VbduPu7D9xKXSNJsu/Z84v3ZtL2ag7CPVSFzQDz9/f/gj/pdI5DczP74FrW8Lev3D0c86BOVmynRdYh9UaKhLH8U/vvsP/BhFCs+OxMGx2LGxgKAC5xu2Cws68rN0QSVOLwqeXRQwlP2M7QE6/4KCoK/P+tRxFC9xgUby+oyQoOyGLn4Ufxf8GEUKz4vEJW7ZK9z8hjLfNTCEzr3ggiIicZOQ8D1CUoIyG+qCckTiNkvxuywlLsruw2qoC8oQiRvV5e9TFxOU1VAXlB6JR300nvSRuO/qJoyGuqDkSDwsqfKspJygjIa6oNRIPG6u9LS5xK3Vt2Ez1AUlRmLCDq35OgQFZTPUBaVFYsojvRmPJJ6eOoTJUBeUFJFJ4+SZGoIyGeqCUqIx7aZo9RIPSB/DYqgLSojKxMXlCspiqAuaH52p32Wrl5gD5S4Mhrqg2VFaPKNkQRkMdUFzo7X8kHD1EtOcDUI21AXNjNoCbmULSjbUBTUEXWSBQYmZTBnjguZFYo3WZZZolRaUuAl1QbMiscr1UotcS0xWPgzNULSg/53NygQN9ZQCDfWxeEFphrqgGQm2lAANdlG+eon1SEahGKot6MVm8/Dio1+KFjTc0HxouIcVCEoxVFnQ5x/95/zh+ycPShY00s9saKSDCtVLLDk2Tr6huoJenT/s/mnf3H9RrqCxbuZCY/2rQtB8Q11QZKLNzIRGu6dRvcSqoifJNVT5I/6i/4i/Ov987n/MKzw3mdB4K/Og8d5VImiuodoHSW/6mSRn/SxC0EQns6CJzqlUL7Fw+GnyDOUUtJdveoBe02mmVB9zoKm+VSNonqH5gu52u7GgF/2e5fOJoRUJmmxjBjTZNZ3qOQxNjjTH0GxB9xPqDgW9+u3T7t/vnzyMCHp1vtmnzIOkdBPx0HTPKhI0x1C8oLtJbgR9M3/6fWYLeqNycYICeoiGAjqmVD2DoYCR4g3l24K+eTD/F2Y+4uddphSODxoK6SAWCulXVYLiDeXbB333G+gWtMjzoKAGIqGgbmlVTzcUNFKsoXxH8ZB90NtMj6TMCwprHw4K61VlgmINZTzNBDiKvz1IulfcPiiweygosFNq1ZMNBY4UZ6ifB4UE2jsMFNqn6gTFGer3gwICbh0CCu6SXvVUQ8EjxRiqKOjhJGhx50HhjYND4T2qUFCMoYa2oFbTLD0AtehVKrio5+o+4jHbFYkPOcXqiZtQiT1w7S3ou09K+4hHNU3iMEGzepqhEucw8IKiMxT0/ZPP3z/Z37NciqC4lkmcaKlUUPJZtpBvpC1or+bzzwu61InsmMSpatXqSYZKXEdbQNCLB+Vc6sT2S+JiX7WCEq/0igjaPt/bOf/cMVvhoECg6HZJ3C6hWz3FUIl7ubQF7XZC2+elXOrEN0vihrOKBSXdbSgjaCyMhQOShmb0SuKWXeXqCYZmjJRwvza/oFe/L0rQnE4loZy3lFNiRVDCEy8Cgp7Pn/+0KWhWo1JQ1odyKIlA8w3NGmn2M4P8gt5cjZ89BWpP0Lw2JaC8jzVSYkfQ7KeuMwS92Mz5N5k8bP6peFuCZnYpDmV+MJySGDTb0MyRZs5bkRS0aZqxoP29yjMXiU4PkrrNqPnZ7XJ7FIVyT61BiSVBM2f+SQnaNENDuxfefdbvYE4vEhX4TJJIi9gnJ6LElKB5c6cFBW0m+e/gqc7pI8XlbUFF9sL4p3ejRP/zI5qc2SeDgoa2oBd7Qd//JS5oAfugIidaBCbIpMSYoDnz96YEneyDAragRRzFi1xLkZhimJIFDhHjwc+AnhT09Ci+3wf939Pp0/HD86Dz1zhNCSpyu4TIJO2UmBMUv4YEWtD24qNfOgfDR/FXv5uf2cGUoCJ3RMoscyEIFTkLnAh2FR68oP3+5f1/TXYxi7oWL/LQg9BCQYLQJQTFrmOWIeh8ihJUAiq11JokVORCb1Zc0GEkHrwVW01VErqIoLilStcoqMTcGnLrUYtCRe7lSgW12PMKBZWYPovs55oEnXu3XNBjJGbIpPtZ1e3ayUzfL7Sg6JQiqMQk2Ax+rkvQ6Tvmgt5GYp0LDj8XO4ch8kRWOqfvmQt6E4mlrFj8XJugp++aC7qPwmqVlpggqMhD14CMDXVB+4gsSM2zAV2foOM3zgXd8vk5gjL5ueB1NJF5VSAZvnUuKKOfQyiXn2sUdPjmuaCMfg6gbH4ueSeCyNRpoNy9fS4oo593UD4/1yno3Ru4ekE5/TxCGf1c9F4ukdlRYTm8hWsXlNXPA5TTz7UKengTVy4or5+3UFY/l70bVmQCdGB2cegqBGX28wbK6+d6Bb15I1ctKLefeyizn8sKKrPGCTS7GFRJ0MtvXy0mKLufPZTbzzUL2r+ZCwv69uzLpKBNw2/Sdrfb8VM7KLufCwuKMVRgpJF3VEXQl1/8I7kF3U9hIlE4u0siUBc09DyyhqDHj/iPuwT+j6bpl/7qLeX8utv/qwv3V7b3zUoWXQlyp/CWUvdBO6F8C7ogVGIpXXB2GyNb0Iig205Q/sIlVNqKQJcWVGQxcnAW3geFHcVv+Ms20PclmeUIuvRR/DKnmaLn1yipUlCwoS4oU+JXKChxQTmziUKVBB1Eq/DENV5K6hQUaijzSDdxaLWCpu6SocQF5csmATUkKOtBUvI+Q0oqFRRoaJX7oNqCpu/UpsQFZc/KBAU860JJrYLCDHVByYE8LUiJC8qTQcdLEJStcNDz1pRUKyjIULaRDrdIaxIUNmMFJS4oR0afmCsSFDjnDyX1CgoxdLX7oDyFQ2dNo8QFZU8JgrIcJIHnnaSkYkEBhrqghMBn7qXEBaVm0uuVCIqY+5ySmgVNG8ow0mmr1yEoZvUISlxQWmY6XYKg5MJR6+9QUrWgSUNXuw9KLRy3ghklLih7ViAocpFSSuoWNGWoC5oV7DLPlLig+QkcaZQgKOkgKfhQIAUaSuWCJgwljTTU5NoFDT4HbKnv6kx7ggZ7XLmg4efULfVdnZkNjRq62n3QfEEj8yiY6rs20wVlFTS78Ng8H6b6rs3Mh8YMdUGRic5DY6vvykxbgkY/ISsWND5Pkq2+KzNNCRrfg6tX0MQ8Xrb6rswkQCOG5kETRxglCJp1kJSaZ85Y33WZlgRNpFZBk/MgGuu7LpMCDRvqgsKTnqfTWt9VmS7owoIC5pG11ndVJgkaNBQPBXS2BEHRhUPmOTbXd02mEUEhW54aBQXNw22u75pMGjRkKBYK+mSsUFDYPPH2+q7ItCEoKPUJClzHwF7fFZlEaMDQ1QqKOkiCrrNhsO96TAOCQptam6DgdWAM9l2PSYXOG4qBgntamaDwdYos9l2Nubig8JYaElSQ4GEOdX1ESy3VPEhCLPRmccOkxiRDZzehqz1IAheOWYjQZN+1mHTonKEuaCKohTJt9l2J6YIuIShuIVebfVdiMkBnDF2toLBDPuRCw0b7rsNcUlDkrT/VCIpdCNto33WYHNCpoSAo9ta0WgRFL9Rute8qzOUERd86WYmgaD/N9l2FyQKdGLrafdB04Xg/7fZdg+mC6gqa4afdvmsweaCnhrqggeT4abjvCsxlBM16OrcCQbP8NNx3BSYT9MTQBDRviq0SBI1Xluen5b7LM5cQNHMKuOIFzfTTct/lmVzQsaGr3QeNCZrrp+m+izNdUC1Bs/003XdxJht0ZOhqBQ2/ku+n7b5LM7UFJcyRXbSgBD9t912ayQcdGhqEUhYZKFlQip/G+y7M1BWUtEpLwYKS/DTed2EmI3Rg6Gr3Qed/A2l+Wu+7LNMFlReU6Kf1vssyOaF3hrqgg1D9NN93UaaeoOSl1AsVlOyn+b6LMlmhR0NnoGQ/ixB0+grdT/t9l2RqCUr3s0xBGfy033dJJi/0YOhq90FPX+Hws4C+CzJdUElBWfwsoO+CTGZoIwHdJqCGBB3vyfD4WULf5ZgagjLsf06hwxeMCsrkZwl9l2NyQ5splMnP4gTl8rOIvosx5QXl8rM0Qdn8LKLvYkx2aCMB3UahhgS9e4XPzzL6LsV0QWUEZfSzjL5LMfmhjQR0G4MaFJTTz0L6LsSUFZRt/3O7LUpQVj8L6bsQUwDaHKGsfhYh6E3FvH6W0vdiBnoUlNfPcgRl9rOUvpcz0Ga9+6C9oNx+FtP3YgZapaDXP5x99StEUHY/i+l7OQNt6hP0w8+P29dfpwTddVEs3Bq0mIE2TcO8/9lnUUGv//iqvfz2VVzQnQtaBLT3M7RQNyGLCnr53a/t9Y/Puj993CXwP+0FZRuNRyq9n9QVEhdJRNC3Xx0E7RP4TfEtaBnQpg8/1sgWNCLoVsTPYvpezkBF/CxgH7SgFq1b0ApPM334+XvAUXwN76YxZg1QDUGB50EreDeNMWuAqgg6ipHCrUGLGagLqlO4NWgxA3VBdQq3Bi1moC6oTuHWoMUM1AXVKdwatJiBuqA6hVuDFjNQF1SncGvQYgZavaC6Cd2bYi7FDLSgkY7igtJSzEALGukoLigtxQy0oJGO4oLSUsxACxrpKEYF9Xhu4oJ6TMcF9ZiOC+oxHRfUYzoWBb18dHb2eOlBwNLPHVBCPvx89sWz9P9mMAYF7R/Uu/ymjLfzdSG/SS8f7x/SLTAGBX3bPwf1sojGX/7hT0WMs3/+sdAYFLTP3ePOlvPhb/8s4yP+8ru/+0c8Z/oHSgvI6+8L2Qe9fPR4P81BgTEp6PUPRfjZtbwUQUdzcBQVi4L2v+8l5PVZnxJ+l67/7ILypRQ/+xSyBe2POf0jnis3G6YyGl+KoNc/nH1Z5oG8QUE9nru4oB7TcUE9puOCekzHBfWYjgvqMR0X1GM6LqjHdFxQVN59+nT032/uv1hoJGuJC4qKC6odFxQVF1Q7LigqnaDvPv3pk83mYdtenW/u/bUT9P2Tzab7cnHvafetz5ceYW1xQVHpBf3ko1/ai/svehmvzu+/eP/kQdtedN97/qD/x8MbFxSVvaAP91/3n+6dqPuvV+cPu+/99Jl/4HPHBUVl/xH/dP+132i27z57cbHZp/tsv+g/+D28cUFRmRO0/7rP882DJcdWZ1xQVAaC7j/au3+9uXd7YP/m/r/PfRPKHRcUlYGgV+cPbg+Suk1oZ2m/G+pnndjjgqIyEHR0mqnbij7vPN0f0Xs444J6TMcF9ZiOC+oxHRfUYzouqMd0XFCP6bigHtP5P7M82a9ti2cHAAAAAElFTkSuQmCC" style="display: block; margin: auto;" /></p>
 <p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
 <p>The matrix of differences diffM simply stores the differences of the two time series <span class="math inline">\(Q\)</span> and <span class="math inline">\(C\)</span>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tmp$diffM</code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">tmp<span class="op">$</span>diffM</a></code></pre></div>
 <pre><code>##      [,1] [,2] [,3] [,4] [,5] [,6] [,7]
 ## [1,]    1    0    0   -1   -2   -1    0
 ## [2,]    1    0    0   -1   -2   -1    0
@@ -129,59 +339,59 @@ tmp &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<span clas
 ## [5,]    2    1    1    0   -1    0    1
 ## [6,]    0   -1   -1   -2   -3   -2   -1</code></pre>
 <p>The global cost matrix is calculated by walking through the matrix of absolute differences <code>abs(diffM)</code> from top left to bottom right applying the following rule:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cm &lt;-<span class="st"> </span><span class="kw">abs</span>(diffM) <span class="co"># cost matrix</span>
-gcm &lt;-<span class="st"> </span>cm <span class="co"># initialize the global cost matrix</span>
-for(j in <span class="dv">1</span>:m){
-   for(i in <span class="dv">1</span>:n){
-      gcm[ , <span class="dv">1</span>] &lt;-<span class="st"> </span>cm[ ,<span class="dv">1</span>]
-      gcm[<span class="dv">1</span>,  ] &lt;-<span class="st"> </span>cm[<span class="dv">1</span>, ]
-      gcm[i, j] &lt;-<span class="st"> </span>cm[i, j] +<span class="st"> </span><span class="kw">min</span>(<span class="kw">c</span>(gcm[i<span class="dv">-1</span>, j<span class="dv">-1</span>], 
-                                    gcm[i  , j<span class="dv">-1</span>],
-                                    gcm[i<span class="dv">-1</span>, j  ]))}}</code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">cm &lt;-<span class="st"> </span><span class="kw">abs</span>(diffM) <span class="co"># cost matrix</span></a>
+<a class="sourceLine" id="cb7-2" data-line-number="2">gcm &lt;-<span class="st"> </span>cm <span class="co"># initialize the global cost matrix</span></a>
+<a class="sourceLine" id="cb7-3" data-line-number="3"><span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>m){</a>
+<a class="sourceLine" id="cb7-4" data-line-number="4">   <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n){</a>
+<a class="sourceLine" id="cb7-5" data-line-number="5">      gcm[ , <span class="dv">1</span>] &lt;-<span class="st"> </span>cm[ ,<span class="dv">1</span>]</a>
+<a class="sourceLine" id="cb7-6" data-line-number="6">      gcm[<span class="dv">1</span>,  ] &lt;-<span class="st"> </span>cm[<span class="dv">1</span>, ]</a>
+<a class="sourceLine" id="cb7-7" data-line-number="7">      gcm[i, j] &lt;-<span class="st"> </span>cm[i, j] <span class="op">+</span><span class="st"> </span><span class="kw">min</span>(<span class="kw">c</span>(gcm[i<span class="dv">-1</span>, j<span class="dv">-1</span>], </a>
+<a class="sourceLine" id="cb7-8" data-line-number="8">                                    gcm[i  , j<span class="dv">-1</span>],</a>
+<a class="sourceLine" id="cb7-9" data-line-number="9">                                    gcm[i<span class="dv">-1</span>, j  ]))}}</a></code></pre></div>
 <p>The direction matrix dm is calculated simultaneously to the global cost matrix and stores for each position where to go next to make the cheapest step.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dm &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="ot">NA</span>, <span class="dt">ncol=</span><span class="kw">length</span>(C), <span class="dt">nrow =</span> <span class="kw">length</span>(Q))
-dm[<span class="dv">1</span>,  ] &lt;-<span class="st"> </span><span class="dv">3</span>
-dm[ , <span class="dv">1</span>] &lt;-<span class="st"> </span><span class="dv">2</span>
-dm[<span class="dv">1</span>, <span class="dv">1</span>] &lt;-<span class="st"> </span><span class="ot">NA</span>
-
-for(j in <span class="dv">1</span>:m){
-   for(i in <span class="dv">1</span>:n){
-      min_index &lt;-<span class="st"> </span><span class="kw">which.min</span>(<span class="kw">c</span>(gcm[i<span class="dv">-1</span>, j<span class="dv">-1</span>], 
-                               gcm[i  , j<span class="dv">-1</span>], 
-                               gcm[i<span class="dv">-1</span>, j  ]))
-      if( min_index ==<span class="st"> </span><span class="dv">1</span>){
-         dm[i, j] &lt;-<span class="st"> </span><span class="dv">1</span>
-      } else if( min_index ==<span class="st"> </span><span class="dv">2</span>){
-         dm[i, j] &lt;-<span class="st"> </span><span class="dv">2</span>
-      } else if( min_index ==<span class="st"> </span><span class="dv">3</span>){
-         dm[i, j] &lt;-<span class="st"> </span><span class="dv">3</span>
-      } } }</code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1">dm &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="ot">NA</span>, <span class="dt">ncol=</span><span class="kw">length</span>(C), <span class="dt">nrow =</span> <span class="kw">length</span>(Q))</a>
+<a class="sourceLine" id="cb8-2" data-line-number="2">dm[<span class="dv">1</span>,  ] &lt;-<span class="st"> </span><span class="dv">3</span></a>
+<a class="sourceLine" id="cb8-3" data-line-number="3">dm[ , <span class="dv">1</span>] &lt;-<span class="st"> </span><span class="dv">2</span></a>
+<a class="sourceLine" id="cb8-4" data-line-number="4">dm[<span class="dv">1</span>, <span class="dv">1</span>] &lt;-<span class="st"> </span><span class="ot">NA</span></a>
+<a class="sourceLine" id="cb8-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb8-6" data-line-number="6"><span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>m){</a>
+<a class="sourceLine" id="cb8-7" data-line-number="7">   <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n){</a>
+<a class="sourceLine" id="cb8-8" data-line-number="8">      min_index &lt;-<span class="st"> </span><span class="kw">which.min</span>(<span class="kw">c</span>(gcm[i<span class="dv">-1</span>, j<span class="dv">-1</span>], </a>
+<a class="sourceLine" id="cb8-9" data-line-number="9">                               gcm[i  , j<span class="dv">-1</span>], </a>
+<a class="sourceLine" id="cb8-10" data-line-number="10">                               gcm[i<span class="dv">-1</span>, j  ]))</a>
+<a class="sourceLine" id="cb8-11" data-line-number="11">      <span class="cf">if</span>( min_index <span class="op">==</span><span class="st"> </span><span class="dv">1</span>){</a>
+<a class="sourceLine" id="cb8-12" data-line-number="12">         dm[i, j] &lt;-<span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb8-13" data-line-number="13">      } <span class="cf">else</span> <span class="cf">if</span>( min_index <span class="op">==</span><span class="st"> </span><span class="dv">2</span>){</a>
+<a class="sourceLine" id="cb8-14" data-line-number="14">         dm[i, j] &lt;-<span class="st"> </span><span class="dv">2</span></a>
+<a class="sourceLine" id="cb8-15" data-line-number="15">      } <span class="cf">else</span> <span class="cf">if</span>( min_index <span class="op">==</span><span class="st"> </span><span class="dv">3</span>){</a>
+<a class="sourceLine" id="cb8-16" data-line-number="16">         dm[i, j] &lt;-<span class="st"> </span><span class="dv">3</span></a>
+<a class="sourceLine" id="cb8-17" data-line-number="17">      } } }</a></code></pre></div>
 <p>In case the cost matrix, or the matrix of differences is already in storage, and you want to save calculation time, you can use these matrices also as input:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> tmp$diffM, <span class="dt">C =</span> <span class="st">&quot;diffM&quot;</span>)
-IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> <span class="kw">abs</span>(tmp$diffM), <span class="dt">C =</span> <span class="st">&quot;cm&quot;</span>)</code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1">IncDTW<span class="op">::</span><span class="kw">dtw</span>(<span class="dt">Q =</span> tmp<span class="op">$</span>diffM, <span class="dt">C =</span> <span class="st">&quot;diffM&quot;</span>)</a>
+<a class="sourceLine" id="cb9-2" data-line-number="2">IncDTW<span class="op">::</span><span class="kw">dtw</span>(<span class="dt">Q =</span> <span class="kw">abs</span>(tmp<span class="op">$</span>diffM), <span class="dt">C =</span> <span class="st">&quot;cm&quot;</span>)</a></code></pre></div>
 </div>
 <div id="incremental-calculation-of-dtw-idtw" class="section level2">
 <h2>Incremental Calculation of DTW: idtw()</h2>
 <p>The main intention of idtw() is to compare the DTW distance for different subsets of two time series. That is to compare the DTW(<span class="math inline">\(Q\)</span>, <span class="math inline">\(C_0\)</span>) with DTW(<span class="math inline">\(Q\)</span>, <span class="math inline">\(C_1\)</span>) where <span class="math inline">\(C_1\)</span> could be the extension of <span class="math inline">\(C_0\)</span> for couple of observations.</p>
 <p>Another possible application is a live data stream and you want to update the DTW calculation each time a set of values of <span class="math inline">\(Q\)</span> are observed. Of course this depends on the application and certainly does not make sense in any case, since a time warp of two time series where the lengths differ <em>too much</em> is questionable. A reasonable range for the ratio n/m depends on the application and purposes of the data analysis.</p>
 <p>Assume we already have calculated the DTW of <span class="math inline">\(C\)</span> and <span class="math inline">\(Q\)</span>, when an update of <span class="math inline">\(C\)</span> provides new observations:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">1030</span>)
-C0 &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">1000</span>))
-Q &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">800</span>))
-tmp0 &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C0)
-gcm0 &lt;-<span class="st"> </span>tmp0$gcm
-dm0 &lt;-<span class="st"> </span>tmp0$dm</code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="kw">set.seed</span>(<span class="dv">1030</span>)</a>
+<a class="sourceLine" id="cb10-2" data-line-number="2">C0 &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">1000</span>))</a>
+<a class="sourceLine" id="cb10-3" data-line-number="3">Q &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">800</span>))</a>
+<a class="sourceLine" id="cb10-4" data-line-number="4">tmp0 &lt;-<span class="st"> </span>IncDTW<span class="op">::</span><span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C0)</a>
+<a class="sourceLine" id="cb10-5" data-line-number="5">gcm0 &lt;-<span class="st"> </span>tmp0<span class="op">$</span>gcm</a>
+<a class="sourceLine" id="cb10-6" data-line-number="6">dm0 &lt;-<span class="st"> </span>tmp0<span class="op">$</span>dm</a></code></pre></div>
 <p>To update the DTW distance for new observations of <span class="math inline">\(C\)</span> we recycle as much from previous results as possible to keep calculation time low:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">C_new &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">10</span>))
-C_update &lt;-<span class="st"> </span><span class="kw">c</span>(C0, C_new) 
-
-<span class="co"># result from incremental calculation</span>
-res_inc &lt;-<span class="st"> </span>IncDTW::<span class="kw">idtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C_update, <span class="dt">newO =</span> C_new, 
-                    <span class="dt">gcm =</span> tmp0$gcm, <span class="dt">dm =</span> tmp0$dm)</code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1">C_new &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">10</span>))</a>
+<a class="sourceLine" id="cb11-2" data-line-number="2">C_update &lt;-<span class="st"> </span><span class="kw">c</span>(C0, C_new) </a>
+<a class="sourceLine" id="cb11-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb11-4" data-line-number="4"><span class="co"># result from incremental calculation</span></a>
+<a class="sourceLine" id="cb11-5" data-line-number="5">res_inc &lt;-<span class="st"> </span>IncDTW<span class="op">::</span><span class="kw">idtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C_update, <span class="dt">newO =</span> C_new, </a>
+<a class="sourceLine" id="cb11-6" data-line-number="6">                    <span class="dt">gcm =</span> tmp0<span class="op">$</span>gcm, <span class="dt">dm =</span> tmp0<span class="op">$</span>dm)</a></code></pre></div>
 <p>Finally we compare the results from the incremental calculation with the one from scratch:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># result from scratch</span>
-res_scratch &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C_update) 
-<span class="kw">sapply</span>(<span class="kw">names</span>(res_inc), function(x){<span class="kw">identical</span>(res_inc[[x]], res_scratch[[x]])})</code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1"><span class="co"># result from scratch</span></a>
+<a class="sourceLine" id="cb12-2" data-line-number="2">res_scratch &lt;-<span class="st"> </span>IncDTW<span class="op">::</span><span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C_update) </a>
+<a class="sourceLine" id="cb12-3" data-line-number="3"><span class="kw">sapply</span>(<span class="kw">names</span>(res_inc), <span class="cf">function</span>(x){<span class="kw">identical</span>(res_inc[[x]], res_scratch[[x]])})</a></code></pre></div>
 <pre><code>## distance      gcm       dm 
 ##     TRUE     TRUE     TRUE</code></pre>
 </div>
@@ -196,119 +406,129 @@ res_scratch &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<s
 <p>where the last one is used as benchmark. Moreover we test calculation times for different ways of using these functions and different input parameters, respectively. To compare the calculation times we use the package rbenchmark.</p>
 <p>I can not use the package microbenchmark here in the official vignette on CRAN because it has currently the status of ‘currently-unstated OS requirements’, and does not run reliably on some OSes. For interested readers/ users please visit my github page <a href="https://github.com/maxar/IncDTW/blob/master/vignettes/Incremental_Dynamic_Time_Warping.Rmd" class="uri">https://github.com/maxar/IncDTW/blob/master/vignettes/Incremental_Dynamic_Time_Warping.Rmd</a> where you will find more detailed run-time comparisons with the help of the microbenchmark package. Also there the function my_check()` is applied to compare the values of the calculated DTW distances to be identical.</p>
 <p>First we define the functions with special settings to be tested. Then we test the computation times and compare implicitly the computed values (by the function <code>my_check()</code>), first without warping window, and then with the sakoe chiba window.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_check &lt;-<span class="st"> </span>function(values) {
-  <span class="kw">all</span>(<span class="kw">sapply</span>(values[-<span class="dv">1</span>], function(x) <span class="kw">identical</span>(values[[<span class="dv">1</span>]], x)))
-}
-
-<span class="co">#--- define 'benchmark' functions from package: dtw</span>
-dtw_0 &lt;-<span class="st"> </span>function(C, Q){
-   dtw::<span class="kw">dtw</span>(C, Q, <span class="dt">step.pattern =</span> symmetric1)$distance }
-
-dtw_sc &lt;-<span class="st"> </span>function(C, Q){
-   dtw::<span class="kw">dtw</span>(C, Q, <span class="dt">step.pattern =</span> symmetric1, 
-            <span class="dt">window.type =</span> <span class="st">&quot;sakoechiba&quot;</span>, <span class="dt">window.size =</span> <span class="dv">40</span>)$distance }
-
-dtw_cm&lt;-<span class="st"> </span>function(cm){
-   dtw::<span class="kw">dtw</span>(<span class="dt">x=</span>cm, <span class="dt">step.pattern =</span> symmetric1)$distance }
-
-<span class="co">#--- define functions to be tested from package: IncDTW</span>
-idtw_0 &lt;-<span class="st"> </span>function(C, Q){
-   IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C)$distance }
-
-idtw_sc &lt;-<span class="st"> </span>function(C, Q){
-   IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C, <span class="dt">ws =</span> <span class="dv">40</span>)$distance }
-
-idtw_diff &lt;-<span class="st"> </span>function(diffM){
-   IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> diffM, <span class="dt">C =</span> <span class="st">&quot;diffM&quot;</span>)$distane }
-
-idtw_cm &lt;-<span class="st"> </span>function(cm){
-   IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> cm, <span class="dt">C =</span> <span class="st">&quot;cm&quot;</span>)$distance }
-
-idtw_inc &lt;-<span class="st"> </span>function(C, Q, gcm00, dm00){
-   IncDTW::<span class="kw">idtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C, <span class="dt">newO =</span> C[(<span class="kw">length</span>(C)-<span class="dv">9</span>) :<span class="st"> </span><span class="kw">length</span>(C)],
-                <span class="dt">gcm =</span> gcm00, <span class="dt">dm =</span> dm00)$distance }</code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1">WS &lt;-<span class="st"> </span><span class="dv">40</span></a>
+<a class="sourceLine" id="cb14-2" data-line-number="2">my_check &lt;-<span class="st"> </span><span class="cf">function</span>(values) {</a>
+<a class="sourceLine" id="cb14-3" data-line-number="3">  <span class="kw">all</span>(<span class="kw">sapply</span>(values[<span class="op">-</span><span class="dv">1</span>], <span class="cf">function</span>(x) <span class="kw">identical</span>(values[[<span class="dv">1</span>]], x)))</a>
+<a class="sourceLine" id="cb14-4" data-line-number="4">}</a>
+<a class="sourceLine" id="cb14-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb14-6" data-line-number="6"><span class="co">#--- define 'benchmark' functions from package: dtw</span></a>
+<a class="sourceLine" id="cb14-7" data-line-number="7">dtw_<span class="dv">0</span> &lt;-<span class="st"> </span><span class="cf">function</span>(C, Q){</a>
+<a class="sourceLine" id="cb14-8" data-line-number="8">   dtw<span class="op">::</span><span class="kw">dtw</span>(C, Q, <span class="dt">step.pattern =</span> symmetric1, <span class="dt">distance.only =</span> <span class="ot">TRUE</span>)<span class="op">$</span>distance }</a>
+<a class="sourceLine" id="cb14-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb14-10" data-line-number="10">dtw_sc &lt;-<span class="st"> </span><span class="cf">function</span>(C, Q){</a>
+<a class="sourceLine" id="cb14-11" data-line-number="11">   dtw<span class="op">::</span><span class="kw">dtw</span>(C, Q, <span class="dt">step.pattern =</span> symmetric1, </a>
+<a class="sourceLine" id="cb14-12" data-line-number="12">            <span class="dt">window.type =</span> <span class="st">&quot;sakoechiba&quot;</span>, <span class="dt">distance.only =</span> <span class="ot">TRUE</span>, <span class="dt">window.size =</span> WS)<span class="op">$</span>distance }</a>
+<a class="sourceLine" id="cb14-13" data-line-number="13"></a>
+<a class="sourceLine" id="cb14-14" data-line-number="14">dtw_cm&lt;-<span class="st"> </span><span class="cf">function</span>(cm){</a>
+<a class="sourceLine" id="cb14-15" data-line-number="15">   dtw<span class="op">::</span><span class="kw">dtw</span>(<span class="dt">x=</span>cm, <span class="dt">step.pattern =</span> symmetric1, <span class="dt">distance.only =</span> <span class="ot">TRUE</span>)<span class="op">$</span>distance }</a>
+<a class="sourceLine" id="cb14-16" data-line-number="16"></a>
+<a class="sourceLine" id="cb14-17" data-line-number="17"><span class="co">#--- define functions to be tested from package: IncDTW</span></a>
+<a class="sourceLine" id="cb14-18" data-line-number="18">idtw_dtw2vec &lt;-<span class="st"> </span><span class="cf">function</span>(C, Q){</a>
+<a class="sourceLine" id="cb14-19" data-line-number="19">   IncDTW<span class="op">::</span><span class="kw">dtw2vec</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C) }</a>
+<a class="sourceLine" id="cb14-20" data-line-number="20"></a>
+<a class="sourceLine" id="cb14-21" data-line-number="21">idtw_dtw2vec_sc &lt;-<span class="st"> </span><span class="cf">function</span>(C, Q){</a>
+<a class="sourceLine" id="cb14-22" data-line-number="22">   IncDTW<span class="op">::</span><span class="kw">dtw2vec</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C, <span class="dt">ws =</span> WS) }</a>
+<a class="sourceLine" id="cb14-23" data-line-number="23"></a>
+<a class="sourceLine" id="cb14-24" data-line-number="24">idtw_<span class="dv">0</span> &lt;-<span class="st"> </span><span class="cf">function</span>(C, Q){</a>
+<a class="sourceLine" id="cb14-25" data-line-number="25">   IncDTW<span class="op">::</span><span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C)<span class="op">$</span>distance }</a>
+<a class="sourceLine" id="cb14-26" data-line-number="26"></a>
+<a class="sourceLine" id="cb14-27" data-line-number="27">idtw_sc &lt;-<span class="st"> </span><span class="cf">function</span>(C, Q){</a>
+<a class="sourceLine" id="cb14-28" data-line-number="28">   IncDTW<span class="op">::</span><span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C, <span class="dt">ws =</span> WS)<span class="op">$</span>distance }</a>
+<a class="sourceLine" id="cb14-29" data-line-number="29"></a>
+<a class="sourceLine" id="cb14-30" data-line-number="30">idtw_diff &lt;-<span class="st"> </span><span class="cf">function</span>(diffM){</a>
+<a class="sourceLine" id="cb14-31" data-line-number="31">   IncDTW<span class="op">::</span><span class="kw">dtw</span>(<span class="dt">Q =</span> diffM, <span class="dt">C =</span> <span class="st">&quot;diffM&quot;</span>)<span class="op">$</span>distane }</a>
+<a class="sourceLine" id="cb14-32" data-line-number="32"></a>
+<a class="sourceLine" id="cb14-33" data-line-number="33">idtw_cm &lt;-<span class="st"> </span><span class="cf">function</span>(cm){</a>
+<a class="sourceLine" id="cb14-34" data-line-number="34">   IncDTW<span class="op">::</span><span class="kw">dtw</span>(<span class="dt">Q =</span> cm, <span class="dt">C =</span> <span class="st">&quot;cm&quot;</span>)<span class="op">$</span>distance }</a>
+<a class="sourceLine" id="cb14-35" data-line-number="35"></a>
+<a class="sourceLine" id="cb14-36" data-line-number="36">idtw_inc &lt;-<span class="st"> </span><span class="cf">function</span>(C, Q, gcm00, dm00){</a>
+<a class="sourceLine" id="cb14-37" data-line-number="37">   IncDTW<span class="op">::</span><span class="kw">idtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C, <span class="dt">newO =</span> C[(<span class="kw">length</span>(C)<span class="op">-</span><span class="dv">9</span>) <span class="op">:</span><span class="st"> </span><span class="kw">length</span>(C)],</a>
+<a class="sourceLine" id="cb14-38" data-line-number="38">                <span class="dt">gcm =</span> gcm00, <span class="dt">dm =</span> dm00)<span class="op">$</span>distance }</a></code></pre></div>
 <p>After defining the functions, we execute them for many synthetic random walks inside of <code>lapply()</code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tmp &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="dv">1</span>:<span class="dv">20</span>, function(pseudoseed){
-   <span class="kw">set.seed</span>(pseudoseed)
-   C &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">500</span>))
-   Q &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">480</span>))
-   tmp00 &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C[<span class="dv">1</span>:(<span class="kw">length</span>(C)-<span class="dv">10</span>)], <span class="dt">return_diffM =</span> <span class="ot">TRUE</span>)
-   gcm00 &lt;-<span class="st"> </span>tmp00$gcm
-   dm00 &lt;-<span class="st"> </span>tmp00$dm
-   tmp &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C, <span class="dt">return_diffM =</span> <span class="ot">TRUE</span>)
-   diffM &lt;-<span class="st"> </span>tmp$diffM
-   cm &lt;-<span class="st"> </span><span class="kw">abs</span>(diffM)
-   
-   
-   mic &lt;-<span class="st"> </span>rbenchmark::<span class="kw">benchmark</span>( <span class="kw">dtw_0</span>(C, Q),
-                          <span class="kw">dtw_cm</span>(cm),
-                          <span class="co">#----</span>
-                          <span class="kw">idtw_0</span>(C, Q),
-                          <span class="kw">idtw_diff</span>(diffM),
-                          <span class="kw">idtw_cm</span>(cm),
-                          <span class="kw">idtw_inc</span>(C, Q, gcm00, dm00),
-                          <span class="dt">replications =</span> benchmark_replications[<span class="dv">1</span>]
-                        )
-                          
-   <span class="kw">return</span>(<span class="kw">as.data.frame</span>(mic))
-})
-mics &lt;-<span class="st"> </span><span class="kw">do.call</span>(rbind, tmp)
-<span class="co"># class(mics) &lt;- c(&quot;microbenchmark&quot;, &quot;data.frame&quot;)</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1">tmp &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">20</span>, <span class="cf">function</span>(pseudoseed){</a>
+<a class="sourceLine" id="cb15-2" data-line-number="2">   <span class="kw">set.seed</span>(pseudoseed)</a>
+<a class="sourceLine" id="cb15-3" data-line-number="3">   C &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">500</span>))</a>
+<a class="sourceLine" id="cb15-4" data-line-number="4">   Q &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">480</span>))</a>
+<a class="sourceLine" id="cb15-5" data-line-number="5">   tmp00 &lt;-<span class="st"> </span>IncDTW<span class="op">::</span><span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C[<span class="dv">1</span><span class="op">:</span>(<span class="kw">length</span>(C)<span class="op">-</span><span class="dv">10</span>)], <span class="dt">return_diffM =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb15-6" data-line-number="6">   gcm00 &lt;-<span class="st"> </span>tmp00<span class="op">$</span>gcm</a>
+<a class="sourceLine" id="cb15-7" data-line-number="7">   dm00 &lt;-<span class="st"> </span>tmp00<span class="op">$</span>dm</a>
+<a class="sourceLine" id="cb15-8" data-line-number="8">   tmp &lt;-<span class="st"> </span>IncDTW<span class="op">::</span><span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C, <span class="dt">return_diffM =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb15-9" data-line-number="9">   diffM &lt;-<span class="st"> </span>tmp<span class="op">$</span>diffM</a>
+<a class="sourceLine" id="cb15-10" data-line-number="10">   cm &lt;-<span class="st"> </span><span class="kw">abs</span>(diffM)</a>
+<a class="sourceLine" id="cb15-11" data-line-number="11">   </a>
+<a class="sourceLine" id="cb15-12" data-line-number="12">   </a>
+<a class="sourceLine" id="cb15-13" data-line-number="13">   mic &lt;-<span class="st"> </span>rbenchmark<span class="op">::</span><span class="kw">benchmark</span>( <span class="kw">dtw_0</span>(C, Q),</a>
+<a class="sourceLine" id="cb15-14" data-line-number="14">                          <span class="kw">dtw_cm</span>(cm),</a>
+<a class="sourceLine" id="cb15-15" data-line-number="15">                          <span class="co">#----</span></a>
+<a class="sourceLine" id="cb15-16" data-line-number="16">                          <span class="kw">idtw_dtw2vec</span>(C, Q),</a>
+<a class="sourceLine" id="cb15-17" data-line-number="17">                          <span class="kw">idtw_0</span>(C, Q),</a>
+<a class="sourceLine" id="cb15-18" data-line-number="18">                          <span class="kw">idtw_diff</span>(diffM),</a>
+<a class="sourceLine" id="cb15-19" data-line-number="19">                          <span class="kw">idtw_cm</span>(cm),</a>
+<a class="sourceLine" id="cb15-20" data-line-number="20">                          <span class="kw">idtw_inc</span>(C, Q, gcm00, dm00),</a>
+<a class="sourceLine" id="cb15-21" data-line-number="21">                          <span class="dt">replications =</span> benchmark_replications[<span class="dv">1</span>]</a>
+<a class="sourceLine" id="cb15-22" data-line-number="22">                        )</a>
+<a class="sourceLine" id="cb15-23" data-line-number="23">                          </a>
+<a class="sourceLine" id="cb15-24" data-line-number="24">   <span class="kw">return</span>(<span class="kw">as.data.frame</span>(mic))</a>
+<a class="sourceLine" id="cb15-25" data-line-number="25">})</a>
+<a class="sourceLine" id="cb15-26" data-line-number="26">mics &lt;-<span class="st"> </span><span class="kw">do.call</span>(rbind, tmp)</a>
+<a class="sourceLine" id="cb15-27" data-line-number="27"><span class="co"># class(mics) &lt;- c(&quot;microbenchmark&quot;, &quot;data.frame&quot;)</span></a></code></pre></div>
 <p>Now we aggregate the results and print them. This table shows how much faster our proposed functions are than the baseline, and how much calculation time can be saved by recycling already existing calculation results. On average our proposed method in the most basic form <code>idtw_0</code> is about 3 times faster than the appropriate pendant <code>dtw_0</code>. Also the incremental way of calculating saves time, that is <code>idtw_inc</code> is about 5 times faster than calculating from scratch with <code>itdw_0</code> and about 2-3 times faster compared to the case when the difference matrix is already given <code>idtw_diff</code> or similar, when the cost matrix is given <code>idtw_cm</code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(mics)</code></pre></div>
-<pre><code>##                          test replications elapsed relative user.self
-## 1                 dtw_0(C, Q)          100    2.51   17.929      2.00
-## 2                  dtw_cm(cm)          100    1.50   10.714      1.17
-## 3                idtw_0(C, Q)          100    0.78    5.571      0.46
-## 5                 idtw_cm(cm)          100    0.28    2.000      0.20
-## 4            idtw_diff(diffM)          100    0.37    2.643      0.27
-## 6 idtw_inc(C, Q, gcm00, dm00)          100    0.14    1.000      0.10
-##   sys.self user.child sys.child
-## 1     0.51         NA        NA
-## 2     0.31         NA        NA
-## 3     0.33         NA        NA
-## 5     0.08         NA        NA
-## 4     0.11         NA        NA
-## 6     0.04         NA        NA</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tmp &lt;-<span class="st"> </span><span class="kw">aggregate</span>(mics$elapsed, <span class="dt">by =</span> <span class="kw">list</span>(mics$test), mean)
-tmp$xrel &lt;-<span class="st"> </span>tmp$x/<span class="kw">min</span>(tmp$x)
-tmp</code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="kw">head</span>(mics)</a></code></pre></div>
+<pre><code>##                 test replications elapsed relative user.self sys.self
+## 1        dtw_0(C, Q)          100    3.19   45.571      1.72     1.45
+## 2         dtw_cm(cm)          100    1.84   26.286      0.91     0.94
+## 4       idtw_0(C, Q)          100    1.06   15.143      0.54     0.51
+## 6        idtw_cm(cm)          100    0.33    4.714      0.19     0.14
+## 5   idtw_diff(diffM)          100    0.55    7.857      0.31     0.24
+## 3 idtw_dtw2vec(C, Q)          100    0.07    1.000      0.07     0.00
+##   user.child sys.child
+## 1         NA        NA
+## 2         NA        NA
+## 4         NA        NA
+## 6         NA        NA
+## 5         NA        NA
+## 3         NA        NA</code></pre>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1">tmp &lt;-<span class="st"> </span><span class="kw">aggregate</span>(mics<span class="op">$</span>elapsed, <span class="dt">by =</span> <span class="kw">list</span>(mics<span class="op">$</span>test), mean)</a>
+<a class="sourceLine" id="cb18-2" data-line-number="2">tmp<span class="op">$</span>xrel &lt;-<span class="st"> </span>tmp<span class="op">$</span>x<span class="op">/</span><span class="kw">min</span>(tmp<span class="op">$</span>x)</a>
+<a class="sourceLine" id="cb18-3" data-line-number="3">tmp</a></code></pre></div>
 <pre><code>##                       Group.1      x      xrel
-## 1                 dtw_0(C, Q) 2.6945 18.329932
-## 2                  dtw_cm(cm) 1.6510 11.231293
-## 3                idtw_0(C, Q) 0.7760  5.278912
-## 4                 idtw_cm(cm) 0.2935  1.996599
-## 5            idtw_diff(diffM) 0.3990  2.714286
-## 6 idtw_inc(C, Q, gcm00, dm00) 0.1470  1.000000</code></pre>
+## 1                 dtw_0(C, Q) 2.2375 34.160305
+## 2                  dtw_cm(cm) 1.1945 18.236641
+## 3                idtw_0(C, Q) 0.9010 13.755725
+## 4                 idtw_cm(cm) 0.3265  4.984733
+## 5            idtw_diff(diffM) 0.4660  7.114504
+## 6          idtw_dtw2vec(C, Q) 0.0655  1.000000
+## 7 idtw_inc(C, Q, gcm00, dm00) 0.1830  2.793893</code></pre>
 <p>Next we compare the functions with the sakoe chiba warping window. These need to be tested separately, since the return value can differ from the one without warping window, so the function <code>my_check()</code> would stop the execution. Nevertheless we simulate exactly (using the same seeds) the same time series as above, such that the computation times are comparable.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tmp &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="dv">1</span>:<span class="dv">20</span>, function(pseudoseed){
-   <span class="kw">set.seed</span>(pseudoseed)
-   C &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">500</span>))
-   Q &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">480</span>))
-   tmp00 &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C[<span class="dv">1</span>:(<span class="kw">length</span>(C)-<span class="dv">10</span>)], <span class="dt">return_diffM =</span> <span class="ot">TRUE</span>)
-   gcm00 &lt;-<span class="st"> </span>tmp00$gcm
-   dm00 &lt;-<span class="st"> </span>tmp00$dm
-   tmp &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C, <span class="dt">return_diffM =</span> <span class="ot">TRUE</span>)
-   diffM &lt;-<span class="st"> </span>tmp$diffM
-   cm &lt;-<span class="st"> </span><span class="kw">abs</span>(diffM)
-   
-   mic &lt;-<span class="st"> </span>rbenchmark::<span class="kw">benchmark</span>( <span class="kw">dtw_sc</span>(C, Q),
-                          <span class="co">#----</span>
-                          <span class="kw">idtw_sc</span>(C, Q),
-                          <span class="dt">replications =</span> benchmark_replications[<span class="dv">1</span>])
-
-   <span class="kw">return</span>(<span class="kw">as.data.frame</span>(mic))
-})
-mics_sc &lt;-<span class="st"> </span><span class="kw">do.call</span>(rbind, tmp)</code></pre></div>
-<p>Again the <code>idtw</code> function outperforms the baseline even by a factor of about 4 to 5. Both functions are about 3 milliseconds faster than the appropriate pendants without warping window <code>dtw_0</code> and <code>idtw_0</code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(mics_sc)</code></pre></div>
-<pre><code>##            test replications elapsed relative user.self sys.self
-## 1  dtw_sc(C, Q)          100    2.42    3.507      1.71     0.70
-## 2 idtw_sc(C, Q)          100    0.69    1.000      0.34     0.35
-## 3  dtw_sc(C, Q)          100    2.51    3.691      1.80     0.71
-## 4 idtw_sc(C, Q)          100    0.68    1.000      0.34     0.35
-## 5  dtw_sc(C, Q)          100    2.46    3.727      1.57     0.89
-## 6 idtw_sc(C, Q)          100    0.66    1.000      0.41     0.25
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" data-line-number="1">tmp &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">20</span>, <span class="cf">function</span>(pseudoseed){</a>
+<a class="sourceLine" id="cb20-2" data-line-number="2">   <span class="kw">set.seed</span>(pseudoseed)</a>
+<a class="sourceLine" id="cb20-3" data-line-number="3">   C &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">500</span>))</a>
+<a class="sourceLine" id="cb20-4" data-line-number="4">   Q &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">480</span>))</a>
+<a class="sourceLine" id="cb20-5" data-line-number="5">   tmp00 &lt;-<span class="st"> </span>IncDTW<span class="op">::</span><span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C[<span class="dv">1</span><span class="op">:</span>(<span class="kw">length</span>(C)<span class="op">-</span><span class="dv">10</span>)], <span class="dt">return_diffM =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb20-6" data-line-number="6">   gcm00 &lt;-<span class="st"> </span>tmp00<span class="op">$</span>gcm</a>
+<a class="sourceLine" id="cb20-7" data-line-number="7">   dm00 &lt;-<span class="st"> </span>tmp00<span class="op">$</span>dm</a>
+<a class="sourceLine" id="cb20-8" data-line-number="8">   tmp &lt;-<span class="st"> </span>IncDTW<span class="op">::</span><span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C, <span class="dt">return_diffM =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb20-9" data-line-number="9">   diffM &lt;-<span class="st"> </span>tmp<span class="op">$</span>diffM</a>
+<a class="sourceLine" id="cb20-10" data-line-number="10">   cm &lt;-<span class="st"> </span><span class="kw">abs</span>(diffM)</a>
+<a class="sourceLine" id="cb20-11" data-line-number="11">   </a>
+<a class="sourceLine" id="cb20-12" data-line-number="12">   mic &lt;-<span class="st"> </span>rbenchmark<span class="op">::</span><span class="kw">benchmark</span>( <span class="kw">dtw_sc</span>(C, Q),</a>
+<a class="sourceLine" id="cb20-13" data-line-number="13">                          <span class="co">#----</span></a>
+<a class="sourceLine" id="cb20-14" data-line-number="14">                          <span class="kw">idtw_dtw2vec_sc</span>(C,Q),</a>
+<a class="sourceLine" id="cb20-15" data-line-number="15">                          <span class="kw">idtw_sc</span>(C, Q),</a>
+<a class="sourceLine" id="cb20-16" data-line-number="16">                          <span class="dt">replications =</span> benchmark_replications[<span class="dv">1</span>])</a>
+<a class="sourceLine" id="cb20-17" data-line-number="17"></a>
+<a class="sourceLine" id="cb20-18" data-line-number="18">   <span class="kw">return</span>(<span class="kw">as.data.frame</span>(mic))</a>
+<a class="sourceLine" id="cb20-19" data-line-number="19">})</a>
+<a class="sourceLine" id="cb20-20" data-line-number="20">mics_sc &lt;-<span class="st"> </span><span class="kw">do.call</span>(rbind, tmp)</a></code></pre></div>
+<p>Again the <code>idtw</code> function outperforms the baseline even by a factor of about 4 to 5. The vector based function is too fast to be benchmarked by the package rbenchmark. Interested readers may repeat the experiment with the microbenchmark package. This is here not possible due to problems between CRAN and microbenchmark. Both functions are about 3 milliseconds faster than the appropriate pendants without warping window <code>dtw_0</code> and <code>idtw_0</code>.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" data-line-number="1"><span class="kw">head</span>(mics_sc)</a></code></pre></div>
+<pre><code>##                    test replications elapsed relative user.self sys.self
+## 1          dtw_sc(C, Q)          100    2.26    113.0      1.45     0.81
+## 2 idtw_dtw2vec_sc(C, Q)          100    0.02      1.0      0.01     0.00
+## 3         idtw_sc(C, Q)          100    0.74     37.0      0.39     0.36
+## 4          dtw_sc(C, Q)          100    2.26    113.0      1.36     0.89
+## 5 idtw_dtw2vec_sc(C, Q)          100    0.02      1.0      0.01     0.00
+## 6         idtw_sc(C, Q)          100    0.81     40.5      0.45     0.36
 ##   user.child sys.child
 ## 1         NA        NA
 ## 2         NA        NA
@@ -316,41 +536,41 @@ mics_sc &lt;-<span class="st"> </span><span class="kw">do.call</span>(rbind, tmp
 ## 4         NA        NA
 ## 5         NA        NA
 ## 6         NA        NA</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tmp &lt;-<span class="st"> </span><span class="kw">aggregate</span>(mics_sc$elapsed, <span class="dt">by =</span> <span class="kw">list</span>(mics_sc$test), mean)
-tmp$xrel &lt;-<span class="st"> </span>tmp$x/<span class="kw">min</span>(tmp$x)
-tmp</code></pre></div>
-<pre><code>##         Group.1      x     xrel
-## 1  dtw_sc(C, Q) 2.5810 3.826538
-## 2 idtw_sc(C, Q) 0.6745 1.000000</code></pre>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" data-line-number="1">tmp &lt;-<span class="st"> </span><span class="kw">aggregate</span>(mics_sc<span class="op">$</span>elapsed, <span class="dt">by =</span> <span class="kw">list</span>(mics_sc<span class="op">$</span>test), mean)</a>
+<a class="sourceLine" id="cb23-2" data-line-number="2">tmp<span class="op">$</span>xrel &lt;-<span class="st"> </span>tmp<span class="op">$</span>x<span class="op">/</span><span class="kw">min</span>(tmp<span class="op">$</span>x)</a>
+<a class="sourceLine" id="cb23-3" data-line-number="3">tmp</a></code></pre></div>
+<pre><code>##                 Group.1      x      xrel
+## 1          dtw_sc(C, Q) 2.3855 144.57576
+## 2 idtw_dtw2vec_sc(C, Q) 0.0165   1.00000
+## 3         idtw_sc(C, Q) 0.8035  48.69697</code></pre>
 </div>
 <div id="decremental-dynamic-time-warping-dec_dm" class="section level2">
 <h2>Decremental Dynamic Time Warping: dec_dm()</h2>
 <p>Now that we have understood the incremental approach and tested the calculation time and correctness of results, we want to introduce another concept, which is just the reverse: Instead of adding new observations to the time series x, in this section we introduce an easy and fast way of reducing most current observations, conditional to already existing calculation results including all observations of <span class="math inline">\(C\)</span>.</p>
 <p>Of course this is only interesting if you are interested not only in the DTW distance, but also want to know about the warping path. Meanwhile the DTW distance could be directly taken from the global cost matrix from previous calculations (by selecting the value of the last row and last but k column, k is the number of reduced observations of <span class="math inline">\(C\)</span>), we cannot update or modify the previous warping path but need to calculate it again from scratch. This is required, since adding or neglecting observations causes an updated alignment of the two updated time series, and in general the new alignment could be completely different from the original.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">1150</span>)
-Q &lt;-<span class="st"> </span><span class="kw">cos</span>(<span class="dv">1</span>:<span class="dv">100</span>)
-C &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">80</span>))
-Ndec &lt;-<span class="st"> </span><span class="dv">4</span>
-<span class="co"># the ordinary calculation</span>
-result_base &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<span class="dt">Q=</span>Q, <span class="dt">C=</span>C) 
-gcm0 &lt;-<span class="st"> </span>result_base$gcm</code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" data-line-number="1"><span class="kw">set.seed</span>(<span class="dv">1150</span>)</a>
+<a class="sourceLine" id="cb25-2" data-line-number="2">Q &lt;-<span class="st"> </span><span class="kw">cos</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">100</span>)</a>
+<a class="sourceLine" id="cb25-3" data-line-number="3">C &lt;-<span class="st"> </span><span class="kw">cumsum</span>(<span class="kw">rnorm</span>(<span class="dv">80</span>))</a>
+<a class="sourceLine" id="cb25-4" data-line-number="4">Ndec &lt;-<span class="st"> </span><span class="dv">4</span></a>
+<a class="sourceLine" id="cb25-5" data-line-number="5"><span class="co"># the ordinary calculation</span></a>
+<a class="sourceLine" id="cb25-6" data-line-number="6">result_base &lt;-<span class="st"> </span>IncDTW<span class="op">::</span><span class="kw">dtw</span>(<span class="dt">Q=</span>Q, <span class="dt">C=</span>C) </a>
+<a class="sourceLine" id="cb25-7" data-line-number="7">gcm0 &lt;-<span class="st"> </span>result_base<span class="op">$</span>gcm</a></code></pre></div>
 <p>To update the DTW distance by decreasing x for some observations (say 4), again we recycle as much from previous results as possible to keep calculation time low:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># the ordinary calculation without the last 4 observations</span>
-result_decr1 &lt;-<span class="st"> </span>IncDTW::<span class="kw">dtw</span>(<span class="dt">Q=</span>Q, <span class="dt">C=</span>C[<span class="dv">1</span>:(<span class="kw">length</span>(C) -<span class="st"> </span>Ndec)])
-gcm1 &lt;-<span class="st"> </span>result_decr1$gcm
-
-<span class="co"># the decremental step: reduce C for 4 observation</span>
-result_decr2 &lt;-<span class="st"> </span>IncDTW::<span class="kw">dec_dm</span>(result_base$dm, <span class="dt">Ndec =</span> Ndec) 
-
-<span class="co"># compare the results: ii, jj, wp and the gcm of </span>
-<span class="co"># result_decr1 (conventional) and result_decr2 (recycling previous results)</span>
-comparison_0 &lt;-<span class="st"> </span><span class="kw">c</span>(
-<span class="kw">identical</span>(result_decr1$ii, result_decr2$ii),
-<span class="kw">identical</span>(result_decr1$jj, result_decr2$jj),
-<span class="kw">identical</span>(result_decr1$wp, result_decr2$wp),
-<span class="kw">identical</span>(gcm1[<span class="kw">nrow</span>(gcm1), <span class="kw">ncol</span>(gcm1)], gcm0[<span class="kw">nrow</span>(gcm0), <span class="kw">ncol</span>(gcm0) -<span class="st"> </span>Ndec]))
-comparison_0</code></pre></div>
-<pre><code>## [1] FALSE FALSE FALSE  TRUE</code></pre>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" data-line-number="1"><span class="co"># the ordinary calculation without the last 4 observations</span></a>
+<a class="sourceLine" id="cb26-2" data-line-number="2">result_decr1 &lt;-<span class="st"> </span>IncDTW<span class="op">::</span><span class="kw">dtw</span>(<span class="dt">Q=</span>Q, <span class="dt">C=</span>C[<span class="dv">1</span><span class="op">:</span>(<span class="kw">length</span>(C) <span class="op">-</span><span class="st"> </span>Ndec)])</a>
+<a class="sourceLine" id="cb26-3" data-line-number="3">gcm1 &lt;-<span class="st"> </span>result_decr1<span class="op">$</span>gcm</a>
+<a class="sourceLine" id="cb26-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb26-5" data-line-number="5"><span class="co"># the decremental step: reduce C for 4 observation</span></a>
+<a class="sourceLine" id="cb26-6" data-line-number="6">result_decr2 &lt;-<span class="st"> </span>IncDTW<span class="op">::</span><span class="kw">dec_dm</span>(result_base<span class="op">$</span>dm, <span class="dt">Ndec =</span> Ndec) </a>
+<a class="sourceLine" id="cb26-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb26-8" data-line-number="8"><span class="co"># compare the results: ii, jj, wp and the gcm of </span></a>
+<a class="sourceLine" id="cb26-9" data-line-number="9"><span class="co"># result_decr1 (conventional) and result_decr2 (recycling previous results)</span></a>
+<a class="sourceLine" id="cb26-10" data-line-number="10">comparison_<span class="dv">0</span> &lt;-<span class="st"> </span><span class="kw">c</span>(</a>
+<a class="sourceLine" id="cb26-11" data-line-number="11"><span class="kw">identical</span>(result_decr1<span class="op">$</span>ii, result_decr2<span class="op">$</span>ii),</a>
+<a class="sourceLine" id="cb26-12" data-line-number="12"><span class="kw">identical</span>(result_decr1<span class="op">$</span>jj, result_decr2<span class="op">$</span>jj),</a>
+<a class="sourceLine" id="cb26-13" data-line-number="13"><span class="kw">identical</span>(result_decr1<span class="op">$</span>wp, result_decr2<span class="op">$</span>wp))</a>
+<a class="sourceLine" id="cb26-14" data-line-number="14">comparison_<span class="dv">0</span></a></code></pre></div>
+<pre><code>## [1] FALSE FALSE FALSE</code></pre>
 </div>
 
 

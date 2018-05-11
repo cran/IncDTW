@@ -90,27 +90,34 @@ res_scratch <- IncDTW::dtw(Q = Q, C = C_update)
 sapply(names(res_inc), function(x){identical(res_inc[[x]], res_scratch[[x]])})
 
 ## ---- message=FALSE------------------------------------------------------
+WS <- 40
 my_check <- function(values) {
   all(sapply(values[-1], function(x) identical(values[[1]], x)))
 }
 
 #--- define 'benchmark' functions from package: dtw
 dtw_0 <- function(C, Q){
-   dtw::dtw(C, Q, step.pattern = symmetric1)$distance }
+   dtw::dtw(C, Q, step.pattern = symmetric1, distance.only = TRUE)$distance }
 
 dtw_sc <- function(C, Q){
    dtw::dtw(C, Q, step.pattern = symmetric1, 
-            window.type = "sakoechiba", window.size = 40)$distance }
+            window.type = "sakoechiba", distance.only = TRUE, window.size = WS)$distance }
 
 dtw_cm<- function(cm){
-   dtw::dtw(x=cm, step.pattern = symmetric1)$distance }
+   dtw::dtw(x=cm, step.pattern = symmetric1, distance.only = TRUE)$distance }
 
 #--- define functions to be tested from package: IncDTW
+idtw_dtw2vec <- function(C, Q){
+   IncDTW::dtw2vec(Q = Q, C = C) }
+
+idtw_dtw2vec_sc <- function(C, Q){
+   IncDTW::dtw2vec(Q = Q, C = C, ws = WS) }
+
 idtw_0 <- function(C, Q){
    IncDTW::dtw(Q = Q, C = C)$distance }
 
 idtw_sc <- function(C, Q){
-   IncDTW::dtw(Q = Q, C = C, ws = 40)$distance }
+   IncDTW::dtw(Q = Q, C = C, ws = WS)$distance }
 
 idtw_diff <- function(diffM){
    IncDTW::dtw(Q = diffM, C = "diffM")$distane }
@@ -121,6 +128,7 @@ idtw_cm <- function(cm){
 idtw_inc <- function(C, Q, gcm00, dm00){
    IncDTW::idtw(Q = Q, C = C, newO = C[(length(C)-9) : length(C)],
                 gcm = gcm00, dm = dm00)$distance }
+
 
 
 ## ------------------------------------------------------------------------
@@ -139,6 +147,7 @@ tmp <- lapply(1:20, function(pseudoseed){
    mic <- rbenchmark::benchmark( dtw_0(C, Q),
                           dtw_cm(cm),
                           #----
+                          idtw_dtw2vec(C, Q),
                           idtw_0(C, Q),
                           idtw_diff(diffM),
                           idtw_cm(cm),
@@ -171,6 +180,7 @@ tmp <- lapply(1:20, function(pseudoseed){
    
    mic <- rbenchmark::benchmark( dtw_sc(C, Q),
                           #----
+                          idtw_dtw2vec_sc(C,Q),
                           idtw_sc(C, Q),
                           replications = benchmark_replications[1])
 
@@ -207,7 +217,6 @@ result_decr2 <- IncDTW::dec_dm(result_base$dm, Ndec = Ndec)
 comparison_0 <- c(
 identical(result_decr1$ii, result_decr2$ii),
 identical(result_decr1$jj, result_decr2$jj),
-identical(result_decr1$wp, result_decr2$wp),
-identical(gcm1[nrow(gcm1), ncol(gcm1)], gcm0[nrow(gcm0), ncol(gcm0) - Ndec]))
+identical(result_decr1$wp, result_decr2$wp))
 comparison_0
 
