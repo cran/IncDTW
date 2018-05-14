@@ -9,6 +9,10 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r set-options, echo=FALSE, cache=FALSE}
+options(width = 1000)
+```
+
 Dynamic Time Warping is a well known and often applied technic to measure the distance between two time series. ([Google](https://www.google.at/search?q=dynamic+time+warpinig&oq=dynamic+time+warpinig&aqs=chrome..69i57j0l5.4553j0j7&sourceid=chrome&ie=UTF-8)) finds about 750,000 matches for the term _Dynamic Time Warping_. Searching the scientific search engines for research articles for this subject results in:
 
 - ([scholar.google](https://scholar.google.at/scholar?hl=en&q=dynamic+time+warping&btnG=&as_sdt=1%2C5&as_sdtp=)) finds about 117,000 hits 
@@ -51,7 +55,8 @@ In the following we show by aid of toy example how to use the functions of IncDT
 set.seed(1090)
 Q <- sin(1:10)#+rnorm(20)
 C <- sin(-2:10)#+rnorm(15)
-tmp <- IncDTW::dtw(Q = Q, C = C, return_diffM = TRUE, return_wp = TRUE, return_QC = TRUE, return_cm = TRUE, return_diffp = TRUE)
+tmp <- IncDTW::dtw(Q = Q, C = C, return_diffM = TRUE, return_wp = TRUE,
+                   return_QC = TRUE, return_cm = TRUE, return_diffp = TRUE)
 names(tmp)
 ```
 
@@ -71,7 +76,8 @@ set.seed(1090)
 Q <- c(1, 1, 2, 3, 2, 0)
 C <- c(0, 1, 1, 2, 3, 2, 1)
 
-tmp <- IncDTW::dtw(Q = Q, C = C, return_diffM = TRUE, return_wp = TRUE, return_QC = TRUE, return_cm = TRUE, return_diffp = TRUE)
+tmp <- IncDTW::dtw(Q = Q, C = C, return_diffM = TRUE, return_wp = TRUE,
+                   return_QC = TRUE, return_cm = TRUE, return_diffp = TRUE)
 names(tmp)
 ```
 
@@ -326,7 +332,8 @@ To update the DTW distance by decreasing x for some observations (say 4), again 
 
 ```{r}
 # the ordinary calculation without the last 4 observations
-result_decr1 <- IncDTW::dtw(Q=Q, C=C[1:(length(C) - Ndec)])
+result_decr1 <- IncDTW::dtw(Q=Q, C=C[1:(length(C) - Ndec)], 
+                            return_wp = TRUE)
 gcm1 <- result_decr1$gcm
 
 # the decremental step: reduce C for 4 observation

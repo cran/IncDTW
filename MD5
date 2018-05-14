@@ -1,11 +1,11 @@
-4dac2a46734e47e03bf5d2b2f821194e *DESCRIPTION
+37e9decce23ace2dac37463e98b4c3ab *DESCRIPTION
 e129195d8f9b09e2eabb6fbf9093a572 *NAMESPACE
 3af607fd5a4cf7bde6825a8037ba9178 *R/RcppExports.R
 f0b8a8918ffd727f6aaf29d86c9171a9 *R/Rfunctions.R
 b3e58c019f27dd4abd4236b2b94a0f98 *build/vignette.rds
-4527b1dbb5ef630157309697da4abec3 *inst/doc/Incremental_Dynamic_Time_Warping.R
-809fc11261829783791ad954536649d1 *inst/doc/Incremental_Dynamic_Time_Warping.Rmd
-b4cd3a21571b8c7ee9878bef03ad083d *inst/doc/Incremental_Dynamic_Time_Warping.html
+d0aad4e90d71d69239bfc8c4f01d5826 *inst/doc/Incremental_Dynamic_Time_Warping.R
+1d6f7739260d4f693c03a7bfdbec3eed *inst/doc/Incremental_Dynamic_Time_Warping.Rmd
+fc22013de064078c433e1a3521b89235 *inst/doc/Incremental_Dynamic_Time_Warping.html
 73e2c5cc736d702e09a711e975f127b2 *man/IncDTW-package.Rd
 72ea5719899ea24e6c4ae176d726cc68 *man/dec_dm.Rd
 f4d0f27ec0715e21a7cd8477600db14b *man/dtw.Rd
@@ -13,8 +13,8 @@ f4d0f27ec0715e21a7cd8477600db14b *man/dtw.Rd
 4d8890deab4fb2f8ff9818c6b386e1ff *man/idtw.Rd
 904b610f329523efb275047f00a7dbb4 *man/idtw2vec.Rd
 29834258f1169843949edb41a6931bf7 *man/plot_idtw.Rd
-291617f4e1bfd5d8147559885a08749e *src/GCM.cpp
+7c260f0372ca3c2b93e45d35c1e713c0 *src/GCM.cpp
 7041e7a018fb8eaa7cb2f23e26a43d03 *src/RcppExports.cpp
-876310e09f606f6aa93e0880e0cf5f36 *src/dtw2vec.cpp
+c39589501fef9e79e3efb83303608e53 *src/dtw2vec.cpp
 b1f68f002e031c20cd54a18d575104b9 *src/init.c
-809fc11261829783791ad954536649d1 *vignettes/Incremental_Dynamic_Time_Warping.Rmd
+1d6f7739260d4f693c03a7bfdbec3eed *vignettes/Incremental_Dynamic_Time_Warping.Rmd

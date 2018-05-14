@@ -62,8 +62,8 @@ double cpp_dtw2vec (NumericVector x, NumericVector y)
    }
    
    ret = *(p1+nx-1);//p1[nx-1]
-   delete(p1);
-   delete(p2);
+   delete[] p1;
+   delete[] p2;
    
    return (ret);
 }
@@ -120,8 +120,8 @@ List cpp_dtw2vec_inc (NumericVector x, NumericVector newObs, NumericVector gcm_l
    ret["gcm_lr"] = gcm_lr;
    ret["gcm_lc_new"] = gcm_lc_new;
    ret["distance"] = *(p1+nx-1);
-   delete(p1);
-   delete(p2);
+   delete[] p1;
+   delete[] p2;
    return ret ;
 }
 
@@ -199,8 +199,8 @@ List cpp_dtw2vec_inc_ws (NumericVector x, NumericVector newObs, NumericVector gc
    ret["gcm_lr"] = gcm_lr;
    ret["gcm_lc_new"] = gcm_lc_new;
    ret["distance"] = *(p1+nx-1);
-   delete(p1);
-   delete(p2);
+   delete[] p1;
+   delete[] p2;
    
    return ret ;
 }
@@ -268,8 +268,8 @@ double cpp_dtw2vec_ws (NumericVector x, NumericVector y, int ws)
       p2 = ptmp;
    }
    ret = *(p1+nx-1);//p1[nx-1]
-   delete(p1);
-   delete(p2);
+   delete[] p1;
+   delete[] p2;
    
    return (ret);
 }
@@ -325,8 +325,8 @@ double cpp_dtw2vec_ea (NumericVector x, NumericVector y, double threshold)
    }
    
    ret = *(p1+nx-1);//p1[nx-1]
-   delete(p1);
-   delete(p2);
+   delete[] p1;
+   delete[] p2;
    
    return (ret);
 }
@@ -411,8 +411,8 @@ double cpp_dtw2vec_ws_ea (NumericVector x, NumericVector y, int ws,double thresh
       p2 = ptmp;
    }
    ret = *(p1+nx-1);//p1[nx-1]
-   delete(p1);
-   delete(p2);
+   delete[] p1;
+   delete[] p2;
    
    return (ret);
 }
@@ -488,8 +488,8 @@ double cpp_dtw2vec_v32 (NumericVector x, NumericVector y)
       p2 = ptmp;
    }
    ret = *(p1+nx-1);//p1[nx-1]
-   delete(p1);
-   delete(p2);
+   delete[] p1;
+   delete[] p2;
    
    return (ret);
 }

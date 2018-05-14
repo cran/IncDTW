@@ -222,7 +222,8 @@ List GCM_cpp(Rcpp::NumericMatrix cM){
       dm(0,j)=2;
       gcm(0, j) = cM(0, j) + gcm(0, j - 1);
    }
-   dm(0,0) = NAN;
+   // dm(0,0) = NAN;
+   dm(0,0) = NA_INTEGER;
    
    for (int i = 1; i < n; i++){
       for (int j = 1; j < m; j++){
