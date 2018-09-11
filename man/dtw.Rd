@@ -1,25 +1,34 @@
 \name{dtw}
 \alias{dtw}
+\alias{cm}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Dynamic Time Warping
 }
 \description{
-Wrapper function for the C++ calculations of the global cost matrix and the BACKTRACK_cpp that finds the cheapest warping path.
+Calculate the DTW distance, cost matrices and direction matrices including the warping path two multivariate time series.
 }
 \usage{
-dtw(Q, C, ws = NULL, return_cm = FALSE,
-                     return_diffM = FALSE,
-                     return_wp = FALSE,
-                     return_diffp = FALSE,
-                     return_QC = FALSE)
+dtw(Q, C, dist_method = c("norm1", "norm2", "norm2_square"), 
+    step_pattern = c("symmetric2", "symmetric1"), ws = NULL,
+    return_cm = FALSE,
+    return_diffM = FALSE,
+    return_wp = FALSE,
+    return_diffp = FALSE,
+    return_QC = FALSE)
+                     
+cm(Q, C, dist_method = c("norm1", "norm2", "norm2_square"), ws = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{Q}{one dimensional vector, query time series. Alternatively Q can also be a matrix of differences/ costs (diffM, cm).
+  \item{Q}{Query time series. Q needs to be one of the following: (1) a one dimensional vector, (2) a matrix where each row is one observations and each column is one dimension of the time seris, or (3) a matrix of differences/ costs (diffM, cm). If Q and C are matrices they need to have the same number of columns.
 }
 \item{C}{
-one dimensional vector, time series to be fitted to C, and for which values are constantly observed. If Q is not a vector but a matrix, then C needs to be one of the following strings ('diffM', 'cm').
+Candidate time series. C needs to be one of the following: (1) a one dimensional vector, (2) a matrix where each row is one observations and each column is one dimension of the time seris, or (3) if Q is a matrix of differences or costs C needs to eb the respective cahracter string 'diffM' or 'cm'.
+}
+\item{dist_method}{character, describes the method of distance measure for multivariate time series (this parameter is ignored for univariate time series). Currently supported methods are 'norm1' (default, is the manhatten distance), 'norm2' (is the Euclidean distance) and 'norm2_square'. 
+}
+\item{step_pattern}{character, describes the step pattern. Currently implemented are the patterns \code{symmetric1} and \code{symmetric2}, see details.
 }
 \item{ws}{
 integer, describes the window size for the sakoe chiba window. If NULL, then no window is applied. (default = NULL)
@@ -40,8 +49,28 @@ boolean, if TRUE then the input vectors Q and C are appended to the returned lis
 }
 }
 \details{
-The dynamic time warping distance is the element in the last row and last column of the global cost matrix.
+The dynamic time warping distance is the element in the last row and last column of the global cost matrix. 
+
+For the multivariate case where Q is a matrix of n rows and k columns and C is a matrix of m rows and k columns
+the dist_method parameter defines the following distance measures: 
+
+ norm1: \deqn{dist(Q_{i,.}, C_{j,.}) = \sum_{l = 1}^k |Q_{i,l} - C_{j,l}|}
+
+ norm2: \deqn{dist(Q_{i,.}, C_{j,.}) = \sqrt{\sum_{l = 1}^k (Q_{i,l} - C_{j,l})^2}}
+ 
+ norm2_square: \deqn{dist(Q_{i,.}, C_{j,.}) = \sum_{l = 1}^k (Q_{i,l} - C_{j,l})^2}
+ 
+
+The parameter \code{step_pattern} describes how the two time series are aligned. 
+If \code{step_pattern == "symmetric1"} then  \deqn{gcm_{i,j} = cm{i,j} + min(gcm_{i-1,j}, gcm{i-1, j-1}, gcm{i, i-1} }.
+
+If \code{step_pattern == "symmetric2"} then  \deqn{gcm_{i,j} = cm{i,j} + min(gcm_{i-1,j}, cm{i,j}+ gcm{i-1, j-1}, gcm{i, i-1} }.
+ 
+
+To make DTW distances comparable for many time seires of differnt lengths use the \code{normlized_distance} with the setting \code{step_method = 'symmetric2'}. Please find a more detailed discussion and further references here: \url{http://dtw.r-forge.r-project.org/}.
+
 }
+
 \value{
 %%  ~Describe the value returned
 %%  If it is a LIST, use
@@ -49,6 +78,7 @@ The dynamic time warping distance is the element in the last row and last column
 %%  \item{comp2 }{Description of 'comp2'}
 %% ...
 \item{distance}{the DTW distance, that is the element of the last row and last column of gcm}
+\item{normalized_distance}{the normalized DTW distance, that is the distance divided by \code{N+M}, where N and M are the lengths of the time series Q and C, respectively. If \code{step_pattern == 'symmetric1'} no normaliziation is performed and \code{NA} is returned (see details).}
 \item{gcm}{global cost matrix}
 \item{dm}{direction matrix (3=up, 1=diagonal, 2=left)}
 \item{wp}{warping path}
@@ -68,9 +98,20 @@ Maximilian Leodolter
 }
 
 \examples{
+# multivariate
+Q <- matrix(rnorm(100), ncol=2)
+C <- matrix(rnorm(80), ncol=2)
+tmp <- dtw(Q = Q, C = C, ws = 30)
+
+
+# univariate
 Q <- cumsum(rnorm(100))
 C <- Q[11:100] + rnorm(90, 0, 0.5)
-dtw(Q = Q, C = C, ws = 15, return_diffM = FALSE)
+tmp <- dtw(Q = Q, C = C, ws = 15, return_diffM = FALSE)
+names(tmp)
+tmp$distance
+
+
 
 # compare different input variations
 dtw_base <- dtw(Q = Q, C = C, ws = 15, return_diffM = TRUE)
@@ -82,6 +123,11 @@ identical(dtw_base$gcm, dtw_diffM$gcm)
 
 # of course no diffM is returned in the 'cm'-case
 dtw_cm$diffM
+
+# multivariate case
+Q <- matrix(rnorm(100), ncol=2)
+C <- matrix(rnorm(80), ncol=2)
+dtw(Q = Q, C = C, ws = 30, dist_method = "norm2")
 }
 \keyword{ cluster }% use one of  RShowDoc("KEYWORDS")
 \keyword{ ts }% __ONLY ONE__ keyword per line

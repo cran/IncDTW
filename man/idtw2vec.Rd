@@ -1,22 +1,32 @@
 \name{idtw2vec}
 \alias{idtw2vec}
+\alias{idtw2vec_univ}
+\alias{idtw2vec_multiv}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Dynamic Time Warping
+Incremental vector-based DTW 
 }
 \description{
-Wrapper function for the C++ calculations of vector based fast calculation of DTW. Allows incremental calculation for new observations and sakoe chiba warping window.
+Update the DTW distance for new observations of two time series. 
 }
 \usage{
-idtw2vec(Q, newObs, gcm_lc = NULL, nC = NULL, ws = NULL)
+idtw2vec(Q, newObs, dist_method = c("norm1", "norm2", "norm2_square"),
+         step_pattern = c("symmetric2", "symmetric1"),
+         gcm_lc = NULL, gcm_lr = NULL, nC = NULL, ws = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{Q}{one dimensional vector, query time series.}
-\item{newObs}{one dimensional vector of new observations}
-\item{gcm_lc}{vector, last column of global cost matrix of previous calculation. If NULL, then DTW is calculated and the last column and last row are returned to start upcoming incremental calculations. (default = NULL)}
+\item{Q}{time series as vector or matrix (if Q and newObs are matrices, they need to have the same number of columns)}
+\item{newObs}{time series as vector or matrix. Either new Observations of C (running calculations) or the complete time series C (initial calculation).}
+\item{dist_method}{character, describes the method of distance measure. See also \code{\link{dtw}}.}
+\item{step_pattern}{character, describes the step pattern. See also \code{\link{dtw}}.
+}
+\item{gcm_lc}{vector, last column of global cost matrix of previous calculation. If NULL (necessary for the initial calculation), then DTW is calculated and the last column and last row are returned to start upcoming incremental calculations. (default = NULL)
+}
+\item{gcm_lr}{vector, last row of global cost matrix of previous calculation (default = NULL). 
+}
 \item{nC}{
-integer, is the length of the original time series C, of which newObs are the new observations. Length of time series C exclusive new observations, such that length(c(C,newObs)) = length(newObs) + nC. Necessary if ws is not NULL.  (default = NULL)
+integer, is the length of the original time series C, of which newObs are the new observations. Length of time series C exclusive new observations, such that \code{length(c(C, newObs)) = nC + length(newObs)}. Necessary if ws is not NULL.  (default = NULL)
 }
 \item{ws}{
 integer, describes the window size for the sakoe chiba window. If NULL, then no window is applied. (default = NULL)
@@ -25,12 +35,16 @@ integer, describes the window size for the sakoe chiba window. If NULL, then no 
 
 
 \details{
+If new observations are recorded only for C and the only interest is a fast update of the DTW distance, the last row is not required, neither for the current nor for future incremental calculations.
+
 no matrices are allocated, no matrices are returned
 }
 \value{
 \item{distance}{the DTW distance}
 \item{gcm_lc_new}{the last column of the new global cost matrix}
-\item{gcm_lr}{the last row of the new global cost matrix}
+\item{gcm_lr_new}{the last row of the new global cost matrix. Only if the input vector \code{gcm_lr} is not NUll and represents the last row of the previous global cost matrix, \code{gcm_lr_new} actually is the last row of the updated global cost matrix. Otherwise, if \code{gcm_lr} is NULL then \code{gcm_lr_new} is only the last row of the new part (concerning the new observations) of the global cost matrix.  
+}
+\item{normalized_distance}{the normalized DTW distance, see also \code{link{dtw}}}
 }
 \references{
 Sakoe, H.; Chiba, S., Dynamic programming algorithm optimization for spoken word recognition, Acoustics, Speech, and Signal Processing [see also IEEE Transactions on Signal Processing], IEEE Transactions on , vol.26, no.1, pp. 43-49, Feb 1978. http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1163055
@@ -48,7 +62,6 @@ res0 <- idtw2vec(Q=Q, newObs = C, gcm_lc = NULL)
 
 # incremental calculation for new observations
 res1 <- idtw2vec(Q, newObs = rnorm(10), gcm_lc = res0$gcm_lc_new)
-
 
 }
 

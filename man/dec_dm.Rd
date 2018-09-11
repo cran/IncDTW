@@ -2,10 +2,10 @@
 \alias{dec_dm}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-dec_dm
+Decrement the Warping Path
 }
 \description{
-  wrapper function for the C++ implementation of an decremental calculation of the warping path subject to a given direction matrix for dynamic time warping
+Update the warping path to omit observations of the alignment of two time series.
 }
 \usage{
 dec_dm(dm, Ndec, diffM = NULL)

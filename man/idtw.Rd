@@ -2,27 +2,31 @@
 \alias{idtw}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Incremental Dynamic Time Warping
+Incremental DTW
 }
 \description{
-Wrapper function for the incremental designed C++ calculations of the global cost matrix and the BACKTRACK_cpp that finds the cheapest warping path.
+Update the DTW distance, cost matrices and direction matrices including the warping path for new observations of two time series.
 }
 \usage{
-idtw(Q, C, newO, gcm, dm, diffM = NULL, ws = NULL, 
-     return_cm = FALSE,
-     return_diffM = FALSE,
-     return_wp = FALSE,
-     return_diffp = FALSE,
-     return_QC = FALSE)
+idtw(Q, C, newObs, gcm, dm, dist_method = c("norm1", "norm2", "norm2_square"),
+      step_pattern = c("symmetric2", "symmetric1"),
+      diffM = NULL, ws = NULL, 
+      return_cm = FALSE,
+      return_diffM = FALSE,
+      return_wp = FALSE,
+      return_diffp = FALSE,
+      return_QC = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
- \item{Q}{one dimensional numeric vector}
-\item{C}{one dimensional numeric vector}
-\item{newO}{one dimensional numeric vector of new observations to be appended to C}
+ \item{Q}{numeric vector, or matrix (see also \code{\link{dtw}})}
+\item{C}{numeric vector, or matrix}
+\item{newObs}{vector or matrix of new observations to be appended to C}
 \item{gcm}{global cost matrix, output from dtw(Q=Q, C=C, ws=ws)}
 \item{dm}{direction matrix, output from dtw(Q=Q, C=C, ws=ws)}
-\item{diffM}{differences matrix, output from dtw(Q=Q, C=C, ws=ws)}
+\item{dist_method}{character, describes the method of distance measure. See also \code{\link{dtw}}.}
+\item{step_pattern}{character, describes the step pattern. See also \code{\link{dtw}}.}
+\item{diffM}{differences matrix, output from dtw(Q=Q, C=C, ws=ws). This matrix is an optional input parameter (default = NULL) that is necessary to return the path of differences. It makes no sense in the multivariate case.}
 \item{ws}{integer, describes the window size for the sakoe chiba window. If NULL, then no window is applied. (default = NULL)
 }
 \item{return_cm}{boolean, if TRUE then the Matrix of costs (the absolute value) is returned. (default = FALSE)
@@ -53,6 +57,7 @@ The dynamic time warping distance is the element in the last row and last column
 \item{diffp}{path of differences}
 \item{Q}{input Q}
 \item{C}{input C}
+\item{normalized_distance}{the normalized DTW distance, see also \code{link{dtw}}}
 }
 \references{
 Sakoe, H.; Chiba, S., Dynamic programming algorithm optimization for spoken word recognition, Acoustics, Speech, and Signal Processing [see also IEEE Transactions on Signal Processing], IEEE Transactions on , vol.26, no.1, pp. 43-49, Feb 1978.
