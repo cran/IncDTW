@@ -1,7 +1,9 @@
 \name{idtw2vec}
 \alias{idtw2vec}
+\alias{idtw2vec_cm}
 \alias{idtw2vec_univ}
 \alias{idtw2vec_multiv}
+
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Incremental vector-based DTW 
@@ -16,8 +18,10 @@ idtw2vec(Q, newObs, dist_method = c("norm1", "norm2", "norm2_square"),
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-\item{Q}{time series as vector or matrix (if Q and newObs are matrices, they need to have the same number of columns)}
-\item{newObs}{time series as vector or matrix. Either new Observations of C (running calculations) or the complete time series C (initial calculation).}
+\item{Q}{Either \code{Q} is (a) a time series (vector or matrix for multivariate time series) or (b) \code{Q} is a cost matrix, so a matrix storing the local distances of the time series \code{Q} and \code{newObs}. If \code{Q} and \code{newObs} are matrices, they need to have the same number of columns. If \code{Q} is a cost matrix, see details...
+}
+\item{newObs}{time series as vector or matrix, or if \code{Q} is a cost matrix newObs must equals \code{"cm"}. If \code{newObs} is a time series, see details... 
+}
 \item{dist_method}{character, describes the method of distance measure. See also \code{\link{dtw}}.}
 \item{step_pattern}{character, describes the step pattern. See also \code{\link{dtw}}.
 }
@@ -36,6 +40,10 @@ integer, describes the window size for the sakoe chiba window. If NULL, then no 
 
 \details{
 If new observations are recorded only for C and the only interest is a fast update of the DTW distance, the last row is not required, neither for the current nor for future incremental calculations.
+
+If \code{Q} is a cost matrix, it needs to store either the distances of \code{Q} and new observations of \code{C} (running calculations, in that case gcm_lc != NULL), or it stores the distances of \code{Q} and the entire time series \code{C} (initial calculation, in that case gcm_lc = NULL).
+
+If \code{newObs} is a time series, it stores either new Observations of \code{C} (running calculations) or the complete time series \code{C} (initial calculation).
 
 no matrices are allocated, no matrices are returned
 }
@@ -62,6 +70,32 @@ res0 <- idtw2vec(Q=Q, newObs = C, gcm_lc = NULL)
 
 # incremental calculation for new observations
 res1 <- idtw2vec(Q, newObs = rnorm(10), gcm_lc = res0$gcm_lc_new)
+
+
+
+# perform an incremental DTW calculation with a customized distance function 
+d_cos <- function(x, y){
+   sum(x * y)/(sqrt(sum(x^2)) * sqrt(sum(y^2))) 
+}
+
+x <- matrix(rnorm(100), ncol=5, nrow=20)
+y <- matrix(rnorm(150), ncol=5, nrow=30)
+
+cm1 <- function(x,y){
+   nx <- nrow(x); ny <- nrow(y)
+   mat <- matrix(0, ncol=ny, nrow=nx)
+   for(i in 1:nx){
+      for(j in 1:ny){
+         mat[i,j] <- d_cos(x[i,], y[j, ])
+      }
+   }
+   return(mat)
+}
+
+dtw2vec(Q = cm1(x,y), C = "cm")$distance
+res0 <- idtw2vec(Q = cm1(x,y[1:20,]), newObs =  "cm")
+idtw2vec(Q = cm1(x,y[21:30,]), newObs =  "cm", 
+                 gcm_lc = res0$gcm_lc_new)$distance
 
 }
 

@@ -1,10 +1,10 @@
 ---
-title: "Incremental Dynamic Time Warping"
+title: "IncDTW Runtime Comparison"
 author: "Leodolter Maximilian"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Incremental Dynamic Time Warping}
+  %\VignetteIndexEntry{IncDTW Runtime Comparison}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

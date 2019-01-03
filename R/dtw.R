@@ -1,7 +1,27 @@
 cm <- function(Q, C, dist_method = c("norm1", "norm2", "norm2_square"), ws = NULL){
-   dist_method <- match.arg(dist_method)
-   ws_cpp <- ifelse(is.null(ws), yes = -1, no = ws)
-   return(cpp_cm(Q, C, dist_method = dist_method, ws = ws_cpp, nPrevObs = 0))
+   
+   if(!is.matrix(Q)){ Q <- as.matrix(Q) }
+   if(!is.matrix(C)){ C <- as.matrix(C) }
+   
+   if(class(dist_method) == "function"){
+      
+      nq <- nrow(Q); nc <- nrow(C)
+      mat <- matrix(0, nrow = nq, ncol = nc)
+      for(i in 1:nq){
+         for(j in 1:nc){
+            # print(c(i,j))
+            mat[i,j] <- dist_method(Q[i,], C[j, ])
+         }
+      }
+      return(mat)   
+      
+   }else{
+   
+      dist_method <- match.arg(dist_method)
+      ws_cpp <- ifelse(is.null(ws), yes = -1, no = ws)
+      return(cpp_cm(Q, C, dist_method = dist_method, ws = ws_cpp, nPrevObs = 0))   
+   }
+   
 }
 
 
@@ -107,7 +127,7 @@ dtw <- function(Q, C, dist_method = c("norm1", "norm2", "norm2_square"),
    
    #Normalization
    if(step_pattern == "symmetric2"){
-      ret <- c(ret, normalized_distance = ret$distance/(length(Q) + length(C)) )
+      ret <- c(ret, normalized_distance = ret$distance/(n+m) )
    }else{
       ret <- c(ret, normalized_distance = NA )
    }
@@ -237,31 +257,14 @@ dtw2vec <- function(Q, C, dist_method = c("norm1", "norm2", "norm2_square"),
    initial_dim_check(Q = Q, C = C)
 
    
+   
    if(is.character(C)){
       if(C != "cm"){
          stop("If Q is the costmatrix, C needs to be equal 'cm'.")
       }
-      # vector based implementation with pre-calculated cost matrix
-      if(is.null(ws) & is.null(threshold)){
-         ret <- cpp_dtw2vec_cm(cm = Q, step_pattern = step_pattern)
-         
-      }else {
-         # ea and sakoe chiba
-         if(is.null(ws)) ws <- max(c(nrow(Q), ncol(Q)))
-         if(is.null(threshold)) threshold <- Inf
-         ret <- cpp_dtw2vec_cm_ws_ea(cm = Q, step_pattern = step_pattern, 
-                                     ws = ws, threshold = threshold)
-      }
-      
-      #Normalization
-      if(step_pattern == "symmetric2"){
-         ret <- list(distance = ret, normalized_distance = ret/(nrow(Q) + ncol(Q)) )
-      }else{
-         ret <- list(distance = ret, normalized_distance = NA )
-      }
-      return(ret)
-      
+      return(dtw2vec_cm(cm = Q, step_pattern = step_pattern, ws = ws, threshold = threshold))      
    }
+   
    
    if(is.vector(Q)){
       if(dist_method != "norm1"){
@@ -280,6 +283,34 @@ dtw2vec <- function(Q, C, dist_method = c("norm1", "norm2", "norm2_square"),
                                ws = ws, threshold = threshold))   
       }
    }
+}
+
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+dtw2vec_cm <- function(cm, step_pattern = c("symmetric2", "symmetric1"), ws = NULL, threshold = NULL){
+   
+   # vector based implementation with pre-calculated cost matrix
+   if(is.null(ws) & is.null(threshold)){
+      ret <- cpp_dtw2vec_cm(cm = cm, step_pattern = step_pattern)
+      
+   }else {
+      # ea and sakoe chiba
+      if(is.null(ws)) ws <- max(c(nrow(cm), ncol(cm)))
+      if(is.null(threshold)) threshold <- Inf
+      ret <- cpp_dtw2vec_cm_ws_ea(cm = cm, step_pattern = step_pattern, 
+                                  ws = ws, threshold = threshold)
+   }
+   
+   #Normalization
+   if(step_pattern == "symmetric2"){
+      ret <- list(distance = ret, normalized_distance = ret/(nrow(cm) + ncol(cm)) )
+   }else{
+      ret <- list(distance = ret, normalized_distance = NA )
+   }
+   return(ret)
 }
 
 

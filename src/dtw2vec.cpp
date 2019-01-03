@@ -90,16 +90,18 @@ vecStepFunction selectVecStepFunction(std::string step_pattern)
 }
 
 
+
+
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 // [[Rcpp::export]]
-double cpp_dtw2vec_cm (const arma::mat& cm, std::string step_pattern)
+double cpp_dtw2vec_cm (Rcpp::NumericMatrix cm, std::string step_pattern)
 {
    
-   int nx = cm.n_rows;
-   int ny = cm.n_cols;
+   int nx = cm.nrow();
+   int ny = cm.ncol();
    double * p1 = new double [nx];
    double * p2 = new double [nx];
    double * ptmp; 
@@ -140,15 +142,79 @@ double cpp_dtw2vec_cm (const arma::mat& cm, std::string step_pattern)
 
 
 // [[Rcpp::export]]
-double cpp_dtw2vec_cm_ws_ea (const arma::mat& cm, 
+List cpp_dtw2vec_cm_inc (Rcpp::NumericVector gcm_lc, Rcpp::NumericMatrix cm, 
+                         std::string step_pattern)
+{
+   // x ... time series that is fixed
+   // y ... time series of new observations, ONLY new observations to be appended
+   // gcm_lc ... last column of old GCM
+   
+   int n = cm.nrow();
+   int m = cm.ncol();// = nnewObs
+   
+   double * p1 = new double [n];
+   double * p2 = new double [n];
+   double * ptmp; 
+   
+   double mynan;
+   NumericVector gcm_lr_new(m);
+   NumericVector gcm_lc_new(n);
+   mynan = std::numeric_limits<double>::quiet_NaN();
+   
+   // set step sunction
+   SEXP step_SEXP = selectVecStep(step_pattern);
+   XPtr<funcPtr_step_vec> xpfun_step(step_SEXP);
+   funcPtr_step_vec step_fun = *xpfun_step;
+   
+   if(n != gcm_lc.size()){
+      return mynan;
+   }
+   
+   // first column
+   for(int i=0; i<n; i++){
+      p1[i] = gcm_lc[i];
+   }
+   
+   for(int j=0; j < m; j++){
+      *p2 = cm(0,j) + *(p1);
+      
+      for(int i=1; i<n; i++){
+         *(p2+i) =  step_fun(*(p2+i-1), *(p1+i-1), *(p1+i), cm(i,j));
+      }
+      gcm_lr_new[j] = *(p2+n-1);
+      ptmp=p1;
+      p1 = p2;
+      p2 = ptmp;
+   }
+   
+   for(int i=0; i<n; i++){
+      gcm_lc_new[i] = *(p1+i);
+   }
+   
+   
+   List ret;
+   ret["gcm_lr_new"] = gcm_lr_new;
+   ret["gcm_lc_new"] = gcm_lc_new;
+   ret["distance"] = *(p1+n-1);
+   delete[] p1;
+   delete[] p2;
+   return ret ;
+}
+
+
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+// [[Rcpp::export]]
+double cpp_dtw2vec_cm_ws_ea (Rcpp::NumericMatrix cm, 
                           std::string step_pattern, int ws, double threshold)
 {
    
    int iBegin = 0;
    int iEnd = 0;
    
-   int nx = cm.n_rows;
-   int ny = cm.n_cols;
+   int nx = cm.nrow();
+   int ny = cm.ncol();
    double * p1 = new double [nx];
    double * p2 = new double [nx];
    double * ptmp; 
@@ -223,6 +289,96 @@ double cpp_dtw2vec_cm_ws_ea (const arma::mat& cm,
    delete[] p2;
    
    return (ret);
+}
+
+
+
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+// [[Rcpp::export]]
+List cpp_dtw2vec_cm_ws_inc(NumericVector gcm_lc, Rcpp::NumericMatrix cm, 
+                        std::string step_pattern, int ws, int ny){
+   
+   // cm ... cost matrix for new observations of y
+   // gcm_lc ... last column of old GCM
+   // int ws ... window size
+   // int ny ... length of time series y exclusive new observations,
+   //             length(c(y,newObs)) = length(newObs) + ny
+   
+   int n = cm.nrow();
+   int m = cm.ncol();// = nnewObs
+   
+   double * p1 = new double [n];
+   double * p2 = new double [n];
+   double * ptmp; 
+   
+   int iBegin = 0;
+   int iEnd = 0;
+   
+   double mynan;
+   NumericVector gcm_lr_new(m);
+   NumericVector gcm_lc_new(n);
+   mynan = std::numeric_limits<double>::quiet_NaN();
+   
+   // set step sunction
+   SEXP step_SEXP = selectVecStep(step_pattern);
+   XPtr<funcPtr_step_vec> xpfun_step(step_SEXP);
+   funcPtr_step_vec step_fun = *xpfun_step;
+   
+   if(n != gcm_lc.size()){
+      return mynan;
+   }
+   
+   // first column
+   for(int i=0; i<n; i++){
+      p1[i] = gcm_lc[i];
+      p2[i] = mynan;//initialize b with NAN
+   }
+   
+   for(int j=0; j < m; j++){
+      iBegin = ny+j-ws;
+      if(iBegin <= 0){
+         *p2 = cm(0,j) + *(p1);
+         iBegin = 1;
+      }else if (iBegin == 1){
+         *(p2+iBegin -1) = mynan;//must not be available for finding the cheapest path
+      }else{
+         *(p2+iBegin -1) = mynan;//must not be available for finding the cheapest path
+         *(p2+iBegin -2) = mynan;//must not be available for finding the cheapest path
+      }
+      
+      iEnd   = ny+j+ws+1;
+      if(iEnd >= n){
+         iEnd = n;
+      }else{
+         *(p1+iEnd) = mynan;//must not be available for finding the cheapest path
+      }
+      
+      for (int i = iBegin; i < iEnd; i++){
+         *(p2+i) =  step_fun(*(p2+i-1), *(p1+i-1), *(p1+i), cm(i,j));
+      
+      }
+      gcm_lr_new[j] = *(p2+n-1);
+      ptmp=p1;
+      p1 = p2;
+      p2 = ptmp;
+   }
+   
+   for(int i=0; i<n; i++){
+      gcm_lc_new[i] = *(p1+i);
+   }
+   
+   
+   List ret;
+   ret["gcm_lr_new"] = gcm_lr_new;
+   ret["gcm_lc_new"] = gcm_lc_new;
+   ret["distance"] = *(p1+n-1);
+   delete[] p1;
+   delete[] p2;
+   return ret ;
+   
 }
 
 

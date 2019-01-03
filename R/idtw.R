@@ -125,6 +125,9 @@ idtw <- function(Q, C, newObs, gcm, dm, dist_method = c("norm1", "norm2", "norm2
 }
 
 
+
+
+
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -136,6 +139,15 @@ idtw2vec <- function(Q, newObs, dist_method = c("norm1", "norm2", "norm2_square"
    dist_method <- match.arg(dist_method)
    step_pattern <- match.arg(step_pattern)
    initial_dim_check(Q = Q, C = newObs)
+   
+   if(is.character(newObs)){
+      if(newObs != "cm"){
+         stop("If Q is the costmatrix, C needs to be equal 'cm'.")
+      }
+      return(idtw2vec_cm(cm = Q, step_pattern = step_pattern,
+                         gcm_lc = gcm_lc, gcm_lr = gcm_lr, nC = nC, ws = ws))      
+   }
+   
    
    if(is.vector(Q)){
       if(dist_method != "norm1"){
@@ -158,6 +170,69 @@ idtw2vec <- function(Q, newObs, dist_method = c("norm1", "norm2", "norm2_square"
                                 nC = nC, ws = ws, step_pattern = step_pattern))
       }
    }
+}
+
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+idtw2vec_cm <- function(cm, step_pattern = c("symmetric2", "symmetric1"),
+                        gcm_lc = NULL, gcm_lr = NULL, nC = NULL, ws = NULL){
+   
+   step_pattern <- match.arg(step_pattern)
+   
+   if(is.null(gcm_lc)){
+      # initial case
+      if(ncol(cm) <= 1){
+         stop("ERROR: in the initial calculation the cost matrix 
+              cm needs to have at least 2 columns")
+         return(NA)
+      }
+      
+      init_gcm_lc <- cumsum(cm[,1])
+      if(is.null(ws)){
+         ret <- cpp_dtw2vec_cm_inc(gcm_lc = init_gcm_lc, cm = cm[,-1, drop = FALSE],
+                                   step_pattern = step_pattern)
+      }else {
+         # sakoe chiba warping window
+         ret <- cpp_dtw2vec_cm_ws_inc(gcm_lc = init_gcm_lc, cm = cm[,-1, drop = FALSE],
+                                      step_pattern = step_pattern, ws = ws, ny = 1)
+      }
+      ret$gcm_lr_new <- c(tail(init_gcm_lc, 1),  ret$gcm_lr_new)
+      
+   }else{
+      # running case
+      if(is.null(ws)){
+         ret <- cpp_dtw2vec_cm_inc(gcm_lc = gcm_lc, cm = cm,
+                                   step_pattern = step_pattern)
+         
+      }else if (!is.null(ws) & !is.null(nC)){
+         # sakoe chiba warping window
+         ret <- cpp_dtw2vec_cm_ws_inc(gcm_lc = gcm_lc, cm = cm,
+                                      step_pattern = step_pattern, ws = ws, ny = nC)
+         
+      }else {
+         stop("ERROR: if ws is not NULL, then nC must not be NULL")
+         return(NA)
+      }   
+      
+      
+      if(!is.null(gcm_lr)){#append former parts of last row of gcm
+         ret$gcm_lr_new <- c(gcm_lr,  ret$gcm_lr_new)   
+      }
+   }
+   
+   #Normalization
+   ret <- c(ret, normalized_distance = NA )
+   if(step_pattern == "symmetric2"){
+      if(is.null(gcm_lc)){#initial case
+         ret$normalized_distance <- ret$distance/(nrow(cm) + ncol(cm)) 
+      }else if(!is.null(nC)){
+         ret$normalized_distance <-  ret$distance/(nrow(cm) + nC + ncol(cm)) 
+      }
+   }
+return(ret)
 }
 
 

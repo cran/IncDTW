@@ -8,16 +8,33 @@
 #                                  I added this option to omit vignette checking
 #                                  
 #
+# TODO: (done?!) change name of Vignette, the name visible online
+#
 # TODO: test "inline" for help functions, especially <<mymin>>
 # 
 # TODO: adjust Version number in Description File
 #
-# TODO: upcoming features: - incremental DTW for stream data with running normalization 
+# TODO: upcoming features: - vectorbased (also incremental) implementation for existing cost matrix
+#                          - incremental DTW for stream data with running normalization 
 #                          - norm01 from caterpillar package without discretization
 #                          - plot functions fpr DBA for multivariate time series
 #                          - plot function for reverse (start-) partial alignment
 #                          - ...
 #                          - ...
+#  
+#  
+#  --------------------------------------------------------------------------  
+#  --------------------------------------------------------------------------
+#  CHANGES SINCE VERSION 1.0.4
+#     
+#     - bug fix: normalized dtw in dtw() for multivar time series 
+#     
+#     - simulate_timewarp(): new function
+#     
+#     - dtw2vec_cm() and idtw2vec_cm() : new functions included in dtw2vec() and idtw2vec()
+#  
+#  
+#  
 #  
 #  
 #  --------------------------------------------------------------------------  

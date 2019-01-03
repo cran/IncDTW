@@ -21,8 +21,16 @@ cpp_dtw2vec_cm <- function(cm, step_pattern) {
     .Call(`_IncDTW_cpp_dtw2vec_cm`, cm, step_pattern)
 }
 
+cpp_dtw2vec_cm_inc <- function(gcm_lc, cm, step_pattern) {
+    .Call(`_IncDTW_cpp_dtw2vec_cm_inc`, gcm_lc, cm, step_pattern)
+}
+
 cpp_dtw2vec_cm_ws_ea <- function(cm, step_pattern, ws, threshold) {
     .Call(`_IncDTW_cpp_dtw2vec_cm_ws_ea`, cm, step_pattern, ws, threshold)
+}
+
+cpp_dtw2vec_cm_ws_inc <- function(gcm_lc, cm, step_pattern, ws, ny) {
+    .Call(`_IncDTW_cpp_dtw2vec_cm_ws_inc`, gcm_lc, cm, step_pattern, ws, ny)
 }
 
 cpp_dtw2vec <- function(x, y, step_pattern) {

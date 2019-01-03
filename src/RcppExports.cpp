@@ -75,28 +75,56 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_dtw2vec_cm
-double cpp_dtw2vec_cm(const arma::mat& cm, std::string step_pattern);
+double cpp_dtw2vec_cm(Rcpp::NumericMatrix cm, std::string step_pattern);
 RcppExport SEXP _IncDTW_cpp_dtw2vec_cm(SEXP cmSEXP, SEXP step_patternSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type cm(cmSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type cm(cmSEXP);
     Rcpp::traits::input_parameter< std::string >::type step_pattern(step_patternSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_dtw2vec_cm(cm, step_pattern));
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_dtw2vec_cm_inc
+List cpp_dtw2vec_cm_inc(Rcpp::NumericVector gcm_lc, Rcpp::NumericMatrix cm, std::string step_pattern);
+RcppExport SEXP _IncDTW_cpp_dtw2vec_cm_inc(SEXP gcm_lcSEXP, SEXP cmSEXP, SEXP step_patternSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type gcm_lc(gcm_lcSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type cm(cmSEXP);
+    Rcpp::traits::input_parameter< std::string >::type step_pattern(step_patternSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_dtw2vec_cm_inc(gcm_lc, cm, step_pattern));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_dtw2vec_cm_ws_ea
-double cpp_dtw2vec_cm_ws_ea(const arma::mat& cm, std::string step_pattern, int ws, double threshold);
+double cpp_dtw2vec_cm_ws_ea(Rcpp::NumericMatrix cm, std::string step_pattern, int ws, double threshold);
 RcppExport SEXP _IncDTW_cpp_dtw2vec_cm_ws_ea(SEXP cmSEXP, SEXP step_patternSEXP, SEXP wsSEXP, SEXP thresholdSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type cm(cmSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type cm(cmSEXP);
     Rcpp::traits::input_parameter< std::string >::type step_pattern(step_patternSEXP);
     Rcpp::traits::input_parameter< int >::type ws(wsSEXP);
     Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_dtw2vec_cm_ws_ea(cm, step_pattern, ws, threshold));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_dtw2vec_cm_ws_inc
+List cpp_dtw2vec_cm_ws_inc(NumericVector gcm_lc, Rcpp::NumericMatrix cm, std::string step_pattern, int ws, int ny);
+RcppExport SEXP _IncDTW_cpp_dtw2vec_cm_ws_inc(SEXP gcm_lcSEXP, SEXP cmSEXP, SEXP step_patternSEXP, SEXP wsSEXP, SEXP nySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type gcm_lc(gcm_lcSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type cm(cmSEXP);
+    Rcpp::traits::input_parameter< std::string >::type step_pattern(step_patternSEXP);
+    Rcpp::traits::input_parameter< int >::type ws(wsSEXP);
+    Rcpp::traits::input_parameter< int >::type ny(nySEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_dtw2vec_cm_ws_inc(gcm_lc, cm, step_pattern, ws, ny));
     return rcpp_result_gen;
 END_RCPP
 }

@@ -1,5 +1,6 @@
 \name{dtw2vec}
 \alias{dtw2vec}
+\alias{dtw2vec_cm}
 \alias{dtw2vec_univ}
 \alias{dtw2vec_multiv}
 %- Also NEED an '\alias' for EACH other topic documented here.
@@ -16,9 +17,9 @@ dtw2vec(Q, C, dist_method = c("norm1", "norm2", "norm2_square"),
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-\item{Q}{time series as vector or matrix (if Q and C are matrices, they need to have the same number of columns)}
-\item{C}{time series as vector or matrix}
-\item{dist_method}{character, describes the method of distance measure. See also \code{\link{dtw}}.}
+\item{Q}{Either Q is (a) a time series (vector or matrix for multivariate time series) or (b) Q is a cost matrix, so a matrix storing the local distances of the time series Q and C. If Q and C are matrices, they need to have the same number of columns. If Q is a cost matrix, C needs to be equal the charachter string "cm".}
+\item{C}{time series as vector or matrix, or for case (b) C equals "cm"}
+\item{dist_method}{character, describes the method of distance measure. See also \code{\link{dtw}}.  If Q is a cost matrix, the dist_method parameter is not necessary.}
 \item{step_pattern}{character, describes the step pattern. See also \code{\link{dtw}}.}
 \item{ws}{
 integer, describes the window size for the sakoe chiba window. If NULL, then no window is applied. (default = NULL)
@@ -49,6 +50,8 @@ dtw2vec(Q = Q, C = C, ws = 30)
 dtw2vec(Q = Q, C = C, threshold = 100)
 dtw2vec(Q = Q, C = C, ws = 30, threshold = 100)
 
+cm0 <- cm(Q, C)
+dtw2vec(Q = cm0, C = "cm", ws = 30, threshold = 100)
 }
 \keyword{ classif }% use one of  RShowDoc("KEYWORDS")
 \keyword{ cluster }% use one of  RShowDoc("KEYWORDS")

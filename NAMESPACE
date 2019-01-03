@@ -19,6 +19,9 @@ export(dtw_disvec)
 export(DBA)
 export(centroid)
 
+export(simulate_timewarp)
+
+importFrom(stats, approx)
 importFrom(Rcpp, evalCpp)
 importFrom(scales, pretty_breaks)
 importFrom(graphics, lines, plot)

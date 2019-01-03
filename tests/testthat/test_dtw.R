@@ -2,6 +2,21 @@ context("Equal dtw package")
 library(dtw)
 
 
+test_that("Bub: dtw normalized mv", {
+   Q <- matrix(rnorm(100), ncol=2)
+   C <- matrix(rnorm(800), ncol=2)
+   
+   tmp <- IncDTW::dtw(Q, C)
+   # tmp$distance
+   # tmp$normalized_distance
+   
+   dist_norm <- tmp$distance/(nrow(Q)+nrow(C))
+   dist_norm2 <- tmp$normalized_distance
+   expect_equal(dist_norm, dist_norm2)
+   
+})
+
+
 test_that("IncDTW:dtw2vec is equal dtw::dtw", {
    Q <- cumsum(rnorm(100))
    C <- Q[11:100] + rnorm(90, 0, 0.5)
@@ -191,6 +206,42 @@ test_that("Equal Incremental vs. Scratch vec-based with WS", {
    
    expect_equal(res1$distance, resfs$distance)
 })
+
+
+
+test_that("Equal Incremental vs. Scratch vec-based, with cost matrix", {
+   Q <- cumsum(rnorm(100))
+   C <- Q[11:100] + rnorm(90, 0, 0.5)
+   nC <- length(C)
+   # skip("skip this: just for testing")
+   cm <- IncDTW::cm(Q, C)
+   res00 <- dtw(Q = cm, C = "cm")
+   res0  <- idtw2vec_cm(cm = cm[,1:(nC-10), drop = FALSE],     gcm_lc = NULL)#initial
+   res1  <- idtw2vec_cm(cm = cm[, (nC-10+1):nC, drop = FALSE], gcm_lc = res0$gcm_lc_new)#incremental
+   
+   expect_equal(res1$distance, res00$distance)
+   
+   
+   WS <- 30
+   res00 <- dtw(Q = cm, C = "cm", ws = WS)
+   res0  <- idtw2vec_cm(cm = cm[,1:(nC-10), drop = FALSE], ws = WS,     gcm_lc = NULL)#initial
+   res1  <- idtw2vec_cm(cm = cm[, (nC-10+1):nC, drop = FALSE], ws = WS, nC = nC-10, gcm_lc = res0$gcm_lc_new)#incremental
+   
+   expect_equal(res1$distance, res00$distance)
+   expect_equal(res1$normalized_distance, res00$normalized_distance)
+   
+   
+   WS <- 30
+   res00 <- dtw(Q = cm, C = "cm", ws = WS)
+   res0  <- idtw2vec(Q = cm[,1:(nC-10), drop = FALSE], newObs = "cm", ws = WS,     gcm_lc = NULL)#initial
+   res1  <- idtw2vec(Q = cm[, (nC-10+1):nC, drop = FALSE], newObs = "cm",ws = WS, nC = nC-10, gcm_lc = res0$gcm_lc_new)#incremental
+   
+   expect_equal(res1$distance, res00$distance)
+   expect_equal(res1$normalized_distance, res00$normalized_distance)
+})
+
+
+
 
 
 

@@ -24,9 +24,9 @@ cm(Q, C, dist_method = c("norm1", "norm2", "norm2_square"), ws = NULL)
   \item{Q}{Query time series. Q needs to be one of the following: (1) a one dimensional vector, (2) a matrix where each row is one observations and each column is one dimension of the time seris, or (3) a matrix of differences/ costs (diffM, cm). If Q and C are matrices they need to have the same number of columns.
 }
 \item{C}{
-Candidate time series. C needs to be one of the following: (1) a one dimensional vector, (2) a matrix where each row is one observations and each column is one dimension of the time seris, or (3) if Q is a matrix of differences or costs C needs to eb the respective cahracter string 'diffM' or 'cm'.
+Candidate time series. C needs to be one of the following: (1) a one dimensional vector, (2) a matrix where each row is one observations and each column is one dimension of the time seris, or (3) if Q is a matrix of differences or costs C needs to be the respective character string 'diffM' or 'cm'.
 }
-\item{dist_method}{character, describes the method of distance measure for multivariate time series (this parameter is ignored for univariate time series). Currently supported methods are 'norm1' (default, is the manhatten distance), 'norm2' (is the Euclidean distance) and 'norm2_square'. 
+\item{dist_method}{character, describes the method of distance measure for multivariate time series (this parameter is ignored for univariate time series). Currently supported methods are 'norm1' (default, is the manhatten distance), 'norm2' (is the Euclidean distance) and 'norm2_square' For the function \code{cm} the parameter \code{dist_method} can also be a user defined distance function. 
 }
 \item{step_pattern}{character, describes the step pattern. Currently implemented are the patterns \code{symmetric1} and \code{symmetric2}, see details.
 }

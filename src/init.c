@@ -15,7 +15,9 @@ extern SEXP _IncDTW_cpp_cm(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _IncDTW_cpp_diffm(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _IncDTW_cpp_dtw2vec(SEXP, SEXP, SEXP);
 extern SEXP _IncDTW_cpp_dtw2vec_cm(SEXP, SEXP);
+extern SEXP _IncDTW_cpp_dtw2vec_cm_inc(SEXP, SEXP, SEXP);
 extern SEXP _IncDTW_cpp_dtw2vec_cm_ws_ea(SEXP, SEXP, SEXP, SEXP);
+extern SEXP _IncDTW_cpp_dtw2vec_cm_ws_inc(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _IncDTW_cpp_dtw2vec_ea(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _IncDTW_cpp_dtw2vec_inc(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _IncDTW_cpp_dtw2vec_inc_mv(SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -46,7 +48,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IncDTW_cpp_diffm",             (DL_FUNC) &_IncDTW_cpp_diffm,             4},
     {"_IncDTW_cpp_dtw2vec",           (DL_FUNC) &_IncDTW_cpp_dtw2vec,           3},
     {"_IncDTW_cpp_dtw2vec_cm",        (DL_FUNC) &_IncDTW_cpp_dtw2vec_cm,        2},
+    {"_IncDTW_cpp_dtw2vec_cm_inc",    (DL_FUNC) &_IncDTW_cpp_dtw2vec_cm_inc,    3},
     {"_IncDTW_cpp_dtw2vec_cm_ws_ea",  (DL_FUNC) &_IncDTW_cpp_dtw2vec_cm_ws_ea,  4},
+    {"_IncDTW_cpp_dtw2vec_cm_ws_inc", (DL_FUNC) &_IncDTW_cpp_dtw2vec_cm_ws_inc, 5},
     {"_IncDTW_cpp_dtw2vec_ea",        (DL_FUNC) &_IncDTW_cpp_dtw2vec_ea,        4},
     {"_IncDTW_cpp_dtw2vec_inc",       (DL_FUNC) &_IncDTW_cpp_dtw2vec_inc,       4},
     {"_IncDTW_cpp_dtw2vec_inc_mv",    (DL_FUNC) &_IncDTW_cpp_dtw2vec_inc_mv,    5},
