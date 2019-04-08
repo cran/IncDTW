@@ -12,7 +12,7 @@
 
 <meta name="author" content="Leodolter Maximilian" />
 
-<meta name="date" content="2019-01-02" />
+<meta name="date" content="2019-04-08" />
 
 <title>Incremental Dynamic Time Warping</title>
 
@@ -280,7 +280,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">Incremental Dynamic Time Warping</h1>
 <h4 class="author"><em>Leodolter Maximilian</em></h4>
-<h4 class="date"><em>2019-01-02</em></h4>
+<h4 class="date"><em>2019-04-08</em></h4>
 
 
 
@@ -304,11 +304,11 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <!-- % https://colinfay.me/writing-r-extensions/writing-r-documentation-files.html -->
 <div id="introduction-to-dynamic-time-warping-dtw" class="section level2">
 <h2>Introduction to Dynamic Time Warping: <em>dtw()</em></h2>
-<p>The distance measure DTW calcuates the minimal costs of the shortest non-linear alignment of two time series <span class="math inline">\(Q\)</span> (the query time series) and <span class="math inline">\(C\)</span> (the candidate time series), conditional to</p>
+<p>The distance measure DTW calculates the minimal costs of the shortest non-linear alignment of two time series <span class="math inline">\(Q\)</span> (the query time series) and <span class="math inline">\(C\)</span> (the candidate time series), conditional to</p>
 <ul>
 <li>The first element of <span class="math inline">\(Q\)</span> is aligned to the first element of <span class="math inline">\(C\)</span></li>
 <li>The last element of <span class="math inline">\(Q\)</span> is aligned to the last element of <span class="math inline">\(C\)</span></li>
-<li>A 1:k alignment is applied (unlike to the Euclidean distance calcuation). That is, one observation of <span class="math inline">\(Q\)</span> can be applied to k-many of <span class="math inline">\(C\)</span>, and vice versa.</li>
+<li>A 1:k alignment is applied (unlike to the Euclidean distance calculation). That is, one observation of <span class="math inline">\(Q\)</span> can be applied to k-many of <span class="math inline">\(C\)</span>, and vice versa.</li>
 </ul>
 <p>Remark: The DTW distance measure is not a distance metric in the conventional sense, since it does not fulfill the triangle inequality.</p>
 <p>In the following we show by aid of toy example how to use the functions of IncDTW and what they are doing. We start with the basic functions. Suppose we have two time series and we need to calculate the DTW distance of these:</p>
@@ -472,7 +472,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <div id="open-alignments" class="section level3">
 <h3>Open Alignments</h3>
 <p>The original DTW algorithm has fixed alignments at the beginning and the end of the time series, so that when calculating <em>dtw(Q, C)</em> the first element of Q must be aligned to the first element of C, and the last element of Q to the last element of C. % Here we relax this restriction and allow one time series to be aligned only partially, so <em>dtw(Q, C[1:k])</em>, where the lengths of Q and C are <span class="math inline">\(m\)</span> and <span class="math inline">\(n\)</span> respectively, and <span class="math inline">\(n &gt; k\)</span>. The counterpart is <em>dtw(Q[1:l], C)</em> for any <span class="math inline">\(l&lt;m\)</span>. Once the global cost matrix for the full alignment is determined <em>dtw(Q, C)</em> the DTW distances for possible partial open-end alignments are given by the last column and last row of the global cost matrix. The function <em>dtw_partial()</em> returns the indices of the open-end alignment with the minimum normalized DTW distance.</p>
-<p>In the following example we first get the full alignment and use this as input to find the open-end alignment for a parital match of C.</p>
+<p>In the following example we first get the full alignment and use this as input to find the open-end alignment for a partial match of C.</p>
 <div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" data-line-number="1">Q &lt;-<span class="st"> </span><span class="kw">sin</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">50</span>)</a>
 <a class="sourceLine" id="cb30-2" data-line-number="2">C &lt;-<span class="st"> </span><span class="kw">cos</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">1000</span>)</a>
 <a class="sourceLine" id="cb30-3" data-line-number="3">tmp &lt;-<span class="st"> </span>IncDTW<span class="op">::</span><span class="kw">dtw</span>(<span class="dt">Q =</span> Q, <span class="dt">C =</span> C)</a>
@@ -485,7 +485,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 ## 
 ## $normalized_distance
 ## [1] 0.08396951</code></pre>
-<p>Since DTW is reversible (for symmetric step patterns), so <em>dtw(Q[1:m], C[1:n]) = dtw(Q[m:1], C[n:1])</em>, possible open-start alignments can be compared similarly. So for the following time series, where obviously the initial 50 observations of C have no reasonable connection with Q we try to find the best open-start alignment. Considering that we first get the full alignment of the reverse time series and use this as input to find the open-start alignment for a parital match of C.</p>
+<p>Since DTW is reversible (for symmetric step patterns), so <em>dtw(Q[1:m], C[1:n]) = dtw(Q[m:1], C[n:1])</em>, possible open-start alignments can be compared similarly. So for the following time series, where obviously the initial 50 observations of C have no reasonable connection with Q we try to find the best open-start alignment. Considering that we first get the full alignment of the reverse time series and use this as input to find the open-start alignment for a partial match of C.</p>
 <div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" data-line-number="1">Q &lt;-<span class="st"> </span><span class="kw">sin</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">100</span>)</a>
 <a class="sourceLine" id="cb32-2" data-line-number="2">C &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">rnorm</span>(<span class="dv">50</span>), Q)</a>
 <a class="sourceLine" id="cb32-3" data-line-number="3">tmp &lt;-<span class="st"> </span>IncDTW<span class="op">::</span><span class="kw">dtw</span>(<span class="dt">Q =</span> <span class="kw">rev</span>(Q), <span class="dt">C =</span> <span class="kw">rev</span>(C))</a>
@@ -498,7 +498,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 ## 
 ## $normalized_distance
 ## [1] 0</code></pre>
-<p>Combining the incremental calculation and the partial alignment is also possible since the incremental algorithm returns either the updated global cost matrix (for the matrix based algorithm <em>idtw()</em> or the last column and last row (vetor based <em>idet2vec()</em>) for possible future iterations. As a consequence we can update the partial alignment after each incremental step, where Q is a query pattern and C is recorded at the time of analysis, just like a data stream:</p>
+<p>Combining the incremental calculation and the partial alignment is also possible since the incremental algorithm returns either the updated global cost matrix (for the matrix based algorithm <em>idtw()</em> or the last column and last row (vector based <em>idtw2vec()</em>) for possible future iterations. As a consequence we can update the partial alignment after each incremental step, where Q is a query pattern and C is recorded at the time of analysis, just like a data stream:</p>
 <div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb34-1" data-line-number="1">Q &lt;-<span class="st"> </span><span class="kw">sin</span>(<span class="kw">seq</span>(<span class="dv">1</span>, <span class="dv">50</span>, <span class="dt">length.out =</span> <span class="dv">200</span>))</a>
 <a class="sourceLine" id="cb34-2" data-line-number="2">C &lt;-<span class="st"> </span><span class="kw">cos</span>(<span class="kw">seq</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dt">length.out =</span> <span class="dv">20</span>))</a>
 <a class="sourceLine" id="cb34-3" data-line-number="3">tmpi &lt;-<span class="st"> </span><span class="kw">idtw2vec</span>(<span class="dt">Q =</span> Q, <span class="dt">newObs =</span> C)</a>

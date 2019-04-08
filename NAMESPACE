@@ -9,6 +9,8 @@ export(idtw2vec_multiv)
 
 export(cm)
 export(dtw)
+export(rundtw)
+export(find_peaks)
 export(dtw_partial)
 export(idtw)
 export(dec_dm)

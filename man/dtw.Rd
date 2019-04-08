@@ -21,12 +21,12 @@ cm(Q, C, dist_method = c("norm1", "norm2", "norm2_square"), ws = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{Q}{Query time series. Q needs to be one of the following: (1) a one dimensional vector, (2) a matrix where each row is one observations and each column is one dimension of the time seris, or (3) a matrix of differences/ costs (diffM, cm). If Q and C are matrices they need to have the same number of columns.
+  \item{Q}{Query time series. Q needs to be one of the following: (1) a one dimensional vector, (2) a matrix where each row is one observations and each column is one dimension of the time series, or (3) a matrix of differences/ costs (diffM, cm). If Q and C are matrices they need to have the same number of columns.
 }
 \item{C}{
-Candidate time series. C needs to be one of the following: (1) a one dimensional vector, (2) a matrix where each row is one observations and each column is one dimension of the time seris, or (3) if Q is a matrix of differences or costs C needs to be the respective character string 'diffM' or 'cm'.
+Candidate time series. C needs to be one of the following: (1) a one dimensional vector, (2) a matrix where each row is one observations and each column is one dimension of the time series, or (3) if Q is a matrix of differences or costs C needs to be the respective character string 'diffM' or 'cm'.
 }
-\item{dist_method}{character, describes the method of distance measure for multivariate time series (this parameter is ignored for univariate time series). Currently supported methods are 'norm1' (default, is the manhatten distance), 'norm2' (is the Euclidean distance) and 'norm2_square' For the function \code{cm} the parameter \code{dist_method} can also be a user defined distance function. 
+\item{dist_method}{character, describes the method of distance measure for multivariate time series (this parameter is ignored for univariate time series). Currently supported methods are 'norm1' (default, is the Manhattan distance), 'norm2' (is the Euclidean distance) and 'norm2_square' For the function \code{cm} the parameter \code{dist_method} can also be a user defined distance function. 
 }
 \item{step_pattern}{character, describes the step pattern. Currently implemented are the patterns \code{symmetric1} and \code{symmetric2}, see details.
 }
@@ -67,7 +67,7 @@ If \code{step_pattern == "symmetric1"} then  \deqn{gcm_{i,j} = cm{i,j} + min(gcm
 If \code{step_pattern == "symmetric2"} then  \deqn{gcm_{i,j} = cm{i,j} + min(gcm_{i-1,j}, cm{i,j}+ gcm{i-1, j-1}, gcm{i, i-1} }.
  
 
-To make DTW distances comparable for many time seires of differnt lengths use the \code{normlized_distance} with the setting \code{step_method = 'symmetric2'}. Please find a more detailed discussion and further references here: \url{http://dtw.r-forge.r-project.org/}.
+To make DTW distances comparable for many time series of different lengths use the \code{normlized_distance} with the setting \code{step_method = 'symmetric2'}. Please find a more detailed discussion and further references here: \url{http://dtw.r-forge.r-project.org/}.
 
 }
 
@@ -78,12 +78,12 @@ To make DTW distances comparable for many time seires of differnt lengths use th
 %%  \item{comp2 }{Description of 'comp2'}
 %% ...
 \item{distance}{the DTW distance, that is the element of the last row and last column of gcm}
-\item{normalized_distance}{the normalized DTW distance, that is the distance divided by \code{N+M}, where N and M are the lengths of the time series Q and C, respectively. If \code{step_pattern == 'symmetric1'} no normaliziation is performed and \code{NA} is returned (see details).}
+\item{normalized_distance}{the normalized DTW distance, that is the distance divided by \code{N+M}, where N and M are the lengths of the time series Q and C, respectively. If \code{step_pattern == 'symmetric1'} no normalization is performed and \code{NA} is returned (see details).}
 \item{gcm}{global cost matrix}
 \item{dm}{direction matrix (3=up, 1=diagonal, 2=left)}
 \item{wp}{warping path}
-\item{ii}{indices of C of the optimal path}
-\item{jj}{indices of Q of the optimal path}
+\item{ii}{indices of Q of the optimal path}
+\item{jj}{indices of C of the optimal path}
 \item{cm}{Matrix of costs}
 \item{diffM}{Matrix of differences}
 \item{diffp}{path of differences}

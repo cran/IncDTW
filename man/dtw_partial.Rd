@@ -16,10 +16,10 @@ dtw_partial(x, partial_Q = TRUE, partial_C = TRUE, reverse = FALSE)
 \item{x}{result object of either \code{\link{dtw}()} or \code{\link{idtw2vec}()}
 }
 \item{partial_Q}{
-logical (default = TRUE), whether Q is aligned completly to C or open ended.  
+logical (default = TRUE), whether Q is aligned completely to C or open ended.  
 }
 \item{partial_C}{
-logical (default = TRUE), whether C is aligned completly to Q or open ended. 
+logical (default = TRUE), whether C is aligned completely to Q or open ended. 
 }
 \item{reverse}{
 logical (default = FALSE), whether Q and C are in original or reverse order. 
@@ -31,9 +31,9 @@ logical (default = FALSE), whether Q and C are in original or reverse order.
 Q is the time series that describes the vertical dimension of the global cost matrix, so \code{length(Q)} is equal to \code{nrow(x$gcm)}. So C describes the horizontal dimension of the global cost matrix, \code{length(C)} is equal to \code{ncol(x$gcm)}.
 
 \code{dtw_partial()} returns the open-end alignment of Q and C with the minimal normalized distance.
-If \code{partial_Q} and \code{partial_C} both are \code{TRUE} the partial alignmnet with the smaller normalized distance is returned.
+If \code{partial_Q} and \code{partial_C} both are \code{TRUE} the partial alignment with the smaller normalized distance is returned.
 
-If Q and C are in reverse order, then the optimal solution for the reverse problem is found, that is the aligmnet with minial normalized distance allowing and open-start alignment.
+If Q and C are in reverse order, then the optimal solution for the reverse problem is found, that is the alignment with minimal normalized distance allowing and open-start alignment.
 
 }
 

@@ -34,7 +34,7 @@ plotWarp(x, Q, C, partial = NULL, selDim = 1, ...)
 \item{...}{Other arguments passed on to methods.}
 }
 \details{
-The plot function visualizes the time warp and the alignment of the two time series. Also for partial alignmnets see \code{\link{dtw_partial}()}
+The plot function visualizes the time warp and the alignment of the two time series. Also for partial alignments see \code{\link{dtw_partial}()}
 }
 \author{
 Maximilian Leodolter

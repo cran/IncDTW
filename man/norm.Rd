@@ -2,10 +2,10 @@
 \alias{norm}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Time Series Normalisation
+Time Series Normalization
 }
 \description{
-normalises a time series per dimension
+normalizes a time series per dimension
 }
 \usage{
 norm(x, type = c('z', '01'),
@@ -15,7 +15,7 @@ norm(x, type = c('z', '01'),
 \arguments{
 \item{x}{time series as vector or matrix
 }
-\item{type}{character, describes the method of to normalise the time series (per column if x is multivariate). The parameter type is either 'z' for z-normalisation or '01' for max-min normalisation.
+\item{type}{character, describes the method of to normalize the time series (per column if x is multivariate). The parameter type is either 'z' for z-normalization or '01' for max-min normalization.
 }
 \item{xmean}{mean used for z-normalization
 }
@@ -29,11 +29,11 @@ norm(x, type = c('z', '01'),
 
 
 \details{
-For a vector \code{x} the z-normalisation subtracts the mean and devides by the standard deviation:  of \code{(x-mean(x))/sd(x)}. The min-max normalisation performs \code{(x-min(x))/(max(x)-min(x))}.
+For a vector \code{x} the z-normalization subtracts the mean and devides by the standard deviation:  of \code{(x-mean(x))/sd(x)}. The min-max normalization performs \code{(x-min(x))/(max(x)-min(x))}.
 }
 
 \value{
-\item{x}{the normalised vector}
+\item{x}{the normalized vector}
 }
 \author{
 Maximilian Leodolter

@@ -46,3 +46,16 @@ test_that("correct values multivariate", {
    expect_equal(sum(abs(byhand-dm2$disvec))< eps, TRUE)
 })
 
+
+test_that("pass names of input", {
+   lot <- lapply(1:4, function(i){
+      cumsum(rnorm(10, i))
+   })
+   names(lot) <- letters[1:4]
+   x <- cumsum(rnorm(10))
+   
+   ret <- dtw_disvec(Q=x, lot = lot,  dist_method="norm2")
+   
+   expect_equal(is.null(labels(ret$disvec)), FALSE)
+   
+})

@@ -108,7 +108,6 @@ test_that("correct values multivariate, normalized", {
 
 
 
-
 test_that("for dev only, speed comparison", {
    skip("")
    eps <- 1/10^7
@@ -173,3 +172,7 @@ test_that("for dev only, speed comparison", {
    dfp2 <- dfp2[, list(expr, ratio = times/.SD[expr == "fcp(lot)", times]), by = c("nn") ]
    ggplot(dfp2)+geom_line(aes(x=nn, y = ratio, group = expr, col=expr))
 })
+
+
+
+

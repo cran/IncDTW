@@ -50,8 +50,8 @@ The dynamic time warping distance is the element in the last row and last column
 \item{gcm}{global cost matrix}
 \item{dm}{direction matrix (3=up, 1=diagonal, 2=left)}
 \item{wp}{warping path}
-\item{ii}{indices of C of the optimal path}
-\item{jj}{indices of Q of the optimal path}
+\item{ii}{indices of Q of the optimal path}
+\item{jj}{indices of C of the optimal path}
 \item{cm}{Matrix of costs}
 \item{diffM}{Matrix of differences}
 \item{diffp}{path of differences}

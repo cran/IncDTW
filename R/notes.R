@@ -1,6 +1,16 @@
 #  --------------------------------------------------------------------------  
 #  --------------------------------------------------------------------------
 #
+# TODO: before submission to JSS:
+#                             - reproduction material:
+#                                   zip the following:
+#                                      + C:\Users\LeodolterM\Documents\SVN_AIT\trunk\JSS_IncDTW_Submission\non_svn
+#                                      + IncDTW tar ball
+#                             - reproduction script
+#                             - version the submission version on overleaf.com
+#                             - submit R package to CRAN         
+#                             
+#
 # TODO: before submission to CRAN: 
 #                             - adjust version number in Description File
 #                             - change options in RStuio -> Tools -> Project Options -> Build Tools -> 
@@ -8,22 +18,54 @@
 #                                  I added this option to omit vignette checking
 #                                  
 #
-# TODO: (done?!) change name of Vignette, the name visible online
-#
 # TODO: test "inline" for help functions, especially <<mymin>>
 # 
 # TODO: adjust Version number in Description File
 #
-# TODO: upcoming features: - vectorbased (also incremental) implementation for existing cost matrix
-#                          - incremental DTW for stream data with running normalization 
-#                          - norm01 from caterpillar package without discretization
-#                          - plot functions fpr DBA for multivariate time series
-#                          - plot function for reverse (start-) partial alignment
+# TODO: upcoming features: - plot function for reverse (start-) partial alignment
+#                          - TODO: add a rev.matrix:
+#                                            rev.matrix <- function(x){ x[nrow(x):1, ,drop=FALSE] }
+#                          - TODO: parallelized implementation of DBA
+#                          - TODO: k-NN search for searching the k-NN in a set of time series of equal lengths 
+#                                  by the same accelerating methods as applied for rundtw()
+#                          - ...
 #                          - ...
 #                          - ...
 #  
 #  
 #  --------------------------------------------------------------------------  
+#  --------------------------------------------------------------------------
+#  CHANGES SINCE VERSION 1.0.5
+#     
+#     - DONE TODO: change name of Vignette, the name visible online
+#                                  
+#     - DONE IDEA: new function: rundtw(), 
+#                    inspird by Glocal cost matrix, compare with the paper 
+#                   "Stream Monitoring under the Time Warping Distance"
+#                    do a similar approach with running min-max normalization
+#            
+#     - DONE (in form of rundtw) TODO: maybe this makes no sense here in this package, but could be interesting
+#              Welford's online algorithm for z-normalization
+#              https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance 
+#              
+#     - DONE TODO: add labels to result of dtw_dismat() and dtw_disvec()
+#                  see test_dtw_dismat.R for code to be included
+#
+#     - DONE new function: find_peaks()
+#
+#     - DONE new feature: for simulate_timewarp(), the parameter preserve_length
+#     
+#     - DONE ... vectorbased (also incremental) implementation for existing cost matrix
+#     
+#     - DONE as part of runDTW ... incremental DTW for stream data with running normalization 
+#     
+#     - DONE ... norm01 from caterpillar package without discretization
+#     
+#     - DONE ... plot functions for DBA for multivariate time series
+#  
+#  
+#  
+#  #  --------------------------------------------------------------------------  
 #  --------------------------------------------------------------------------
 #  CHANGES SINCE VERSION 1.0.4
 #     

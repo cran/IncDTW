@@ -410,6 +410,139 @@ dtw2vec_multiv <- function(Q, C, dist_method = c("norm1", "norm2", "norm2_square
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
+find_peaks <- function (x, w, get_min = TRUE, strict = TRUE){
+   
+   cpp_strict <- strict * 1
+   if(get_min){
+      return( cpp_local_min(x, w = w, strict = cpp_strict) )
+   }else{
+      return( cpp_local_min(-x, w = w, strict = cpp_strict) )
+   }
+}
+
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+rundtw <- function(Q, C, dist_method = c("norm1", "norm2", "norm2_square"),
+                    step_pattern = c("symmetric1", "symmetric2"), k = NULL, 
+                    normalize = TRUE, ws = NULL, threshold = NULL, lower_bound = TRUE,
+                    overlap_tol = 0){
+   
+   debug <- 0#1 # either 0 or 1, if 1 then the cpp function prints computation details, in that case a sink file is recommended
+   dist_method <- match.arg(dist_method)
+   step_pattern <- match.arg(step_pattern)
+   initial_dim_check(Q = Q, C = C)
+   if(is.null(k)) {
+      k <- 0
+   }else{
+      k <- as.integer(k)
+   }
+   if(k < 0) k <- 0L
+   if(k > 0) lower_bound <- TRUE # k overrules lowerbound parameter
+   
+   if(is.null(threshold)){
+      threshold <- Inf
+      use_ea <- 0
+   }else{
+      if(threshold < 0){
+         stop("threshold needs to be >= 0")
+      }
+      # threshold is set to any values >= 0 and smaller Inf
+      use_ea <- 1
+   }
+   
+   
+   if(overlap_tol < 0 || overlap_tol >= length(C)/ifelse(is.null(ncol(C)), 1, ncol(C))){
+      stop("The overlap tolerance parameter needs to be between 0 and the length of C")
+   }
+   
+   if(lower_bound){
+      if(step_pattern != "symmetric1"){
+         warning("lower_bound is set to FALSE, currently only implemented for step_pattern symmetric1")
+         use_lb <- 0
+      }else{
+         use_ea <- 1
+         use_lb <- 1
+      }
+   }else{
+      use_lb <- 0
+   }
+   
+   if(normalize){
+      do_norm <- 1
+      Q <- norm(Q, type="01")
+   }else{
+      do_norm <- 0
+   }
+   
+   
+   if(is.character(C) | is.character(Q)){
+      stop("If Q and C need to be vectors or matrices.")
+   }
+   
+   
+   if(is.vector(Q) || (ncol(Q) == 1 & ncol(C) == 1)){
+      if(is.null(ws)) ws <- length(Q)
+      if(dist_method != "norm1"){
+         warning("dist_method is set to 'norm1' for the univariate case")
+      }
+      
+      ret <- cpp_rundtw(h = Q, x = C, step_pattern = step_pattern, 
+                        ws = ws, threshold = threshold, overlap_tol = overlap_tol, kNNk = k, 
+                        do_norm = do_norm, use_ea = use_ea, use_lb = use_lb, debug = debug) 
+      
+   }else{
+         
+      if(is.null(ws)) ws <- nrow(Q)
+      ret <- cpp_rundtw_mv(h = Q, x = C, step_pattern = step_pattern, 
+                           dist_method = dist_method, ws = ws, threshold = threshold, overlap_tol = overlap_tol,
+                           kNNk = k, do_norm = do_norm, use_ea = use_ea, use_lb = use_lb, debug = debug)
+   }
+   
+   names(ret$counter) <- c("norm_reset","norm_new_extreme", "norm_1step",
+                           "cm_reset", "cm_1step",
+                           "early_abandon", "lower_bound")
+   
+   if(k >0) {
+      # if k > nx/nh then too many NN are initiated and returned, drop those here
+      all_best_indices <- ret$all_best_indices + 1
+      all_best_dist <- ret$dist[all_best_indices]
+      new_order <- order(all_best_dist, decreasing = FALSE)
+      
+      # k_best_indices
+      ret$knn_indices <- all_best_indices[new_order[1:k]]
+      # k_best_dist    
+      ret$knn_values <- all_best_dist[new_order[1:k]]
+      
+      # finally
+      if(debug == 1){
+         print("------all_best indices----------")
+         print(ret$all_best_indices +1)
+         print("------all_best indices end----------")
+      }
+      ret$all_best_indices <- NULL
+      ix_na <- is.na(ret$knn_values)
+      ret$knn_values <- ret$knn_values[!ix_na]
+      ret$knn_indices <- ret$knn_indices[!ix_na]
+      
+      # ix_drop <- which(ret$knn_indices == -99)
+      # if(length(ix_drop) > 0){
+      #    ret$knn_indices <- ret$knn_indices[-ix_drop]
+      #    ret$knn_values  <- ret$knn_values[-ix_drop]
+      # }
+      # ret$knn_indices <- rev(ret$knn_indices + 1)
+      # ret$knn_values  <- rev(ret$knn_values)
+      
+   }
+      
+   return(ret)
+}
+
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 dtw_dismat <- function(lot, dist_method = c("norm1", "norm2", "norm2_square"),
@@ -469,7 +602,12 @@ dtw_dismat <- function(lot, dist_method = c("norm1", "norm2", "norm2_square"),
    NN <- (N*(N-1))/2
    jj <- sapply(1:(N-1), function(j){rep(j, N-j)})
    ii <- sapply(1:(N-1), function(i){(i+1):N})
-   dis <- dist(rep(0,N))
+   # regard labels of lot
+   tmp <- rep(0,N)
+   if(!is.null(names(lot))){
+      names(tmp) <- names(lot)
+   }
+   dis <- dist(tmp)
 
    
    if(ncores > 1){
@@ -645,6 +783,12 @@ dtw_disvec <- function(Q, lot, dist_method = c("norm1", "norm2", "norm2_square")
             ifelse(normalize, yes = tmp$normalized_distance, no = tmp$distance)
          })
       }
+   }
+   
+   
+   #regard labels of lot
+   if(!is.null(names(lot))){
+      names(ret) <- names(lot)
    }
    
    return(list(input = input, disvec = ret))   

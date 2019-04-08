@@ -4,10 +4,10 @@
 \alias{brush_teeth}
 \docType{data}
 \title{
-Acceleromter: drink a glass, walk, brush teeth.
+Accelerometer: drink a glass, walk, brush teeth.
 }
 \description{
-3-dimensional acceleration time series recorded during the activites of walking, drinking a glass or brushing teeth.
+3-dimensional acceleration time series recorded during the activities of walking, drinking a glass or brushing teeth.
 %%  ~~ A concise (1-5 lines) description of the dataset. ~~
 }
 \usage{data("drink_glass")}

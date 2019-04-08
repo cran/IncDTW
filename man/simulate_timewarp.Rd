@@ -16,7 +16,7 @@ simulate_timewarp(x, stretch = 0, compress = 0,
                   stretch_method = insert_linear_interp,
                   p_index = "rnorm", p_number = "rlnorm", 
                   p_index_list = NULL, p_number_list = NULL, 
-                  seed = NULL, ...) 
+                  preserve_length = FALSE, seed = NULL, ...) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,9 +26,10 @@ simulate_timewarp(x, stretch = 0, compress = 0,
 \item{stretch_method}{function, either one of (insert_const, insert_linear_interp,
 insert_norm, insert_linear_norm), or any user defined function that needs the parameters \code{x} (univariate time series as vector), \code{ix} (index where to insert), \code{N} (number of observations to insert) and any other arguments required for that function. See Details. }
 \item{p_index}{string, distribution for simulating the indices where to insert simulated observations, e.g. "rnorm", "runif", etc.}
-\item{p_number}{string, distribution for simulating the number of obervations to insert per index, e.g. "rnorm", "runif", etc.}
+\item{p_number}{string, distribution for simulating the number of observations to insert per index, e.g. "rnorm", "runif", etc.}
 \item{p_index_list}{list of named parameters for the distribution \code{p_index}}
 \item{p_number_list}{list of named parameters for the distribution \code{p_number}}
+\item{preserve_length}{logical, if TRUE (default = FALSE) then the length of the return time series is the same as before the warping, so the compression and stretching do not change the length of the time series, nevertheless perform local warpings}
 \item{seed}{set a seed for reproducible results}
 \item{...}{named parameters for the \code{stretch_method}}
 }
@@ -36,7 +37,7 @@ insert_norm, insert_linear_norm), or any user defined function that needs the pa
 
 
 \details{
-The different distributions \code{p_index} and \code{p_number} also determine the behaviour of the warp. A uniform distribution for \code{p_number} more likely draws high number than e.g. log-normal distributions with appropriate parameters. So, a uniform distribution more likely simulates fewer, but longer warps, that is points of time where the algorithm inserts simulations.
+The different distributions \code{p_index} and \code{p_number} also determine the behavior of the warp. A uniform distribution for \code{p_number} more likely draws high number than e.g. log-normal distributions with appropriate parameters. So, a uniform distribution more likely simulates fewer, but longer warps, that is points of time where the algorithm inserts simulations.
 
 
 The algorithm stretches by randomly selecting an index between 1 and the length of the time series. Then a number of observations to be inserted is drawn out of the range 1 to the remaining number of observations to be inserted. These observations are inserted. Then the algorithm starts again with drawing an index, drawing a number of observations to be inserted, and proceeds until the requested time series length is achieved.
@@ -60,15 +61,15 @@ e.g. if \code{stretch = 0} and ...
 }
 
 
-There are four functions to chose from to insert new simulated observations. You can also define yur own function and apply this one. The four functions to chose from are:
+There are four functions to chose from to insert new simulated observations. You can also define your own function and apply this one. The four functions to chose from are:
 \itemize{
-\item insert a constant, either a constant defined by the user via the iniput parameter \code{const}, or if \code{const = NULL}, then the last observation of the time series where the insertion starts is set as \code{const}
+\item insert a constant, either a constant defined by the user via the input parameter \code{const}, or if \code{const = NULL}, then the last observation of the time series where the insertion starts is set as \code{const}
 \item insert linear interpolated observations (default)
 \item insert a constant with gaussian noise 
 \item insert linear interpolated observations and add gaussian noise.
 }
 
-For the methods with gaussian noise the parameters \code{mean} and \code{sd} for \code{rnorm} can be set at the function call of \code{simulate_timewarp()}.
+For the methods with Gaussian noise the parameters \code{mean} and \code{sd} for \code{rnorm} can be set at the function call of \code{simulate_timewarp()}.
 
 }
 \value{

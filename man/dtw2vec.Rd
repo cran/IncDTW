@@ -17,14 +17,14 @@ dtw2vec(Q, C, dist_method = c("norm1", "norm2", "norm2_square"),
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-\item{Q}{Either Q is (a) a time series (vector or matrix for multivariate time series) or (b) Q is a cost matrix, so a matrix storing the local distances of the time series Q and C. If Q and C are matrices, they need to have the same number of columns. If Q is a cost matrix, C needs to be equal the charachter string "cm".}
+\item{Q}{Either Q is (a) a time series (vector or matrix for multivariate time series) or (b) Q is a cost matrix, so a matrix storing the local distances of the time series Q and C. If Q and C are matrices, they need to have the same number of columns. If Q is a cost matrix, C needs to be equal the character string "cm".}
 \item{C}{time series as vector or matrix, or for case (b) C equals "cm"}
 \item{dist_method}{character, describes the method of distance measure. See also \code{\link{dtw}}.  If Q is a cost matrix, the dist_method parameter is not necessary.}
 \item{step_pattern}{character, describes the step pattern. See also \code{\link{dtw}}.}
 \item{ws}{
 integer, describes the window size for the sakoe chiba window. If NULL, then no window is applied. (default = NULL)
 }
-\item{threshold}{numeric, the threshold for early abandoning. In the calculation of the global cost matrix a possible path stops as soon as the threshold is reached. Facilitates faster calculations incase of low threshold. The threshold relates to the non-normalized distance measure. (default = NULL, no early abandoning)
+\item{threshold}{numeric, the threshold for early abandoning. In the calculation of the global cost matrix a possible path stops as soon as the threshold is reached. Facilitates faster calculations in case of low threshold. The threshold relates to the non-normalized distance measure. (default = NULL, no early abandoning)
 }
 }
 

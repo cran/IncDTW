@@ -48,11 +48,11 @@ library(dtw)
 <!-- % https://colinfay.me/writing-r-extensions/writing-r-documentation-files.html -->
 
 ## Introduction to Dynamic Time Warping: _dtw()_
-The distance measure DTW calcuates the minimal costs of the shortest non-linear alignment of two time series $Q$ (the query time series) and $C$ (the candidate time series), conditional to 
+The distance measure DTW calculates the minimal costs of the shortest non-linear alignment of two time series $Q$ (the query time series) and $C$ (the candidate time series), conditional to 
 
 - The first element of $Q$ is aligned to the first element of $C$
 - The last element of $Q$ is aligned to the last element of $C$
-- A 1:k alignment is applied (unlike to the Euclidean distance calcuation). That is, one observation of $Q$ can be applied to k-many of $C$, and vice versa.
+- A 1:k alignment is applied (unlike to the Euclidean distance calculation). That is, one observation of $Q$ can be applied to k-many of $C$, and vice versa.
 
 
 Remark: The DTW distance measure is not a distance metric in the conventional sense, since it does not fulfill the triangle inequality. 
@@ -294,7 +294,7 @@ The original DTW algorithm has fixed alignments at the beginning and the end of 
 %
 Here we relax this restriction and allow one time series to be aligned only partially, so _dtw(Q, C[1:k])_, where the lengths of Q and C are $m$ and $n$ respectively, and $n > k$. The counterpart is _dtw(Q[1:l], C)_ for any $l<m$. Once the global cost matrix for the full alignment is determined _dtw(Q, C)_ the DTW distances for possible partial open-end alignments are given by the last column and last row of the global cost matrix. The function _dtw\_partial()_ returns the indices of the open-end alignment with the minimum normalized DTW distance. 
 
-In the following example we first get the full alignment and use this as input to find the open-end alignment for a parital match of C.
+In the following example we first get the full alignment and use this as input to find the open-end alignment for a partial match of C.
 ```{r}
 Q <- sin(1:50)
 C <- cos(1:1000)
@@ -303,7 +303,7 @@ IncDTW::dtw_partial(tmp, partial_Q = FALSE, partial_C = TRUE)
 ```
 
 
-Since DTW is reversible (for symmetric step patterns), so _dtw(Q[1:m], C[1:n]) = dtw(Q[m:1], C[n:1])_, possible open-start alignments can be compared similarly. So for the following time series, where obviously the initial 50 observations of C have no reasonable connection with Q we try to find the best open-start alignment. Considering that we first get the full alignment of the reverse time series and use this as input to find the open-start alignment for a parital match of C. 
+Since DTW is reversible (for symmetric step patterns), so _dtw(Q[1:m], C[1:n]) = dtw(Q[m:1], C[n:1])_, possible open-start alignments can be compared similarly. So for the following time series, where obviously the initial 50 observations of C have no reasonable connection with Q we try to find the best open-start alignment. Considering that we first get the full alignment of the reverse time series and use this as input to find the open-start alignment for a partial match of C. 
 
 ```{r}
 Q <- sin(1:100)
@@ -313,7 +313,7 @@ dtw_partial(tmp, partial_Q = FALSE, partial_C = TRUE, reverse = TRUE)
 ```
 
 
-Combining the incremental calculation and the partial alignment is also possible since the incremental algorithm returns either the updated global cost matrix (for the matrix based algorithm _idtw()_ or the last column and last row (vetor based _idet2vec()_) for possible future iterations. As a consequence we can update the partial alignment after each incremental step, where Q is a query pattern and C is recorded at the time of analysis, just like a data stream:
+Combining the incremental calculation and the partial alignment is also possible since the incremental algorithm returns either the updated global cost matrix (for the matrix based algorithm _idtw()_ or the last column and last row (vector based _idtw2vec()_) for possible future iterations. As a consequence we can update the partial alignment after each incremental step, where Q is a query pattern and C is recorded at the time of analysis, just like a data stream:
 
 ```{r}
 Q <- sin(seq(1, 50, length.out = 200))

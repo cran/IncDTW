@@ -18,8 +18,8 @@ dec_dm(dm, Ndec, diffM = NULL)
 }
 \value{
 \item{wp}{warping path}
-\item{ii}{indices of C of the optimal path}
-\item{jj}{indices of Q of the optimal path}
+\item{ii}{indices of Q of the optimal path}
+\item{jj}{indices of C of the optimal path}
 \item{diffp}{path of differences (only returned if diffM is not NULL)}
 }
 \references{

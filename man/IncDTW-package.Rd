@@ -7,7 +7,7 @@
   Incremental Dynamic Time Warping
 }
 \description{
-The Dynamic Time Warping (DTW) distance for time series allows non-linear alignments of time series to match  similar patterns in time series of different lengths and or different speeds. Beside the traditional implementation of the DTW algorithm, the specialities of this package are, (1) the incremental calculation, which is specifically useful for life data streams due to computationally efficiency, (2) the vector based implementation of the traditional DTW algorithm which is faster because no matrices are allocated and is especially useful for computing distance matrices of pairwise DTW distances for many time series  and (3) the combination of incremental and vector-based calculation.
+The Dynamic Time Warping (DTW) distance for time series allows non-linear alignments of time series to match  similar patterns in time series of different lengths and or different speeds. Beside the traditional implementation of the DTW algorithm, the specialties of this package are, (1) the incremental calculation, which is specifically useful for life data streams due to computationally efficiency, (2) the vector based implementation of the traditional DTW algorithm which is faster because no matrices are allocated and is especially useful for computing distance matrices of pairwise DTW distances for many time series  and (3) the combination of incremental and vector-based calculation.
 }
 
 \details{
@@ -15,7 +15,7 @@ Main features:
 \itemize{
 \item{C++ in the heart thanks to Rcpp}
 \item{Incremental Calculation, \code{idtw()} and \code{idtw2vec()}}
-\item{Matrix-based \code{dtw()} and Vector-based \code{dtw2vec()} implemtantion of the DTW algorithm}
+\item{Matrix-based \code{dtw()} and Vector-based \code{dtw2vec()} implementation of the DTW algorithm}
 \item{Sakoe Chiba Warping Window}
 \item{Early abandoning}
 \item{support for multivariate time series}

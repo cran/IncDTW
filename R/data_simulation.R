@@ -2,7 +2,7 @@ simulate_timewarp <- function (x, stretch = 0, compress = 0,
                                stretch_method = insert_linear_interp,
                                p_index = "rnorm", p_number = "rlnorm",
                                p_index_list = NULL, p_number_list = NULL, 
-                               seed = NULL, ...) 
+                               preserve_length = FALSE, seed = NULL, ...) 
 {
    
    # stretch ...  numeric >= 0, 
@@ -21,12 +21,15 @@ simulate_timewarp <- function (x, stretch = 0, compress = 0,
    if(compress == 0 & stretch == 0) return(x)
    if(!is.null(seed)) set.seed(seed)
    
+   
    if(is.vector(x)){
       return(simulate_timewarp_vec(x, stretch, compress, stretch_method, 
-                                   p_index, p_number, p_index_list, p_number_list, ...))
+                                   p_index, p_number, p_index_list, p_number_list, 
+                                   preserve_length = preserve_length, ...))
    }else if (is.matrix(x)){
       return(simulate_timewarp_mat(x, stretch, compress, stretch_method, 
-                                   p_index, p_number, p_index_list, p_number_list, ...))
+                                   p_index, p_number, p_index_list, p_number_list,
+                                   preserve_length = preserve_length, ...))
    }else{
       stop("x needs to be a vector or matrix")
    }
@@ -40,10 +43,16 @@ simulate_timewarp <- function (x, stretch = 0, compress = 0,
 simulate_timewarp_vec <- function (x, stretch = 0, compress = 0,
                                    stretch_method = insert_linear_interp,  
                                    p_index, p_number, p_index_list = NULL, 
-                                   p_number_list = NULL, ...)
+                                   p_number_list = NULL, preserve_length = FALSE,...)
 {
    
    x_new <- x
+   if(preserve_length) {
+      if(stretch <= 0) stretch <- compress
+      compress <- stretch
+   }
+   
+   
    if (stretch > 0) {
       nx <- length(x_new)
       nx_new <- ceiling(nx * (1 + stretch))
@@ -63,9 +72,14 @@ simulate_timewarp_vec <- function (x, stretch = 0, compress = 0,
    }
    
    if (compress > 0) {
-      nx <- length(x_new)
-      nx_new <- ceiling(nx * (1 - compress))
-      rno2o <- nx - nx_new # remaining number of observations to omit
+      if(preserve_length) {
+         rno2o <- length(x_new) - length(x)
+      }else{
+         nx <- length(x_new)
+         nx_new <- ceiling(nx * (1 - compress))
+         rno2o <- nx - nx_new # remaining number of observations to omit
+      }
+      
       while(rno2o > 0){
          nx_new <- length(x_new)
          
@@ -90,10 +104,15 @@ simulate_timewarp_vec <- function (x, stretch = 0, compress = 0,
 simulate_timewarp_mat <- function (x, stretch = 0, compress = 0,
                                    stretch_method = insert_linear_interp,  
                                    p_index, p_number, p_index_list = NULL, 
-                                   p_number_list = NULL, ...)
+                                   p_number_list = NULL, preserve_length = FALSE,...)
 {
    
    x_new <- x
+   if(preserve_length) {
+      if(stretch <= 0) stretch <- compress
+      compress <- stretch
+   }
+   
    if (stretch > 0) {
       nx <- nrow(x_new)
       nx_new <- ceiling(nx * (1 + stretch))
@@ -116,9 +135,14 @@ simulate_timewarp_mat <- function (x, stretch = 0, compress = 0,
    }
    
    if (compress > 0) {
-      nx <- nrow(x_new)
-      nx_new <- ceiling(nx * (1 - compress))
-      rno2o <- nx - nx_new # remaining number of observations to omit
+      if(preserve_length) {
+         rno2o <- nrow(x_new) - nrow(x)
+      }else{
+         nx <- nrow(x_new)
+         nx_new <- ceiling(nx * (1 - compress))
+         rno2o <- nx - nx_new # remaining number of observations to omit
+      }
+      
       while(rno2o > 0){
          nx_new <- nrow(x_new)
          

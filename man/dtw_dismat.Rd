@@ -28,7 +28,7 @@ dtw_disvec(Q, lot, dist_method = c("norm1", "norm2", "norm2_square"),
 \item{ws}{
 integer, describes the window size for the sakoe chiba window. If NULL, then no window is applied. (default = NULL)
 }
-\item{threshold}{numeric, the threshold for early abandoning. In the calculation of the global cost matrix a possible path stops as soon as the threshold is reached. Facilitates faster calculations incase of low threshold. (default = FALSE)
+\item{threshold}{numeric, the threshold for early abandoning. In the calculation of the global cost matrix a possible path stops as soon as the threshold is reached. Facilitates faster calculations in case of low threshold. (default = FALSE)
 }
 \item{return_matrix}{boolean, If TRUE (default) a symmetric matrix of differences is returned. If FALSE the distance matrix is returned as \code{dist} object. 
 }
