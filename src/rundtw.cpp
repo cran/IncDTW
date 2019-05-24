@@ -35,6 +35,40 @@ double get_lb(const NumericMatrix &tube, const NumericVector &x,
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
+// [[Rcpp::export]]
+double get_lb_znorm(const NumericMatrix &tube, const NumericVector &x, 
+                    double mu, double sigma, double threshold,
+                    int j0, int jsup){
+   double lb = 0;
+   int k;
+   double z;
+   int j = j0;
+   
+   while((j < jsup) && (lb < threshold)){
+      
+      k = j - j0;
+      z = (x[j] - mu)/sigma;
+      
+      if(z > tube(k, 1)){
+         
+         lb += z - tube(k, 1);
+         
+      }else if(z < tube(k, 0)){
+         
+         lb += tube(k, 0)- z;
+         
+      }
+      j += 1;
+   }
+   
+   return lb;
+}
+
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
 double get_lb_mv1(const NumericMatrix &tube, const NumericMatrix &x, 
                   int j0, int jsup, int nc){
    double lb = 0;
@@ -117,6 +151,129 @@ double get_lb_mv22(const NumericMatrix &tube, const NumericMatrix &x,
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+
+double get_lb_mv1_z(const NumericMatrix &tube, 
+                    const NumericMatrix &x, 
+                    const NumericVector &mu, 
+                    const NumericVector &sigma, 
+                    double threshold,
+                    int j0, int jsup, int nc){
+   
+   double lb = 0;
+   int c, k;
+   double z;
+   int j = j0;
+   
+   while((j < jsup) && (lb < threshold)){
+      k = j - j0;
+      
+      for(c = 0; c < nc; c++){
+         z = (x(j, c) - mu[c])/sigma[c];
+         
+         if(z > tube(k, 2*c+1)){
+            
+            lb += z - tube(k, 2*c+1);
+            
+         }else if(z < tube(k, 2*c)){
+            
+            lb += tube(k, 2*c) - z;
+            
+         }
+      }
+      j += 1;
+   }
+   
+   return lb;
+}
+
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+double get_lb_mv2_z(const NumericMatrix &tube, 
+                    const NumericMatrix &x, 
+                    const NumericVector &mu, 
+                    const NumericVector &sigma, 
+                    double threshold,
+                    int j0, int jsup, int nc){
+   double lb = 0;
+   double tmp, dimsum;
+   int  c, k;
+   double z;
+   int j = j0;
+   
+   while((j < jsup) && (lb < threshold)){
+      dimsum = 0;
+      k = j - j0;
+      
+      for(c = 0; c < nc; c++){
+         z = (x(j, c) - mu[c])/sigma[c];
+         
+         if(z > tube(k, 2*c+1)){
+            
+            tmp = z - tube(k, 2*c+1);
+            dimsum += tmp * tmp;
+            
+         }else if(z < tube(k, 2*c)){
+            
+            tmp = tube(k, 2*c)- z;
+            dimsum += tmp * tmp;
+            
+         }
+      }
+      lb += sqrt(dimsum);
+      j += 1;
+   }
+   return lb;
+}
+
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+double get_lb_mv22_z(const NumericMatrix &tube, 
+                     const NumericMatrix &x, 
+                     const NumericVector &mu, 
+                     const NumericVector &sigma, 
+                     double threshold,
+                     int j0, int jsup, int nc){
+   double lb = 0;
+   double tmp;
+   int c, k;
+   double z;
+   int j = j0;
+   
+   while((j < jsup) && (lb < threshold)){
+      
+      k = j - j0;
+      
+      for(c = 0; c < nc; c++){
+         z = (x(j, c) - mu[c])/sigma[c];
+         
+         if(z > tube(k, 2*c+1)){
+            
+            tmp = z - tube(k, 2*c+1);
+            lb += tmp * tmp;
+            
+         }else if(z < tube(k, 2*c)){
+            
+            tmp = tube(k, 2*c)- z;
+            lb += tmp * tmp;
+            
+         }
+      }
+      
+      j += 1;
+   }
+   return lb;
+}
+
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 void cpp_cm(NumericMatrix &cm,
             const NumericVector &y, const NumericVector &h,
             int i0, int i1, int nh){
@@ -159,8 +316,8 @@ void cpp_cm1_mv(NumericMatrix &cm,
 
 
 void cpp_cm2_mv(NumericMatrix &cm,
-                      const NumericMatrix &y, const NumericMatrix &h,
-                      int j0, int j1, int nh, int nc){
+                const NumericMatrix &y, const NumericMatrix &h,
+                int j0, int j1, int nh, int nc){
    
    int c, i, j;
    double tmp_sum, tmp2;
@@ -202,6 +359,56 @@ void cpp_cm2square_mv(NumericMatrix &cm,
 }
 
 
+
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+double dist1_mv_z(const NumericMatrix &h, 
+                  const NumericMatrix &x, 
+                  const NumericVector &mu, 
+                  const NumericVector &sigma, 
+                  int ih, int ix, int nc){
+   double ret = 0;
+   for(int k = 0; k < nc; k++){
+      ret += abs( (x(ix, k) - mu[k])/sigma(k) - h(ih, k) );
+   }
+   return (ret);
+}
+
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+double dist2_mv_z(const NumericMatrix &h, 
+                  const NumericMatrix &x, 
+                  const NumericVector &mu, 
+                  const NumericVector &sigma, 
+                  int ih, int ix, int nc){
+   double ret = 0;
+   double tmp = 0;
+   for(int k = 0; k < nc; k++){
+      tmp = (x(ix, k) - mu[k])/sigma(k) - h(ih, k) ;
+      ret += tmp * tmp;
+   }
+   ret = sqrt(ret);
+   return (ret);
+}
+
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+double dist22_mv_z(const NumericMatrix &h, 
+                   const NumericMatrix &x, 
+                   const NumericVector &mu, 
+                   const NumericVector &sigma, 
+                   int ih, int ix, int nc){
+   double ret = 0;
+   double tmp = 0;
+   for(int k =0; k < nc; k++){
+      tmp = (x(ix, k) - mu[k])/sigma(k) - h(ih, k) ;
+      ret += tmp * tmp;
+   }
+   ret = ret * 1;
+   return (ret);
+}
+
+
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -227,9 +434,9 @@ XPtr<funcPtr_step_run> selectVecStepRun(std::string step_pattern) {
 
 
 typedef void (*funcPtr_cm)(NumericMatrix &cm,
-                           const NumericMatrix &y, 
-                           const NumericMatrix &h,
-                           int j0, int j1, int nh, int nc);
+              const NumericMatrix &y, 
+              const NumericMatrix &h,
+              int j0, int j1, int nh, int nc);
 
 XPtr<funcPtr_cm> select_cm(std::string dist_method) {
    if (dist_method == "norm1")
@@ -247,8 +454,8 @@ XPtr<funcPtr_cm> select_cm(std::string dist_method) {
 
 
 typedef double (*funcPtr_lb)(const NumericMatrix &tube, 
-                             const NumericMatrix &x, 
-                             int j0, int jsup, int nc);
+                const NumericMatrix &x, 
+                int j0, int jsup, int nc);
 
 XPtr<funcPtr_lb> select_lb(std::string dist_method) {
    if (dist_method == "norm1")
@@ -259,6 +466,50 @@ XPtr<funcPtr_lb> select_lb(std::string dist_method) {
       return(XPtr<funcPtr_lb>(new funcPtr_lb(&get_lb_mv22)));
    else
       return XPtr<funcPtr_lb>(R_NilValue); // runtime error as NULL no XPtr
+}
+
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+typedef double (*funcPtr_dist_mv_z)(const NumericMatrix &h, 
+                const NumericMatrix &x, 
+                const NumericVector &mu, 
+                const NumericVector &sigma, 
+                int ih, int ix, int nc);
+
+XPtr<funcPtr_dist_mv_z> select_dist_mv_z(std::string dist_method) {
+   if (dist_method == "norm1")
+      return(XPtr<funcPtr_dist_mv_z>(new funcPtr_dist_mv_z(&dist1_mv_z)));
+   else if (dist_method == "norm2")
+      return(XPtr<funcPtr_dist_mv_z>(new funcPtr_dist_mv_z(&dist2_mv_z)));
+   else if (dist_method == "norm2_square")
+      return(XPtr<funcPtr_dist_mv_z>(new funcPtr_dist_mv_z(&dist22_mv_z)));
+   else
+      return XPtr<funcPtr_dist_mv_z>(R_NilValue); // runtime error as NULL no XPtr
+}
+
+
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+typedef double (*funcPtr_lb_z)(const NumericMatrix &tube, 
+                const NumericMatrix &x, 
+                const NumericVector &mu, 
+                const NumericVector &sigma, 
+                double threshold,
+                int j0, int jsup, int nc);
+
+XPtr<funcPtr_lb_z> select_lb_z(std::string dist_method) {
+   if (dist_method == "norm1")
+      return(XPtr<funcPtr_lb_z>(new funcPtr_lb_z(&get_lb_mv1_z)));
+   else if (dist_method == "norm2")
+      return(XPtr<funcPtr_lb_z>(new funcPtr_lb_z(&get_lb_mv2_z)));
+   else if (dist_method == "norm2_square")
+      return(XPtr<funcPtr_lb_z>(new funcPtr_lb_z(&get_lb_mv22_z)));
+   else
+      return XPtr<funcPtr_lb_z>(R_NilValue); // runtime error as NULL no XPtr
 }
 
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -418,6 +669,70 @@ void cpp_set_tube_mv(NumericMatrix &tube, const NumericMatrix &h, int ws){
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
+double get_mean(const NumericVector &x, int i0, int imax){
+   double mu = 0;
+   double nh = (imax - i0 + 1);
+   for(int i = i0; i <= imax; i++){
+      mu += x[i];
+   }
+   mu /= nh;
+   return mu;
+}
+
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+double get_sigma2(const NumericVector &x, int i0, int imax, double mu2){
+   double sigma2 = 0;
+   double nh = (imax - i0 + 1);
+   for(int i = i0; i <= imax; i++){
+      sigma2 += x[i] * x[i];
+   }
+   sigma2 = sigma2/(nh-1) - mu2 * nh/(nh-1);
+   return sigma2;
+}
+
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+void set_mean_sigma_mv(NumericVector &mu,
+                       NumericVector &sigma,
+                       NumericVector &sigma2,
+                       const NumericMatrix &x, 
+                       int i0, int imax, int nc){
+   
+   double nh = (imax - i0 + 1);
+   double tmp = 0;
+   double mu2 = 0;
+   for(int c = 0; c < nc; c++){
+      tmp = 0;
+      // set mean
+      for(int i = i0; i <= imax; i++){
+         tmp += x(i, c);
+      }
+      mu[c] = tmp/nh;
+      mu2 = mu[c] * mu[c];
+      
+      // set sigma
+      tmp = 0;
+      for(int i = i0; i <= imax; i++){
+         tmp += x(i,c) * x(i,c);
+      }
+      sigma2[c] = tmp/(nh-1) - mu2 * nh/(nh-1);
+      sigma[c] = sqrt(sigma2[c]);
+   }
+}
+
+
+
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 void cpp_norm01(const NumericVector &x, NumericVector &y,
                 int i0, int i1, double xmin, double xmax){
    // cpp_norm01_noreturn
@@ -520,7 +835,7 @@ void kick_imax_kNN(NumericVector &kNN_val, IntegerVector &kNN_ix,
       if(new_val > ki.vmax){
          ki.vmax = new_val;
          ki.which_vmax = ki.which_imax ;
-      
+         
       }else{
          double bsf = kNN_val[0];
          int new_i = 0;
@@ -533,7 +848,7 @@ void kick_imax_kNN(NumericVector &kNN_val, IntegerVector &kNN_ix,
          ki.vmax = bsf;
          ki.which_vmax = new_i;
       }
-         
+      
       // }else if(ki.which_imax == ki.which_vmax){
       //    ki.vmax = new_val;
       // }
@@ -544,7 +859,7 @@ void kick_imax_kNN(NumericVector &kNN_val, IntegerVector &kNN_ix,
 
 void update_kNN(NumericVector &kNN_val, IntegerVector &kNN_ix, 
                 double new_val, int new_ix){
-
+   
    int n = kNN_val.size();
    int k = (int) n/2;
    int k_prev=0;
@@ -590,9 +905,9 @@ NumericVector cpp_kNN_rev(const NumericVector &disvec, int w, int debug = 0){
    int i, imin;
    int bi = 0;
    std::vector<int> best_indices;
-
+   
    imin = std::max(0, nd-w);
-
+   
    // Rcout << ndisvec<< " "<< w<< "  "<< ndisvec-w<<"\n";
    for(i = nd-1; i > imin; i--){
       if(disvec[i] < bsfir){
@@ -605,7 +920,7 @@ NumericVector cpp_kNN_rev(const NumericVector &disvec, int w, int debug = 0){
    if(debug == 1){
       Rcout << "i: "<<i << " ---- end of initial ---- \n";            
    } 
-
+   
    for(i = imin; i >= 0 ; i--){
       if(debug == 1){
          Rcout << "i: "<<i << " bi: "<<bi << " bsfir: "<< bsfir <<"\n";            
@@ -640,11 +955,11 @@ NumericVector cpp_kNN_rev(const NumericVector &disvec, int w, int debug = 0){
    }
    // Rcout << "i: "<<i << "... bi: "<<bi << "... disvec[bi]: "<<disvec[bi]<<"\n";
    // sumsavings += bsfir;
-
+   
    if(disvec[bi] == disvec[bi]){
       best_indices.push_back(bi);
    }
-
+   
    return wrap( best_indices );
 }
 
@@ -736,6 +1051,7 @@ IntegerVector cpp_local_min(const NumericVector &x, int w, int strict){
 // [[Rcpp::export]]
 List cpp_rundtw(const NumericVector &h,
                 const NumericVector &x,
+                NumericVector &ret,
                 std::string step_pattern,
                 int ws, double threshold, int overlap_tol = 0, int kNNk = 0,
                 int do_norm = 1, int use_ea = 1, int use_lb = 1, int debug = 0) {
@@ -788,7 +1104,7 @@ List cpp_rundtw(const NumericVector &h,
    NumericVector y (nx, 0.0); // normalized version of x
    NumericVector range(2); // range vector for running min-max
    NumericMatrix cm(nh, nx); //cost matrix
-   NumericVector ret(nx-nh+1, 0.0); // return vetor
+   // NumericVector ret(nx-nh+1, 0.0); // return vetor
    
    
    // set initial maximum indices
@@ -939,9 +1255,13 @@ List cpp_rundtw(const NumericVector &h,
    // ret[0] = cpp_dtw2vec_cm(cm, i, jsup, nh);
    loc_threshold = mymin(ret[0], threshold);
    
+   // ret[0] can be NaN => in this case set bsfiw to Inf, for proper comparisons,
+   // since comparisons with NaN are always FALSE
+   double initial_bsfiw = mymin(ret[0], R_PosInf);
+   
    // fill initially kNN_val
    if(kNNk > 0){
-      kNN_val[0] = ret[0];
+      kNN_val[0] = initial_bsfiw;
       kNN_ix[0] = 0;
       
       for(k = 1; k < kNNk; k++){
@@ -963,7 +1283,7 @@ List cpp_rundtw(const NumericVector &h,
       }
    }
    
-   bsfiw = ret[0]; // best so far in window
+   bsfiw = initial_bsfiw; // best so far in window
    bsfiw_ix = 0; // last index of best so far in window
    
    
@@ -1165,11 +1485,11 @@ List cpp_rundtw(const NumericVector &h,
          if(debug == 1){
             Rcout << "j = "<< j << ", before: ";
             Rcout << " imax: "<< kNN_inf.imax<< " "<< 
-                     " which_imax: "<<kNN_inf.which_imax << " "<< 
-                     " vmax: "<<kNN_inf.vmax << " "<< 
+               " which_imax: "<<kNN_inf.which_imax << " "<< 
+                  " vmax: "<<kNN_inf.vmax << " "<< 
                      " which_vmax: "<<kNN_inf.which_vmax << " "<< 
-                     " nr_detected: "<<kNN_inf.nr_detected <<" "<< 
-                     " nr_looking4: "<<kNN_inf.nr_looking4 <<"\n "; 
+                        " nr_detected: "<<kNN_inf.nr_detected <<" "<< 
+                           " nr_looking4: "<<kNN_inf.nr_looking4 <<"\n "; 
             Rcout << kNN_val << "\n";
             Rcout << kNN_ix << "\n";
          }
@@ -1203,20 +1523,20 @@ List cpp_rundtw(const NumericVector &h,
                }
             }
          }
-          
-          if(debug == 1){
-             Rcout << "j = "<< j << ", after: ";
-             Rcout << " imax: "<< kNN_inf.imax<< " "<< 
-                " which_imax: "<<kNN_inf.which_imax << " "<< 
-                   " vmax: "<<kNN_inf.vmax << " "<< 
-                      " which_vmax: "<<kNN_inf.which_vmax << " "<< 
-                         " nr_detected: "<<kNN_inf.nr_detected <<" "<< 
-                            " nr_looking4: "<<kNN_inf.nr_looking4 <<"\n "; 
-             Rcout << kNN_val << "\n";
-             Rcout << kNN_ix << "\n";
-             Rcout <<"\n\n";
-          }
-          
+         
+         if(debug == 1){
+            Rcout << "j = "<< j << ", after: ";
+            Rcout << " imax: "<< kNN_inf.imax<< " "<< 
+               " which_imax: "<<kNN_inf.which_imax << " "<< 
+                  " vmax: "<<kNN_inf.vmax << " "<< 
+                     " which_vmax: "<<kNN_inf.which_vmax << " "<< 
+                        " nr_detected: "<<kNN_inf.nr_detected <<" "<< 
+                           " nr_looking4: "<<kNN_inf.nr_looking4 <<"\n "; 
+            Rcout << kNN_val << "\n";
+            Rcout << kNN_ix << "\n";
+            Rcout <<"\n\n";
+         }
+         
          
       }
       
@@ -1225,7 +1545,9 @@ List cpp_rundtw(const NumericVector &h,
          bsfiw = ret[j];
          bsfiw_ix = j;
       }
-   }
+      
+   }//end rolling
+   
    
    List list_ret;
    list_ret["dist"] = ret;
@@ -1261,6 +1583,7 @@ List cpp_rundtw(const NumericVector &h,
 // [[Rcpp::export]]
 List cpp_rundtw_mv(const NumericMatrix &h,
                    const NumericMatrix &x,
+                   NumericVector &ret,
                    std::string step_pattern, std::string dist_method,
                    int ws, double threshold, int overlap_tol = 0, int kNNk = 0,
                    int do_norm = 1, int use_ea = 1, int use_lb = 1, int debug = 0) {
@@ -1289,7 +1612,7 @@ List cpp_rundtw_mv(const NumericMatrix &h,
    SEXP lb_SEXP = select_lb(dist_method);
    XPtr<funcPtr_lb> xpfun_lb(lb_SEXP);
    funcPtr_lb lb_fun = *xpfun_lb;
-
+   
    if(use_lb == 1){
       use_ea = 1; // lb makes no sense if the loc_threshold is not set by bsfiw
    }
@@ -1324,7 +1647,7 @@ List cpp_rundtw_mv(const NumericMatrix &h,
    NumericMatrix y (nx, nc); // normalized version of x
    NumericMatrix range(2, nc); // range vector for running min-max
    NumericMatrix cm(nh, nx); //cost matrix
-   NumericVector ret(nx-nh+1, 0.0); // return vetor
+   // NumericVector ret(nx-nh+1, 0.0); // return vetor
    IntegerVector pastcheck(nc, 0);
    
    // set initial maximum indices
@@ -1478,12 +1801,15 @@ List cpp_rundtw_mv(const NumericMatrix &h,
    // ret[0] = cpp_dtw2vec_cm(cm, i, jsup, nh);
    loc_threshold = mymin(ret[0], threshold);
    
-   bsfiw = ret[0]; // best so far in window
+   //the first bsfiw can be NaN => set it to Inf  if necessary, for proper comparisons 
+   double initial_bsfiw = mymin(ret[0], R_PosInf);
+   
+   bsfiw = initial_bsfiw; // best so far in window
    bsfiw_ix = 0; // last index of of best so far in window
    
    // fill initially kNN_val
    if(kNNk > 0){
-      kNN_val[0] = ret[0];
+      kNN_val[0] = initial_bsfiw;
       kNN_ix[0] = 0;
       
       for(k = 1; k < kNNk; k++){
@@ -1553,7 +1879,7 @@ List cpp_rundtw_mv(const NumericMatrix &h,
                counter_norm_full += 1;
                norm_exit_status = 2;
                // j_cm0 = j;
-    
+               
             }
          }
          
@@ -1591,11 +1917,11 @@ List cpp_rundtw_mv(const NumericMatrix &h,
          // loc_threshold = mymin(loc_threshold, kNN_val[kNNk-1]);
          loc_threshold = mymin(loc_threshold, kNN_inf.vmax);
       }
-    
+      
       ////////////////////////////////////////////////////////////////////////////////
       //////////////////////////////     RUN DTW BEGIN      //////////////////////////
       ////////////////////////////////////////////////////////////////////////////////
-    
+      
       if(loc_threshold <= lb){
          //  loc_threshold < lb < DTW 
          ret[j] = mynan;
@@ -1794,9 +2120,1069 @@ List cpp_rundtw_mv(const NumericMatrix &h,
 
 
 
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+// [[Rcpp::export]]
+List cpp_rundtw_znorm(const NumericVector &h,
+                      const NumericVector &x,
+                      NumericVector &ret,
+                      std::string step_pattern,
+                      int ws, double threshold, int overlap_tol = 0, int kNNk = 0,
+                      int use_ea = 1, int use_lb = 1, int debug = 0) {
+   // scan x with h and get the diff of DL(ss(x)) - DL(ss(x)-h) for each
+   // subsegment ss(x)
+   // h ... normalized
+   // x ... not normalized
+   // ws ... window size parameter for sakoe chiba window
+   // threshold ... global threshold for early abandoning dtw calc
+   //             (if threshold = Inf, then no thresholding takes place,
+   //              in that case use_ea should be 0)
+   // use_ea, use_lb ... either 0 or 1
+   
+   
+   // set step function
+   SEXP step_SEXP = selectVecStepRun(step_pattern);
+   XPtr<funcPtr_step_run> xpfun_step(step_SEXP);
+   funcPtr_step_run step_fun = *xpfun_step;
+   
+   if(use_lb == 1){
+      use_ea = 1; // lb makes no sense if the loc_threshold is not set by bsfiw
+   }
+   
+   if(use_ea == 0){
+      threshold = R_PosInf;
+   }
+   
+   int nh = h.size();
+   
+   int overlap_size = nh - overlap_tol;
+   int nx = x.size();
+   int j, k, jmax, jsup, bsfiw_ix;
+   
+   int counter_lb = 0;
+   int counter_ea = 0;
+   
+   
+   double bsfiw, loc_threshold; // local threshold
+   
+   IntegerVector kNN_ix (kNNk);
+   NumericVector kNN_val (kNNk, 0.0);
+   kNN_info kNN_inf;
+   
+   double mu0 = 0;
+   double mu = 0;
+   double mu2 = 0;
+   double sigma = 0;
+   double sigma2 = 0;
+   double z_j = 0; 
+   // NumericVector ret(nx-nh+1, 0.0); // return vetor
+   
+   
+   // set initial indices: it is possible that the first 
+   //                      some entries of ret are NaN
+   j = 0;
+   while(ret[j] != ret[j] && j < (nx-nh+1)){
+      j += 1;
+   }
+   jsup = j + nh;
+   jmax = jsup -1;
+   
+   // set initial mu and sigma
+   mu = get_mean(x, j, jmax);
+   mu2 = mu * mu;
+   sigma2 = get_sigma2(x, j, jmax, mu2);
+   sigma = sqrt(sigma2);
+   
+   
+   if(debug == 1){
+      Rcout << "j = "<< j << " ... mu: "<< mu << " "<< " sigma: "<< sigma << " sigma2: "<< sigma2 << "\n";
+   }
+   
+   
+   // get initial dtw value
+   loc_threshold = threshold;
+   double lb = 0;
+   
+   NumericMatrix tube(nh,2);
+   if(use_lb == 1){
+      cpp_set_tube(tube, h, ws);
+      lb = get_lb_znorm(tube, x, mu, sigma, loc_threshold, j, jsup);
+      
+   }else{
+      lb = -1;
+   }
+   // double get_lb(const NumericMatrix &tube, const NumericVector &x, 
+   //               int j0, int jsup){
+   
+   ////////////////////////////////////////////////////////////////////////////////
+   //////////////////////////////     1st DTW BEGIN      //////////////////////////
+   ////////////////////////////////////////////////////////////////////////////////
+   
+   
+   int iBegin = 0;
+   int iEnd = 0;
+   int nanCounter_status = 1;
+   
+   double * p1 = new double [nh];
+   double * p2 = new double [nh];
+   double * ptmp;
+   double mynan;
+   int nanCounter;
+   mynan = std::numeric_limits<double>::quiet_NaN();
+   
+   
+   if(loc_threshold <= lb){
+      //  loc_threshold < lb < DTW 
+      ret[j] = mynan;
+      counter_lb += 1;
+      
+   }else{
+      // fill the initial nh columns of the costmatrix
+      // cpp_cm(cm, y, h, j, jsup, nh);
+      // counter_cm_full += 1;
+      // last_cm_calc_j = j;
+      
+      
+      //initialize a and b with NAN
+      for(int i=0; i < nh; i++){
+         p1[i] = mynan;
+         p2[i] = mynan;
+      }
+      
+      // first column
+      z_j = (x[j] - mu)/sigma;
+      p1[0] = abs(z_j - h[0]);
+      
+      if(p1[0] > loc_threshold){
+         ret[j] = mynan;
+         counter_ea += 1;
+         
+      }else{
+         
+         iEnd = std::min(nh, ws+1);
+         for(int i=1; i < iEnd; i++){
+            
+            p1[i] = abs(z_j - h[i]) + p1[i-1];
+            // p1[i] = cm(i, j) + p1[i-1];
+            if(p1[i] > loc_threshold) p1[i] = mynan;
+         }
+         
+         for(int k = j +1 ; k < jsup; k++){
+            
+            z_j = (x[k] - mu)/sigma;
+            
+            nanCounter = 0;
+            iBegin = k-ws-j;
+            if(iBegin <= 0){
+               
+               
+               *p2 = abs(z_j - h[0]) + *(p1);
+               // *p2 = cm(0, k) + *(p1);
+               if(*(p2) > loc_threshold){
+                  *(p2) = mynan;
+                  nanCounter ++;
+               }
+               iBegin = 1;
+               
+            }else if (iBegin == 1){
+               nanCounter = 1;
+               *(p2+iBegin -1) = mynan;//must not be available for finding the cheapest path
+            }else{
+               nanCounter = iBegin;
+               *(p2+iBegin -1) = mynan;//must not be available for finding the cheapest path
+               *(p2+iBegin -2) = mynan;//must not be available for finding the cheapest path
+            }
+            
+            iEnd   = k+ws+1-j;
+            if(iEnd >= nh){
+               iEnd = nh;
+            }else{
+               *(p1+iEnd) = mynan;//must not be available for finding the cheapest path
+            }
+            
+            
+            for (int i = iBegin; i < iEnd; i++){
+               *(p2+i) =  step_fun(*(p2+i-1), *(p1+i-1), *(p1+i), abs(z_j - h[i]));
+               // *(p2+i) =  step_fun(*(p2+i-1), *(p1+i-1), *(p1+i), cm(i,k));
+               if((*(p2+i) > loc_threshold) | (*(p2+i) != *(p2+i))){
+                  *(p2+i) = mynan;
+                  nanCounter ++;
+               }
+            }
+            
+            if(nanCounter == nh) {
+               nanCounter_status = 0;
+               break;
+            }
+            ptmp=p1;
+            p1 = p2;
+            p2 = ptmp;
+         }
+         
+         if(nanCounter_status == 1){
+            ret[j] = *(p1+nh-1);//p1[nx-1]
+         } else{
+            ret[j] = mynan;
+            counter_ea += 1;
+         }
+      }
+      
+   }// lower bounding if clause
+   
+   // Rcout << loc_threshold <<" ... "<< lb << " ... " << ret[j]<< "\n";
+   
+   ////////////////////////////////////////////////////////////////////////////////
+   //////////////////////////////     1st DTW END        //////////////////////////
+   ////////////////////////////////////////////////////////////////////////////////
+   
+   
+   // ret[0] = cpp_dtw2vec_cm_ws_ea(cm, ws, loc_threshold, j, jsup, nh);
+   // ret[0] = cpp_dtw2vec_cm(cm, i, jsup, nh);
+   loc_threshold = mymin(ret[0], threshold);
+   
+   // ret[0] can be NaN => in this case set bsfiw to Inf, for proper comparisons,
+   // since comparisons with NaN are always FALSE
+   double initial_bsfiw = mymin(ret[0], R_PosInf);
+   
+   // fill initially kNN_val
+   if(kNNk > 0){
+      kNN_val[0] = initial_bsfiw;
+      kNN_ix[0] = 0;
+      
+      for(k = 1; k < kNNk; k++){
+         kNN_val[k] = R_PosInf;
+         // kNN_val[k] = mynan;
+         kNN_ix[k] = -99;
+      }
+      kNN_inf.imax = 0;
+      kNN_inf.which_imax = 0;
+      kNN_inf.vmax = R_PosInf; //ret[0];
+      // kNN_inf.vmax = ret[0];
+      
+      kNN_inf.nr_detected = 1;
+      kNN_inf.nr_looking4 = kNNk;
+      if(kNN_inf.nr_detected < kNN_inf.nr_looking4){
+         kNN_inf.which_vmax = -99;   
+      }else{
+         kNN_inf.which_vmax = 0;
+      }
+   }
+   
+   bsfiw = initial_bsfiw; // best so far in window
+   bsfiw_ix = 0; // last index of best so far in window
+   
+   
+   // --------------------------------------start rolling----------------------------
+   int j_prev_norm = 0;
+   j = 1;
+   while(j < (nx-nh+1)){
+   // for(j=1; j < (nx-nh+1); j++){
+      
+      // for lot-mode: test if the current value should be calculated 
+      while(ret[j] != ret[j] && j < (nx-nh+1)){
+         j += 1;
+      }
+      
+      jsup = j + nh; // the frontrunner index +1
+      jmax = jsup -1; // the index of the frontrunner
+      
+      
+      if(j_prev_norm == j-1){
+         // update the discretization of the new window
+         mu0 = mu;
+         mu += (x[jmax] - x[j-1])/nh;
+         sigma2 += (x[jmax] * x[jmax] - x[j-1] * x[j-1])/(nh-1) + 
+            (mu0 * mu0 - mu * mu) * nh/(nh-1);
+         sigma = sqrt(sigma2);
+         
+      }else{
+         //  discretization of the new window from scratch
+         mu0 = mu;
+         mu = get_mean(x, j, jmax);
+         mu2 = mu * mu;
+         sigma2 = get_sigma2(x, j, jmax, mu2);
+         sigma = sqrt(sigma2);
+      }
+      j_prev_norm = j;
+      
+      if(debug == 1){
+         Rcout << "j = "<< j << " ... mu: "<< mu << " "<< " sigma: "<< sigma << " sigma2: "<< sigma2 << "\n";
+      }
+      
+      if((j - bsfiw_ix) >= overlap_size){
+         bsfiw = threshold;
+         bsfiw_ix = j;
+      }
+      
+      
+      
+      //  bsfiw serves as threshold
+      if(use_ea == 1){
+         loc_threshold = mymin(bsfiw, threshold);
+      }else{
+         loc_threshold = threshold;
+      }
+      
+      //  Lower bounding
+      if(use_lb == 1){
+         lb = get_lb_znorm(tube, x, mu, sigma, loc_threshold, j, jsup);
+      }else{
+         lb = -1;
+      }
+      
+      if(kNNk > 0){
+         // update local threshold, set it to the k-nearest neighbor
+         // loc_threshold = mymin(loc_threshold, kNN_val[kNNk-1]);
+         loc_threshold = mymin(loc_threshold, kNN_inf.vmax);
+      }
+      
+      
+      ////////////////////////////////////////////////////////////////////////////////
+      //////////////////////////////     RUN DTW BEGIN      //////////////////////////
+      ////////////////////////////////////////////////////////////////////////////////
+      if(loc_threshold <= lb){
+         //  loc_threshold < lb < DTW 
+         ret[j] = mynan;
+         counter_lb += 1;
+         
+      }else{
+         
+         nanCounter_status = 1;
+         
+         //initialize a and b with NAN
+         for(int i=0; i < nh; i++){
+            p1[i] = mynan;
+            p2[i] = mynan;
+         }
+         
+         // first column
+         z_j = (x[j] - mu)/sigma;
+         p1[0] = abs(z_j - h[0]);
+         
+         if(p1[0] > loc_threshold){
+            ret[j] = mynan;
+            counter_ea += 1;
+            
+         }else{
+            
+            iEnd   = std::min(nh, ws+1);
+            for(int i=1; i < iEnd; i++){
+               
+               p1[i] = abs(z_j - h[i]) + p1[i-1];
+               // p1[i] = cm(i, j) + p1[i-1];
+               if(p1[i] > loc_threshold) p1[i] = mynan;
+            }
+            
+            for(int k = j +1 ; k < jsup; k++){
+               
+               z_j = (x[k] - mu)/sigma;
+               
+               nanCounter = 0;
+               iBegin = k-ws-j;
+               if(iBegin <= 0){
+                  // *p2 = cm(0, k) + *(p1);
+                  *p2 = abs(z_j - h[0]) + *(p1);
+                  if(*(p2) > loc_threshold){
+                     *(p2) = mynan;
+                     nanCounter ++;
+                  }
+                  iBegin = 1;
+                  
+               }else if (iBegin == 1){
+                  nanCounter = 1;
+                  *(p2+iBegin -1) = mynan;//must not be available for finding the cheapest path
+               }else{
+                  nanCounter = iBegin;
+                  *(p2+iBegin -1) = mynan;//must not be available for finding the cheapest path
+                  *(p2+iBegin -2) = mynan;//must not be available for finding the cheapest path
+               }
+               
+               iEnd   = k+ws+1-j;
+               if(iEnd >= nh){
+                  iEnd = nh;
+               }else{
+                  *(p1+iEnd) = mynan;//must not be available for finding the cheapest path
+               }
+               
+               
+               for (int i = iBegin; i < iEnd; i++){
+                  *(p2+i) =  step_fun(*(p2+i-1), *(p1+i-1), *(p1+i), abs(z_j - h[i]));
+                  if((*(p2+i) > loc_threshold) | (*(p2+i) != *(p2+i))){
+                     *(p2+i) = mynan;
+                     nanCounter ++;
+                  }
+               }
+               
+               if(nanCounter == nh) {
+                  nanCounter_status = 0;
+                  break;
+               }
+               ptmp=p1;
+               p1 = p2;
+               p2 = ptmp;
+            }
+            
+            if(nanCounter_status == 1){
+               ret[j] = *(p1+nh-1);//p1[nx-1]
+               // Rcout << ret[j] << " ";
+            } else{
+               ret[j] = mynan;
+               counter_ea += 1;
+            }
+         }
+         
+         
+      }// lower bound if clause
+      
+      // Rcout << loc_threshold <<" ... "<< lb << " ... " << ret[j]<< "\n";
+      
+      ////////////////////////////////////////////////////////////////////////////////
+      //////////////////////////////     RUN DTW END        //////////////////////////
+      ////////////////////////////////////////////////////////////////////////////////
+      
+      
+      // ret[j] = cpp_dtw2vec_cm_ws_ea(cm, ws, loc_threshold, j, jsup, nh);
+      // ret[i] = cpp_dtw2vec_cm(cm, j, jsup, nh);
+      
+      
+      
+      
+      if(kNNk > 0){
+         // update set of k nearest neighbors if new value is smaller than 
+         // k-best value so far
+         
+         if(debug == 1){
+            Rcout << "j = "<< j << ", before: ";
+            Rcout << " imax: "<< kNN_inf.imax<< " "<< 
+               " which_imax: "<<kNN_inf.which_imax << " "<< 
+                  " vmax: "<<kNN_inf.vmax << " "<< 
+                     " which_vmax: "<<kNN_inf.which_vmax << " "<< 
+                        " nr_detected: "<<kNN_inf.nr_detected <<" "<< 
+                           " nr_looking4: "<<kNN_inf.nr_looking4 <<"\n "; 
+            Rcout << kNN_val << "\n";
+            Rcout << kNN_ix << "\n";
+         }
+         
+         
+         
+         if(ret[j] == ret[j]){ // if not nan
+            if(j < kNN_inf.imax + overlap_size){
+               // there is an overlap
+               if(ret[j] < kNN_val[kNN_inf.which_imax]){
+                  // because of overlap the new value needs to be smaller
+                  // than the most recent best-sofar-value => so we replace
+                  // this value with the new one
+                  kick_imax_kNN(kNN_val, kNN_ix, kNN_inf, ret[j], j);
+                  
+                  if(debug == 1){
+                     Rcout << "---kick imax---\n";
+                  }
+               }
+            }else{
+               // no overlap
+               if(ret[j] < kNN_inf.vmax){
+                  // new value needs to be at least smaller 
+                  // than the farthest nearest neighbor
+                  // update_kNN(kNN_val, kNN_ix, ret[j], j);   
+                  kick_vmax_kNN(kNN_val, kNN_ix, kNN_inf, ret[j], j);
+                  
+                  if(debug == 1){
+                     Rcout << "---kick vmax---\n";
+                  }
+               }
+            }
+         }
+         
+         if(debug == 1){
+            Rcout << "j = "<< j << ", after: ";
+            Rcout << " imax: "<< kNN_inf.imax<< " "<< 
+               " which_imax: "<<kNN_inf.which_imax << " "<< 
+                  " vmax: "<<kNN_inf.vmax << " "<< 
+                     " which_vmax: "<<kNN_inf.which_vmax << " "<< 
+                        " nr_detected: "<<kNN_inf.nr_detected <<" "<< 
+                           " nr_looking4: "<<kNN_inf.nr_looking4 <<"\n "; 
+            Rcout << kNN_val << "\n";
+            Rcout << kNN_ix << "\n";
+            Rcout <<"\n\n";
+         }
+         
+         
+      }
+      
+      
+      if(ret[j] < bsfiw){
+         bsfiw = ret[j];
+         bsfiw_ix = j;
+      }
+      
+      j += 1;
+   }//end rolling
+   
+   
+   List list_ret;
+   list_ret["dist"] = ret;
+   IntegerVector counter(7);
+   counter[0] = 0;
+   counter[1] = 0;
+   counter[2] = 0;
+   counter[3] = 0;
+   counter[4] = 0;
+   counter[5] = counter_ea;
+   counter[6] = counter_lb;
+   list_ret["counter"] = counter;
+   
+   if(kNNk > 0){
+      // final reverse minimum search of ret:
+      // up to here the kNN values and indices dealt as additional 
+      // local threshold, but since the possibility of protracting
+      // a local minimum, a final reverse check is necessary:
+      
+      list_ret["all_best_indices"] = cpp_kNN_rev(ret, overlap_size, debug);
+   }
+   delete[] p1;
+   delete[] p2;
+   
+   return list_ret;
+}
+
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+// [[Rcpp::export]]
+List cpp_rundtw_znorm_mv(const NumericMatrix &h,
+                         const NumericMatrix &x,
+                         NumericVector &ret,
+                         std::string step_pattern, std::string dist_method,
+                         int ws, double threshold, int overlap_tol = 0, int kNNk = 0,
+                         int use_ea = 1, int use_lb = 1, int debug = 0) {
+   
+   // scan x with h and get the diff of DL(ss(x)) - DL(ss(x)-h) for each
+   // subsegment ss(x)
+   // h ... normalized
+   // x ... not normalized
+   // ws ... window size parameter for sakoe chiba window
+   // threshold ... global threshold for early abandoning dtw calc
+   //             (if threshold = Inf, then no thresholding takes place,
+   //              in that case use_ea should be 0)
+   // do_norm, use_ea, use_lb ... either 0 or 1
+   
+   // set dist_fun
+   SEXP dist_SEXP = select_dist_mv_z(dist_method);
+   XPtr<funcPtr_dist_mv_z> xpfun_dist_mv_z(dist_SEXP);
+   funcPtr_dist_mv_z dist_fun = *xpfun_dist_mv_z;
+   
+   // set step function
+   SEXP step_SEXP = selectVecStepRun(step_pattern);
+   XPtr<funcPtr_step_run> xpfun_step(step_SEXP);
+   funcPtr_step_run step_fun = *xpfun_step;
+   
+   // set lb function
+   SEXP lb_SEXP = select_lb_z(dist_method);
+   XPtr<funcPtr_lb_z> xpfun_lb_z(lb_SEXP);
+   funcPtr_lb_z lb_fun = *xpfun_lb_z;
+   
+   if(use_lb == 1){
+      use_ea = 1; // lb makes no sense if the loc_threshold is not set by bsfiw
+   }
+   
+   if(use_ea == 0){
+      threshold = R_PosInf;
+   }
+   
+   int nh = h.nrow();
+   int overlap_size = nh - overlap_tol;
+   int nx = x.nrow();
+   int nc = x.ncol();
+   int k, i, j,c, jmax, jsup, bsfiw_ix;
+   int counter_lb = 0;
+   int counter_ea = 0;
+   
+   double bsfiw, loc_threshold; // local threshold
+   double lb = 0;
+   double mu0 = 0;
+   
+   IntegerVector kNN_ix (kNNk);
+   NumericVector kNN_val (kNNk, 0.0);
+   kNN_info kNN_inf;
+   
+   NumericVector sigma2(nc); 
+   NumericVector sigma(nc); 
+   NumericVector mu(nc); 
+   // NumericVector ret(nx-nh+1, 0.0); // return vetor
+   
+   
+   // set initial maximum indices
+   j = 0;
+   while(ret[j] != ret[j] && j < (nx-nh+1)){
+      // if ret[j] is NaN, then ret[j] != ret[j] => these seubsegments 
+      // are artifificial and emerge due to time series concatenation in
+      // lot_mode
+      j += 1;
+   }
+   jsup = j + nh;
+   jmax = jsup -1;
+   
+   
+   // set initial mu and sigma
+   // for( c=0; c<nc; c++){
+   //    tmp = 0;
+   //    for( i = 0; i < nh; i++){
+   //       tmp += x(i,c);
+   //    }
+   //    mu[c] = tmp/(nh);
+   //    mu2 = mu[c] * mu[c];
+   //    
+   //    tmp = 0;
+   //    for( i = 0; i < nh; i++){
+   //       tmp += x(i,c) * x(i,c);
+   //    }
+   //    sigma2[c] = tmp/(nh-1) - mu2 * nh/(nh-1);
+   //    sigma[c] = sqrt(sigma2[c]);
+   // }
+   
+   set_mean_sigma_mv(mu, sigma, sigma2, x, j, jmax, nc);
+   if(debug == 1){
+      for(int c = 0; c<nc; c++){
+         Rcout << "j = "<< j << " ... mu: "<< mu[c] << " "<< " sigma: "<< sigma[c] << " sigma2: "<< sigma2[c] << "\n";   
+      }
+   }
+   
+   // get initial dtw value
+   loc_threshold = threshold;
+   
+   NumericMatrix tube(nh, 2*nc);
+   if(use_lb == 1){
+      cpp_set_tube_mv(tube, h, ws);
+      lb = lb_fun(tube, x, mu, sigma, loc_threshold, j, jsup, nc);
+      
+   }else{
+      lb = -1;
+   }
+   
+   ////////////////////////////////////////////////////////////////////////////////
+   //////////////////////////////     1st DTW BEGIN      //////////////////////////
+   ////////////////////////////////////////////////////////////////////////////////
+   
+   
+   int iBegin = 0;
+   int iEnd = 0;
+   int nanCounter_status = 1;
+   
+   double * p1 = new double [nh];
+   double * p2 = new double [nh];
+   double * ptmp;
+   double mynan;
+   int nanCounter;
+   mynan = std::numeric_limits<double>::quiet_NaN();
+   
+   
+   
+   if(loc_threshold <= lb){
+      //  loc_threshold < lb < DTW 
+      ret[j] = mynan;
+      counter_lb += 1;
+      
+   }else{							   
+      
+      // fill the initial nh columns of the costmatrix
+      // cpp_cm1_mv(cm, y, h, j, jsup, nh, nc);
+      // cm_fun(cm, y, h, j, jsup, nh, nc);
+      
+      //initialize a and b with NAN
+      for( i=0; i < nh; i++){
+         p1[i] = mynan;
+         p2[i] = mynan;
+      }
+      
+      // first column
+      // p1[0] = cm(0, j);
+      p1[0] = dist_fun( h, x, mu, sigma, 0, j, nc);
+      if(p1[0] > loc_threshold){
+         ret[j] = mynan;
+         
+         counter_ea += 1;
+      }else{
+         
+         iEnd   = std::min(nh, ws+1);
+         for( i=1; i < iEnd; i++){
+            p1[i] = dist_fun( h, x, mu, sigma, i, j, nc) + p1[i-1];
+            // p1[i] = cm(i, j) + p1[i-1];
+            if(p1[i] > loc_threshold) p1[i] = mynan;
+         }
+         
+         for( k = j +1 ; k < jsup; k++){
+            nanCounter = 0;
+            iBegin = k-ws-j;
+            if(iBegin <= 0){
+               *p2 = dist_fun( h, x, mu, sigma, 0, k, nc) + *(p1);
+               // *p2 = cm(0, k) + *(p1);
+               if(*(p2) > loc_threshold){
+                  *(p2) = mynan;
+                  nanCounter ++;
+               }
+               iBegin = 1;
+               
+            }else if (iBegin == 1){
+               nanCounter = 1;
+               *(p2+iBegin -1) = mynan;//must not be available for finding the cheapest path
+            }else{
+               nanCounter = iBegin;
+               *(p2+iBegin -1) = mynan;//must not be available for finding the cheapest path
+               *(p2+iBegin -2) = mynan;//must not be available for finding the cheapest path
+            }
+            
+            iEnd   = k+ws+1-j;
+            if(iEnd >= nh){
+               iEnd = nh;
+            }else{
+               *(p1+iEnd) = mynan;//must not be available for finding the cheapest path
+            }
+            
+            for ( i = iBegin; i < iEnd; i++){
+               *(p2+i) =  step_fun(*(p2+i-1), *(p1+i-1), *(p1+i), dist_fun( h, x, mu, sigma, i, k, nc));
+               // *(p2+i) =  step_fun(*(p2+i-1), *(p1+i-1), *(p1+i), cm(i,k));
+               if((*(p2+i) > loc_threshold) | (*(p2+i) != *(p2+i))){
+                  *(p2+i) = mynan;
+                  nanCounter ++;
+               }
+            }
+            
+            if(nanCounter == nh) {
+               nanCounter_status = 0;
+               break;
+            }
+            ptmp=p1;
+            p1 = p2;
+            p2 = ptmp;
+         }
+         
+         if(nanCounter_status == 1){
+            ret[j] = *(p1+nh-1);//p1[nx-1]
+         } else{
+            ret[j] = mynan;
+            counter_ea += 1;
+            
+         }
+      }
+   }// lower bounding if clause  
+   
+   
+   
+   
+   ////////////////////////////////////////////////////////////////////////////////
+   //////////////////////////////     1st DTW END        //////////////////////////
+   ////////////////////////////////////////////////////////////////////////////////
+   
+   
+   // ret[0] = cpp_dtw2vec_cm_ws_ea(cm, ws, loc_threshold, j, jsup, nh);
+   // ret[0] = cpp_dtw2vec_cm(cm, i, jsup, nh);
+   loc_threshold = mymin(ret[0], threshold);
+   
+   //the first bsfiw can be NaN => set it to Inf  if necessary, for proper comparisons 
+   double initial_bsfiw = mymin(ret[0], R_PosInf);
+   
+   bsfiw = initial_bsfiw; // best so far in window
+   bsfiw_ix = 0; // last index of of best so far in window
+   
+   // fill initially kNN_val
+   if(kNNk > 0){
+      kNN_val[0] = initial_bsfiw;
+      kNN_ix[0] = 0;
+      
+      for(k = 1; k < kNNk; k++){
+         kNN_val[k] = R_PosInf;
+         // kNN_val[k] = mynan;
+         kNN_ix[k] = -99;
+      }
+      kNN_inf.imax = 0;
+      kNN_inf.which_imax = 0;
+      kNN_inf.vmax = R_PosInf; //ret[0];
+      // kNN_inf.vmax = ret[0];
+      
+      kNN_inf.nr_detected = 1;
+      kNN_inf.nr_looking4 = kNNk;
+      if(kNN_inf.nr_detected < kNN_inf.nr_looking4){
+         kNN_inf.which_vmax = -99;   
+      }else{
+         kNN_inf.which_vmax = 0;
+      }
+   }
+   
+   
+   // --------------------------------------start rolling----------------------------
+   int j_prev_norm = 0;
+   j = 1;
+   while(j < (nx-nh+1)){
+      // for(j=1; j < (nx-nh+1); j++){
+      
+      // for lot-mode: test if the current value should be calculated 
+      while(ret[j] != ret[j] && j < (nx-nh+1)){
+         j += 1;
+      }
+      
+      jsup = j + nh; // the frontrunner index +1
+      jmax = jsup -1; // the index of the frontrunner
+      
+      if(j_prev_norm == j-1){
+         // update mu and sigma
+         for( c = 0; c < nc; c++){
+            mu0 = mu[c];
+            mu[c] += ( x(jmax, c) - x(j-1, c) )/nh;
+            sigma2[c] += (x(jmax, c) * x(jmax, c) - x(j-1, c) * x(j-1, c) )/(nh-1) + 
+               (mu0 * mu0 - mu[c] * mu[c]) * nh/(nh-1);
+            sigma[c] = sqrt(sigma2[c]);
+         }
+         
+      }else{
+         //  mu and sigma from scratch
+         set_mean_sigma_mv(mu, sigma, sigma2, x, j, jmax, nc);
+      }
+      if(debug == 1){
+         for(int c = 0; c<nc; c++){
+            Rcout << "j = "<< j << " ... mu: "<< mu[c] << " "<< " sigma: "<< sigma[c] << " sigma2: "<< sigma2[c] << "\n";   
+         }
+      }
+      j_prev_norm = j;
+      
+      
+      if((j - bsfiw_ix) >= overlap_size){
+         bsfiw = threshold;
+         bsfiw_ix = j;
+      }
+      
+      
+      //  bsfiw serves as threshold
+      if(use_ea == 1){
+         loc_threshold = mymin(bsfiw, threshold);
+      }else{
+         loc_threshold = threshold;
+      }
+      
+      //  Lower bounding
+      if(use_lb == 1){
+         lb = lb_fun(tube, x, mu, sigma, loc_threshold, j, jsup, nc);
+      }else{
+         lb = -1;
+      }
+      
+      
+      if(kNNk > 0){
+         // update local threshold, set it to the k-nearest neighbor
+         // loc_threshold = mymin(loc_threshold, kNN_val[kNNk-1]);
+         loc_threshold = mymin(loc_threshold, kNN_inf.vmax);
+      }
+      
+      ////////////////////////////////////////////////////////////////////////////////
+      //////////////////////////////     RUN DTW BEGIN      //////////////////////////
+      ////////////////////////////////////////////////////////////////////////////////
+      
+      if(loc_threshold <= lb){
+         //  loc_threshold < lb < DTW 
+         ret[j] = mynan;
+         counter_lb += 1;
+         
+      }else{
+         
+         nanCounter_status = 1;
+         
+         //initialize a and b with NAN
+         for( i=0; i < nh; i++){
+            p1[i] = mynan;
+            p2[i] = mynan;
+         }
+         
+         // first column
+         // p1[0] = cm(0, j);
+         p1[0] = dist_fun( h, x, mu, sigma, 0, j, nc);
+         if(p1[0] > loc_threshold){
+            ret[j] = mynan;
+            
+            counter_ea += 1;
+         }else{
+            
+            iEnd   = std::min(nh, ws+1);
+            for( i=1; i < iEnd; i++){
+               p1[i] = dist_fun( h, x, mu, sigma, i, j, nc) + p1[i-1];
+               // p1[i] = cm(i, j) + p1[i-1];
+               if(p1[i] > loc_threshold) p1[i] = mynan;
+            }
+            
+            for( k = j +1 ; k < jsup; k++){
+               nanCounter = 0;
+               iBegin = k-ws-j;
+               if(iBegin <= 0){
+                  *p2 = dist_fun(h, x, mu, sigma, 0, k, nc) + *(p1);
+                  // *p2 = cm(0, k) + *(p1);
+                  if(*(p2) > loc_threshold){
+                     *(p2) = mynan;
+                     nanCounter ++;
+                  }
+                  iBegin = 1;
+                  
+               }else if (iBegin == 1){
+                  nanCounter = 1;
+                  *(p2+iBegin -1) = mynan;//must not be available for finding the cheapest path
+               }else{
+                  nanCounter = iBegin;
+                  *(p2+iBegin -1) = mynan;//must not be available for finding the cheapest path
+                  *(p2+iBegin -2) = mynan;//must not be available for finding the cheapest path
+               }
+               
+               iEnd   = k+ws+1-j;
+               if(iEnd >= nh){
+                  iEnd = nh;
+               }else{
+                  *(p1+iEnd) = mynan;//must not be available for finding the cheapest path
+               }
+               
+               for ( i = iBegin; i < iEnd; i++){
+                  *(p2+i) =  step_fun(*(p2+i-1), *(p1+i-1), *(p1+i), dist_fun(h, x, mu, sigma, i, k, nc));
+                  // *(p2+i) =  step_fun(*(p2+i-1), *(p1+i-1), *(p1+i), cm(i,k));
+                  if((*(p2+i) > loc_threshold) | (*(p2+i) != *(p2+i))){
+                     *(p2+i) = mynan;
+                     nanCounter ++;
+                  }
+               }
+               
+               if(nanCounter == nh) {
+                  nanCounter_status = 0;
+                  break;
+               }
+               ptmp=p1;
+               p1 = p2;
+               p2 = ptmp;
+            }
+            
+            if(nanCounter_status == 1){
+               ret[j] = *(p1+nh-1);//p1[nx-1]
+               
+            } else{
+               ret[j] = mynan;
+               counter_ea += 1;
+               
+            }
+         }
+      }// lower bound if clause
+      
+      ////////////////////////////////////////////////////////////////////////////////
+      //////////////////////////////     RUN DTW END        //////////////////////////
+      ////////////////////////////////////////////////////////////////////////////////
+      
+      
+      if(kNNk > 0){
+         // update set of k nearest neighbors if new value is smaller than 
+         // k-best value so far
+         
+         if(debug == 1){
+            Rcout << "j = "<< j << ", before: ";
+            Rcout << " imax: "<< kNN_inf.imax<< " "<< 
+               " which_imax: "<<kNN_inf.which_imax << " "<< 
+                  " vmax: "<<kNN_inf.vmax << " "<< 
+                     " which_vmax: "<<kNN_inf.which_vmax << " "<< 
+                        " nr_detected: "<<kNN_inf.nr_detected <<" "<< 
+                           " nr_looking4: "<<kNN_inf.nr_looking4 <<"\n "; 
+            Rcout << kNN_val << "\n";
+            Rcout << kNN_ix << "\n";
+         }
+         
+         if(ret[j] == ret[j]){ // if not nan
+            if(j < kNN_inf.imax + overlap_size){
+               // there is an overlap
+               if(ret[j] < kNN_val[kNN_inf.which_imax]){
+                  // because of overlap the new value needs to be smaller
+                  // than the most recent best-sofar-value => so we replace
+                  // this value with the new one
+                  kick_imax_kNN(kNN_val, kNN_ix, kNN_inf, ret[j], j);
+                  
+                  if(debug == 1){
+                     Rcout << "---kick imax---\n";
+                  }
+               }
+            }else{
+               // no overlap
+               if(ret[j] < kNN_inf.vmax){
+                  // new value needs to be at least smaller 
+                  // than the farthest nearest neighbor
+                  // update_kNN(kNN_val, kNN_ix, ret[j], j);   
+                  kick_vmax_kNN(kNN_val, kNN_ix, kNN_inf, ret[j], j);
+                  
+                  if(debug == 1){
+                     Rcout << "---kick vmax---\n";
+                  }
+               }
+            }
+         }
+         
+         if(debug == 1){
+            Rcout << "j = "<< j << ", after: ";
+            Rcout << " imax: "<< kNN_inf.imax<< " "<< 
+               " which_imax: "<<kNN_inf.which_imax << " "<< 
+                  " vmax: "<<kNN_inf.vmax << " "<< 
+                     " which_vmax: "<<kNN_inf.which_vmax << " "<< 
+                        " nr_detected: "<<kNN_inf.nr_detected <<" "<< 
+                           " nr_looking4: "<<kNN_inf.nr_looking4 <<"\n "; 
+            Rcout << kNN_val << "\n";
+            Rcout << kNN_ix << "\n";
+            Rcout <<"\n\n";
+         }
+      }
+      
+      // ret[j] = cpp_dtw2vec_cm_ws_ea(cm, ws, loc_threshold, j, jsup, nh);
+      // ret[i] = cpp_dtw2vec_cm(cm, j, jsup, nh);
+      
+      if(ret[j] < bsfiw){
+         bsfiw = ret[j];
+         bsfiw_ix = j;
+      }
+      
+      j += 1;
+   }// end rolling
+   
+   List list_ret;
+   list_ret["dist"] = ret;
+   IntegerVector counter(7);
+   counter[0] = 0;
+   counter[1] = 0;
+   counter[2] = 0;
+   counter[3] = 0;
+   counter[4] = 0;
+   counter[5] = counter_ea;
+   counter[6] = counter_lb;
+   
+   list_ret["counter"] = counter;
+   
+   if(kNNk > 0){
+      //TODO: final reverse minimum search of ret?!
+      // list_ret["knn_values"] = kNN_val;
+      // list_ret["knn_indices"] = kNN_ix;
+      list_ret["all_best_indices"] = cpp_kNN_rev(ret, overlap_size, debug);
+   }
+   
+   delete[] p1;
+   delete[] p2;
+   
+   return list_ret;
+}
+
+
+
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
 double Rcode(double a){
    return a * 1;
 }
+
+
+
+
 
 
 // lessons learned: 
@@ -1805,8 +3191,8 @@ double Rcode(double a){
 //         instead of using function calls or using "inline"
 //       + using the function names of cpp_cm1_mv and mystep_symmetric1
 //         directly instead of function pointer
-   
-   
+
+
 /*** R
 
 # test the kNN
@@ -1850,7 +3236,7 @@ if(FALSE){
    
    
    tmp <- cpp_rundtw(hnorm, x, sp, ws = 10, threshold = Inf, kNNk = k,
-              do_norm = 1, use_ea = 1, use_lb = 1, debug = 0)
+                     do_norm = 1, use_ea = 1, use_lb = 1, debug = 0)
    sort(tmp$knn_indices)
    
    sort( goal(hnorm, x, sp, ws=10, kNNk = k) )
@@ -1859,7 +3245,7 @@ if(FALSE){
    zz <- file("build_ignore/mySink.Rout", open = "wt"); sink(zz); sink(zz, type = "message")
    cpp_rundtw(hnorm, x, sp, ws = 10, threshold = Inf, kNNk = 3,
               do_norm = 1, use_ea = 1, use_lb = 1, debug = 1)
-      
+   
    sink();close(zz);
    closeAllConnections()
    
@@ -1898,18 +3284,18 @@ if(FALSE){
    
    tmp <- cpp_rundtw(hnorm, x, sp, ws = 10, threshold = Inf, kNNk = k,
                      do_norm = 1, use_ea = 1, use_lb = 1, debug = 0)
-      sort(tmp$knn_indices)
-      
-      sort( goal(hnorm, x, sp, ws=10, kNNk = k) )
-      
-      
-      zz <- file("build_ignore/mySink.Rout", open = "wt"); sink(zz); sink(zz, type = "message")
-         cpp_rundtw(hnorm, x, sp, ws = 10, threshold = Inf, kNNk = 3,
-                    do_norm = 1, use_ea = 1, use_lb = 1, debug = 1)
-         
-         sink();close(zz);
-         closeAllConnections()
-            
+   sort(tmp$knn_indices)
+   
+   sort( goal(hnorm, x, sp, ws=10, kNNk = k) )
+   
+   
+   zz <- file("build_ignore/mySink.Rout", open = "wt"); sink(zz); sink(zz, type = "message")
+   cpp_rundtw(hnorm, x, sp, ws = 10, threshold = Inf, kNNk = 3,
+              do_norm = 1, use_ea = 1, use_lb = 1, debug = 1)
+   
+   sink();close(zz);
+   closeAllConnections()
+   
 }
 
 
@@ -1919,7 +3305,7 @@ if(FALSE){
    sp <- "symmetric1"
    WS <- NULL
    noise <- function(nr, nc) matrix(cumsum(rnorm(nr*nc)), nrow =nr, ncol=nc)
-# deform <- function(x) (x + rnorm(1, 0, 100)) * abs(rnorm(1, 0, 100))
+   # deform <- function(x) (x + rnorm(1, 0, 100)) * abs(rnorm(1, 0, 100))
    
    nx <- 500
    nh <- 50
@@ -1972,13 +3358,13 @@ if(FALSE){
 
 
 if(FALSE){
-dm <- "norm1"
-sp <- "symmetric1"
-WS <- NULL
-noise <- function(nr, nc) matrix(cumsum(rnorm(nr*nc)), nrow =nr, ncol=nc)
-# deform <- function(x) (x + rnorm(1, 0, 100)) * abs(rnorm(1, 0, 100))
+   dm <- "norm1"
+   sp <- "symmetric1"
+   WS <- NULL
+   noise <- function(nr, nc) matrix(cumsum(rnorm(nr*nc)), nrow =nr, ncol=nc)
+   # deform <- function(x) (x + rnorm(1, 0, 100)) * abs(rnorm(1, 0, 100))
    
-# speed comparison
+   # speed comparison
    foo_2vec <- function(hnorm, x, ws){
       nh <- nrow(hnorm)
       nx <- nrow(x)
@@ -1988,34 +3374,34 @@ noise <- function(nr, nc) matrix(cumsum(rnorm(nr*nc)), nrow =nr, ncol=nc)
                          step_pattern = sp, ws = ws)$dist
       })
    }
-
-foo_cm <- function(hnorm, x, ws){
-   nh <- nrow(hnorm)
-   nx <- nrow(x)
-   sapply(1:(nx-nh+1), function(i){
-      y <- IncDTW::norm(x[i:(i+nh-1), , drop=F], type = "01")
-      cm_tmp <- IncDTW::cm(y, hnorm, dist_method = dm, ws = ws)
-      IncDTW::dtw2vec(cm_tmp, C = "cm", step_pattern = sp, ws = ws)$dist
-   })
-}
-
-nx <- 500
-nh <- 30
-nfits <- 5
-
-nn <- nx - nfits * nh# nnoise
-nn <- nn/nfits
-
-h <- noise(nh, nc)
-hnorm <- IncDTW::norm( h , type="01")
-x <- matrix(numeric(), ncol=nc)
-for(i in 1:nfits){
-   x <- rbind(x, noise(nn, nc), h)
-}
-
-
-microbenchmark::microbenchmark(cpp_rundtw_mv(h, x,sp, dm, 100, Inf, 1),
-                               cpp_rundtw_mv_test(h, x, 100, Inf, 1),
-                               times = 30)
+   
+   foo_cm <- function(hnorm, x, ws){
+      nh <- nrow(hnorm)
+      nx <- nrow(x)
+      sapply(1:(nx-nh+1), function(i){
+         y <- IncDTW::norm(x[i:(i+nh-1), , drop=F], type = "01")
+         cm_tmp <- IncDTW::cm(y, hnorm, dist_method = dm, ws = ws)
+         IncDTW::dtw2vec(cm_tmp, C = "cm", step_pattern = sp, ws = ws)$dist
+      })
+   }
+   
+   nx <- 500
+   nh <- 30
+   nfits <- 5
+   
+   nn <- nx - nfits * nh# nnoise
+   nn <- nn/nfits
+   
+   h <- noise(nh, nc)
+   hnorm <- IncDTW::norm( h , type="01")
+   x <- matrix(numeric(), ncol=nc)
+   for(i in 1:nfits){
+      x <- rbind(x, noise(nn, nc), h)
+   }
+   
+   
+   microbenchmark::microbenchmark(cpp_rundtw_mv(h, x,sp, dm, 100, Inf, 1),
+                                  cpp_rundtw_mv_test(h, x, 100, Inf, 1),
+                                  times = 30)
 }
 */

@@ -35,14 +35,14 @@ test_that("correct multivariate norm1", {
    
    # DO norm
    ist <- rundtw(Q = h, C = x, dist_method = dm, step_pattern = sp, 
-                 ws = WS, normalize = TRUE, threshold = NULL, lower_bound = F)
+                 ws = WS, normalize = "01", threshold = NULL, lower_bound = F)
    soll <- goal(h, x, WS, dm, sp)
    
    expect_equal(ist$dist, soll)
    
    # DONT norm
    ist <- rundtw(Q = h, C = x, dist_method = dm, step_pattern = sp, 
-                 ws = WS, normalize = F, threshold = NULL, lower_bound = F)
+                 ws = WS, normalize = "none", threshold = NULL, lower_bound = F)
    soll <- goal_nonorm(h, x, WS, dm, sp)
    
    expect_equal(ist$dist, soll)
@@ -63,14 +63,14 @@ test_that("correct multivariate norm2", {
    
    # DO norm
    ist <- rundtw(Q = h, C = x, dist_method = dm, step_pattern = sp, 
-                 ws = WS, normalize = TRUE, threshold = NULL, lower_bound = F)
+                 ws = WS, normalize = "01", threshold = NULL, lower_bound = F)
    soll <- goal(h, x, WS, dm, sp)
    
    expect_equal(ist$dist, soll)
    
    # DONT norm
    ist <- rundtw(Q = h, C = x, dist_method = dm, step_pattern = sp, 
-                 ws = WS, normalize = F, threshold = NULL, lower_bound = F)
+                 ws = WS, normalize = "none", threshold = NULL, lower_bound = F)
    soll <- goal_nonorm(h, x, WS, dm, sp)
    
    expect_equal(ist$dist, soll)
@@ -92,14 +92,14 @@ test_that("correct multivariate sym2", {
    
    # DO norm
    ist <- rundtw(Q = h, C = x, dist_method = dm, step_pattern = sp, 
-                 ws = WS, normalize = TRUE, threshold = NULL, lower_bound = F)
+                 ws = WS, normalize = "01", threshold = NULL, lower_bound = F)
    soll <- goal(h, x, WS, dm, sp)
    
    expect_equal(ist$dist, soll)
    
    # DONT norm
    ist <- rundtw(Q = h, C = x, dist_method = dm, step_pattern = sp, 
-                 ws = WS, normalize = F, threshold = NULL, lower_bound = F)
+                 ws = WS, normalize = "none", threshold = NULL, lower_bound = F)
    soll <- goal_nonorm(h, x, WS, dm, sp)
    
    expect_equal(ist$dist, soll)
@@ -120,7 +120,7 @@ test_that("expected result, multivariate", {
    soll <- c(11, 31, 51)
    
    # DONT lowerbound
-   ist <- rundtw(Q = h, C = x, dist_method = dm, step_pattern = sp, normalize = TRUE,
+   ist <- rundtw(Q = h, C = x, dist_method = dm, step_pattern = sp, normalize = "01",
                  threshold = NULL, lower_bound = FALSE)
    ist <- which(ist$dist < 10^(-10))
    
@@ -128,7 +128,7 @@ test_that("expected result, multivariate", {
    
    
    # DO lowerbound
-   ist <- rundtw(Q = h, C = x, dist_method = dm, step_pattern = sp, normalize = TRUE,
+   ist <- rundtw(Q = h, C = x, dist_method = dm, step_pattern = sp, normalize = "01",
                  threshold = NULL, lower_bound = TRUE)
    ist <- which(ist$dist < 10^(-10))
    
@@ -145,7 +145,7 @@ test_that("kNN rundtw", {
    nc <- 3
    goal_knn <- function(hnorm, x, sp, ws = 10, kNNk){
       allv <- rundtw(h, x, dist_method = dm, step_pattern = sp, ws = 10, 
-                     threshold = NULL, k = 0, lower_bound = FALSE, normalize = TRUE)
+                     threshold = NULL, k = 0, lower_bound = FALSE, normalize = "01")
       dd <- allv$dist
       best_i <- integer()
       for(i in 1:kNNk){
@@ -180,7 +180,7 @@ test_that("kNN rundtw", {
    
    
    tmp <- rundtw(h, x, dist_method = dm, step_pattern = sp, ws = 10, threshold = Inf, k = k,
-                 lower_bound = TRUE,normalize = TRUE)
+                 lower_bound = TRUE, normalize = "01")
    ist <- sort(tmp$knn_indices)
    
    soll <- sort( goal_knn(hnorm, x, sp, ws=10, kNNk = k) )
@@ -275,10 +275,10 @@ test_that("run time multiv", {
             
             mic <- microbenchmark::microbenchmark(foo_cm(hnorm, x, WS),
                                                   foo_2vec(hnorm, x, WS),
-                                                  rundtw(hnorm, x, dm, sp, T, WS, NULL),
-                                                  rundtw(hnorm, x, dm, sp, T, WS, Inf),
-                                                  rundtw(hnorm, x, dm, sp, F, WS, NULL),
-                                                  rundtw(hnorm, x, dm, sp, F, WS, Inf),
+                                                  rundtw(hnorm, x, dm, sp, "01", WS, NULL),
+                                                  rundtw(hnorm, x, dm, sp, "01", WS, Inf),
+                                                  rundtw(hnorm, x, dm, sp, "none", WS, NULL),
+                                                  rundtw(hnorm, x, dm, sp, "none", WS, Inf),
                                                   times = 10)
             df0 <- maxaR::rel_microbenchmark(mic, 
                                              cols = c("expr", "min", "mean", "median", "max", "neval"), 

@@ -5,11 +5,12 @@
 rundtw
 }
 \description{
-Detect recurring patterns similar to given query pattern by measuring the distance with DTW. A window of the length of the query pattern is slided along the longer time series and calculates computation time efficiently the DTW distance for each point of time. The function incrementally updates the normalization of the sliding window, incrementally updates the cost matrix, applies the vector-based implementation of the DTW algorithm, early abandons and applies lower bounding methods to decrease the calculation time.
+Detect recurring patterns similar to given query pattern by measuring the distance with DTW. A window of the length of the query pattern slides along the longer time series and calculates computation-time-efficiently the DTW distance for each point of time. The function incrementally updates the normalization of the sliding window, incrementally updates the cost matrix, applies the vector-based implementation of the DTW algorithm, early abandons and applies lower bounding methods to decrease the calculation time.
 }
 \usage{
 rundtw(Q, C, dist_method = c("norm1", "norm2", "norm2_square"), 
-      step_pattern = c("symmetric1", "symmetric2"), k = NULL, normalize = TRUE, 
+      step_pattern = c("symmetric1", "symmetric2"), k = NULL, 
+      normalize = c("01", "z", "none"), 
       ws = NULL, threshold = NULL, lower_bound = TRUE, overlap_tol = 0)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -18,7 +19,7 @@ rundtw(Q, C, dist_method = c("norm1", "norm2", "norm2_square"),
 vector or matrix, the query time series
 }
   \item{C}{
-vector or matrix (same dimension as Q), the longer time series which is scanned for multiple fits of the query time series
+vector or matrix (equal number of columns as Q), the longer time series which is scanned for multiple fits of the query time series. C can also be a list of time series (either all vectors, or all matrices of equal number of columns) with varying lengths. See Details.
 }
   \item{dist_method}{
 see \code{\link{dtw}}
@@ -30,7 +31,7 @@ see \code{\link{dtw}}, only for "symmetric1" the lower bounding is implemented y
 integer >= 0. If \code{k > 0}, then the k-nearest neighbors to the query pattern that are found in all possible sub-sequences of the long time series C are returned. Per default the found fits don't overlap, except the \code{overlap_tol} parameter is adjusted (this should be done with care!). If \code{k > 0} then \code{lowerbound} is set to \code{TRUE}.
 }
   \item{normalize}{
-logical (default = TRUE), if TRUE \code{Q} (once at the start) and \code{C} (running normalization) are normalized. The min-max normalization is applied.
+character, one of c("01", "z", "none") (default = "01"), if not "none" then \code{Q} (once at the start) and \code{C} (running normalization) are normalized. Either min-max ("01") or the z-normalization ("z")  is applied. TRUE (identical to '01') and FALSE (identical to 'none') are deprecated and will be dropped in the next package version.
 }
   \item{ws}{
 see \code{\link{dtw}}
@@ -50,6 +51,9 @@ integer between 0 and length of Q, (default = 0) gives the number of observation
 \value{
 \item{dist}{vector of DTW distances}
 \item{counter}{named vector of counters. Gives information how the algorithm proceeded. see Details}
+\item{knn_indices}{indices of the found kNN}
+\item{knn_values}{DTW distances of the found kNN}
+\item{knn_list_indices}{indices of list entries of C, where to find the kNN. Only returned if C is a list of time series. See examples.}
 }
 
 
@@ -73,7 +77,13 @@ Counter vector:
 \item "cm_1step" how many times only the front running column of the cost matrix is calculated
 \item "early_abandon" how many times the early abandon method aborts the DTW calculation before finishing
 \item "lower_bound" how many times the lower bounding stops the initialization of the DTW calculation
+\item "completed" for how many subsequences the DTW calculation finished
 }
+
+
+
+C is a list of time series:
+If C is a list of time series, the algorithm concatenates the list to one long time series to apply the logic of early abandoning, lower bounding, and finding the kNN. Finally the results are split to match the input. The 
 }
 
 
@@ -114,7 +124,7 @@ for(i in 1:nfits){
 }
 
 # DO norm and DO lower bound
-result <- rundtw(h, x, normalize = TRUE, ws = 10, threshold = Inf, lower_bound = TRUE)
+result <- rundtw(h, x, normalize = '01', ws = 10, threshold = Inf, lower_bound = TRUE)
 
 ## have a look into the result and get best indices with lowest distance
 minima <- find_peaks(result$dist, w = nh, get_min = TRUE)
@@ -125,16 +135,19 @@ plot(result$dist, xlim=c(1, nx))
 points(x = minima, y = result$dist[minima], col="red", pch=16)
 
 
-# DONT norm and DO lower bound
-rundtw(h, x, normalize = TRUE, ws = 10, threshold = Inf, lower_bound = TRUE)
+# DO min-max-norm and DO lower bound
+rundtw(h, x, normalize = '01', ws = 10, threshold = Inf, lower_bound = TRUE)
 
 
-# DO norm and DONT lower bound
-rundtw(h, x, normalize = TRUE, ws = 10, threshold = NULL, lower_bound = FALSE)
+# DO z-norm and DO lower bound
+rundtw(h, x, normalize = 'z', ws = 10, threshold = NULL, lower_bound = TRUE)
 
 # DONT norm and DONT lower bound
-rundtw(h, x, normalize = TRUE, ws = 10, threshold = NULL, lower_bound = FALSE)
+rundtw(h, x, normalize = 'none', ws = 10, threshold = NULL, lower_bound = FALSE)
 
+
+# kNN: DO z-norm and DO lower bound 
+rundtw(h, x, normalize = '01', ws = 10, k = 3)
 
 
 #--- multivariate case
@@ -155,18 +168,40 @@ for(i in 1:nfits){
    x <- rbind(x, noise(nn, nc), h)
 }
 
-# DO norm and DO lower bound
-rundtw(h, x, normalize = TRUE, ws = 10, threshold = Inf, lower_bound = TRUE)
-
-# DONT norm and DO lower bound
-rundtw(h, x, normalize = TRUE, ws = 10, threshold = Inf, lower_bound = TRUE)
+# DO min-max-norm and DO lower bound
+rundtw(h, x, normalize = '01', ws = 10, threshold = Inf, lower_bound = TRUE)
 
 
-# DO norm and DONT lower bound
-rundtw(h, x, normalize = TRUE, ws = 10, threshold = NULL, lower_bound = FALSE)
+# DO z-norm and DO lower bound
+rundtw(h, x, normalize = 'z', ws = 10, threshold = NULL, lower_bound = TRUE)
 
 # DONT norm and DONT lower bound
-rundtw(h, x, normalize = TRUE, ws = 10, threshold = NULL, lower_bound = FALSE)
+rundtw(h, x, normalize = 'none', ws = 10, threshold = NULL, lower_bound = FALSE)
+
+
+
+#--- C is a list of multivariate time series
+noise <- function(nr, nc) matrix(cumsum(rnorm(nr * nc)), nrow = nr, ncol = nc)
+
+nx <- 500
+nh <- 50
+nc <- 2
+
+h <- noise(nh, nc)
+hnorm <- IncDTW::norm( h , type="01")
+x1 <- rbind(noise(100, nc), h, noise(20, nc))
+x2 <- rbind(noise(10, nc), h, noise(50, nc))
+x3 <- rbind(noise(200, nc), h, noise(30, nc))
+x <- list(x1, x2, x3)
+
+# DO min-max-norm and DO lower bound
+rundtw(h, x, normalize = '01', ws = 10, threshold = Inf, lower_bound = TRUE, k = 3)
+
+# DO z-norm and DO lower bound
+rundtw(h, x, normalize = 'z', ws = 10, threshold = Inf, lower_bound = TRUE, k = 3)
+
+# DONT norm and DONT lower bound
+rundtw(h, x, normalize = 'none', ws = 10, threshold = Inf, lower_bound = TRUE, k = 3)
 
 }
 }

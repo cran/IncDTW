@@ -35,7 +35,7 @@ test_that("equal sapply univariate norm1", {
    x <- c(noise(10), h, noise(10))
    
    ist <- rundtw(Q = h, C = x, dist_method = dm, step_pattern = sp, 
-                 ws = WS, normalize = TRUE, threshold = NULL, lower_bound = F)
+                 ws = WS, normalize = "01", threshold = NULL, lower_bound = F)
    soll <- goal(h, x, WS, dm, sp)
    
    expect_equal(ist$dist, soll)
@@ -54,7 +54,7 @@ test_that("equal sapply univariate sym2", {
    x <- c(noise(10), h, noise(10))
    
    ist <- rundtw(Q = h, C = x, dist_method = dm, step_pattern = sp, 
-                 ws = WS, normalize = TRUE, threshold = NULL, lower_bound = F)
+                 ws = WS, normalize = "01", threshold = NULL, lower_bound = F)
    soll <- goal(h, x, WS, dm, sp)
    
    expect_equal(ist$dist, soll)
@@ -76,13 +76,13 @@ test_that("expected result, univariate", {
    
    # without lower bound
    ist <- rundtw(Q = hnorm, C = x, dist_method = dm, step_pattern = sp, 
-                 normalize = TRUE, threshold = NULL, lower_bound = FALSE)
+                 normalize = "01", threshold = NULL, lower_bound = FALSE)
    ist <- which(ist$dist < 10^(-10))
    expect_equal(ist, soll)
    
    # with lower bound
    ist <- rundtw(Q = hnorm, C = x, dist_method = dm, step_pattern = sp, 
-                 normalize = TRUE, threshold = Inf, lower_bound = TRUE)
+                 normalize = "01", threshold = Inf, lower_bound = TRUE)
    ist <- which(ist$dist < 10^(-10))
    
    expect_equal(ist, soll)
@@ -109,7 +109,7 @@ test_that("rundtw and find_peaks", {
    }
    
    # DO norm and DO lower bound
-   result <- rundtw(h, x, normalize = TRUE, ws = 10, threshold = Inf, lower_bound = TRUE)
+   result <- rundtw(h, x, normalize = "01", ws = 10, threshold = Inf, lower_bound = TRUE)
    ## have a look into the result and get best indices with lowest distance
    
    soll_indices <- c(71, 171, 271, 371, 471)
@@ -145,7 +145,7 @@ test_that("kNN rundtw", {
    
    k <- 10
    # DO norm and DO lower bound
-   result <- rundtw(h, x, normalize = TRUE, ws = 10, threshold = Inf, k = k, lower_bound = TRUE)
+   result <- rundtw(h, x, normalize = "01", ws = 10, threshold = Inf, k = k, lower_bound = TRUE)
    ## have a look into the result and get best indices with lowest distance
    
    
@@ -178,7 +178,7 @@ test_that("kNN rundtw", {
       noise <- function(nr) cumsum(rnorm(nr))
       goal_knn <- function(hnorm, x, sp, ws, kNNk){
          allv <- rundtw(h, x, dist_method = dm, step_pattern = sp, ws = ws, threshold = NULL, k = 0,
-                        lower_bound = FALSE, normalize = TRUE)
+                        lower_bound = FALSE, normalize = "01")
          dd <- allv$dist
          best_i <- integer()
          for(i in 1:kNNk){
@@ -213,7 +213,7 @@ test_that("kNN rundtw", {
       
       
       a <- rundtw(h, x, dist_method = dm, step_pattern = sp, ws = WS, threshold = Inf, k = k,
-                    lower_bound = TRUE,normalize = TRUE)
+                    lower_bound = TRUE, normalize = "01")
       ist <- sort(a$knn_indices)
       
       b <- goal_knn(hnorm, x, sp, ws=WS, kNNk = k)
@@ -225,7 +225,7 @@ test_that("kNN rundtw", {
       # 
       # zz <- file("build_ignore/mySink.Rout", open = "wt"); sink(zz); sink(zz, type = "message")
       # tmp <- rundtw(h, x, dist_method = dm, step_pattern = sp, ws = WS, threshold = Inf, k = k,
-      #               lower_bound = TRUE, normalize = TRUE, debug = 1)
+      #               lower_bound = TRUE, normalize = "01", debug = 1)
       # 
       # cpp_kNN_rev(tmp$dist, nh, debug = 1)
       # sink();close(zz);
@@ -244,7 +244,7 @@ test_that("bug go to end",{
    skip("")
 load("build_ignore/bug_data01.Rda")
    zz <- file("build_ignore/mySink.Rout", open = "wt"); sink(zz); sink(zz, type = "message")
-   tmp <- rundtw( Q = Q, C = C, normalize = T, dist_method = "norm1",
+   tmp <- rundtw( Q = Q, C = C, normalize = "01", dist_method = "norm1",
                   ws = 20, threshold = 5, lower_bound = T, k = 5 )
    sink();close(zz);
    closeAllConnections()
@@ -379,7 +379,7 @@ test_that("run time univ kNN", {
    
    
    foo_run <- function(h, x, ws, k){
-      dis <- rundtw(h, x, dm, sp, k=0, T, WS, Inf, T)$dist
+      dis <- rundtw(h, x, dm, sp, k=0, normalize = "01", WS, Inf, T)$dist
       dis[is.nan(dis)] <- Inf
       
       nh <- length(hnorm)
@@ -417,11 +417,11 @@ test_that("run time univ kNN", {
    mic <- microbenchmark::microbenchmark(foo_cm(h, x, WS,k=k),
                                          foo_2vec(h, x, WS, k=k),
                                          foo_run(h, x, WS, k=k),
-                                         rundtw(h, x, dm, sp, k, T, WS, Inf, T),
+                                         rundtw(h, x, dm, sp, k, "01", WS, Inf, T),
                                          times = 30)
    df0 <- maxaR::rel_microbenchmark(mic, 
                                     cols = c("expr", "min", "mean", "median", "max", "neval"), 
-                                    rel_expr = "rundtw(h, x, dm, sp, k, T, WS, Inf, T)")$df
+                                    rel_expr = "rundtw(h, x, dm, sp, k, '01', WS, Inf, T)")$df
    df0   
    
 })
@@ -473,6 +473,9 @@ test_that("run time univ", {
                     nfits = integer()
                     )
    
+   nhh <- NH[1]
+   nx <- NX[1]
+   
    data.table::fwrite(df, file = "comp_time_test_univ.txt")
    tic <- Sys.time()
    for(nhh in NH){
@@ -502,14 +505,16 @@ test_that("run time univ", {
          
          mic <- microbenchmark::microbenchmark(foo_cm(hnorm, x, WS),
                                                foo_2vec(hnorm, x, WS),
-                                               rundtw(hnorm, x, dm, sp, T, WS, NULL),
-                                               rundtw(hnorm, x, dm, sp, T, WS, Inf),
-                                               rundtw(hnorm, x, dm, sp, F, WS, NULL),
-                                               rundtw(hnorm, x, dm, sp, F, WS, Inf),
+                                               rundtw(hnorm, x, dm, sp, 0, '01', WS, NULL),
+                                               rundtw(hnorm, x, dm, sp, 0, '01', WS, Inf),
+                                               rundtw(hnorm, x, dm, sp, 0, "z", WS, NULL),
+                                               rundtw(hnorm, x, dm, sp, 0, "z", WS, Inf),
+                                               rundtw(hnorm, x, dm, sp, 0, "none", WS, NULL),
+                                               rundtw(hnorm, x, dm, sp, 0, "none", WS, Inf),
                                                times = 3)
          df0 <- maxaR::rel_microbenchmark(mic, 
                      cols = c("expr", "min", "mean", "median", "max", "neval"), 
-                     rel_expr = "rundtw(hnorm, x, dm, sp, T, WS, Inf)")$df
+                     rel_expr = "rundtw(hnorm, x, dm, sp, 0, \"01\", WS, Inf)")$df
          df0$nh <- nh
          df0$nx <- nx
          df0$nfits <- nfits
@@ -524,13 +529,56 @@ test_that("run time univ", {
    require(ggplot2)
    
    df <- data.table::fread(file = "comp_time_test_univ.txt")
-   ggplot(df) + geom_line(aes(x = nh/nx, y = rel, group = expr, col = expr))+
+   df <- df[grep("foo_",df$expr, invert = TRUE), ]
+   df <- df[grep("none",df$expr, invert = TRUE), ]
+   ggplot(df) + geom_line(aes(x = nh/nx, y = rel, group = expr, col = expr), size = 2)+
       facet_grid(~nx)
-   
+   #
    
    
    
 
 })
+
+
+
+
+
+
+
+test_that("knn 01-norm vs. knn z-norm", {
+   skip("comparison 01-z")
+   
+   dm <- "norm1"
+   sp <- "symmetric1"
+   WS <- 10
+   
+   noise <- function(i) cumsum(rnorm(i))
+
+   h <- c(20, noise(10))
+   hnorm01 <- IncDTW::norm(h, type="01")
+   hnormz <- IncDTW::norm(h, type="z")
+   
+   par(mfrow=c(3,1))
+   plot(h, type="l")
+   plot(hnorm01, type="l")
+   plot(hnormz, type="l")
+   par(mfrow=c(1,1))
+   
+   x <- c(noise(10), h, noise(10), h, noise(10), h, noise(10), h, noise(10))
+   
+   ret01 <- rundtw(Q = h, C = x, dist_method = dm, step_pattern = sp, 
+                 ws = WS, normalize = "01", threshold = NULL, k = 10)
+   retz  <- rundtw(Q = h, C = x, dist_method = dm, step_pattern = sp, 
+                   ws = WS, normalize = "z", threshold = NULL, k = 10)
+      
+   ret01$knn_indices
+   retz$knn_indices
+   
+})
+
+
+
+
 
 

@@ -129,6 +129,10 @@ get_lb <- function(tube, x, j0, jsup) {
     .Call(`_IncDTW_get_lb`, tube, x, j0, jsup)
 }
 
+get_lb_znorm <- function(tube, x, mu, sigma, threshold, j0, jsup) {
+    .Call(`_IncDTW_get_lb_znorm`, tube, x, mu, sigma, threshold, j0, jsup)
+}
+
 cpp_get_tube <- function(h, ws) {
     .Call(`_IncDTW_cpp_get_tube`, h, ws)
 }
@@ -149,11 +153,19 @@ cpp_local_min <- function(x, w, strict) {
     .Call(`_IncDTW_cpp_local_min`, x, w, strict)
 }
 
-cpp_rundtw <- function(h, x, step_pattern, ws, threshold, overlap_tol = 0L, kNNk = 0L, do_norm = 1L, use_ea = 1L, use_lb = 1L, debug = 0L) {
-    .Call(`_IncDTW_cpp_rundtw`, h, x, step_pattern, ws, threshold, overlap_tol, kNNk, do_norm, use_ea, use_lb, debug)
+cpp_rundtw <- function(h, x, ret, step_pattern, ws, threshold, overlap_tol = 0L, kNNk = 0L, do_norm = 1L, use_ea = 1L, use_lb = 1L, debug = 0L) {
+    .Call(`_IncDTW_cpp_rundtw`, h, x, ret, step_pattern, ws, threshold, overlap_tol, kNNk, do_norm, use_ea, use_lb, debug)
 }
 
-cpp_rundtw_mv <- function(h, x, step_pattern, dist_method, ws, threshold, overlap_tol = 0L, kNNk = 0L, do_norm = 1L, use_ea = 1L, use_lb = 1L, debug = 0L) {
-    .Call(`_IncDTW_cpp_rundtw_mv`, h, x, step_pattern, dist_method, ws, threshold, overlap_tol, kNNk, do_norm, use_ea, use_lb, debug)
+cpp_rundtw_mv <- function(h, x, ret, step_pattern, dist_method, ws, threshold, overlap_tol = 0L, kNNk = 0L, do_norm = 1L, use_ea = 1L, use_lb = 1L, debug = 0L) {
+    .Call(`_IncDTW_cpp_rundtw_mv`, h, x, ret, step_pattern, dist_method, ws, threshold, overlap_tol, kNNk, do_norm, use_ea, use_lb, debug)
+}
+
+cpp_rundtw_znorm <- function(h, x, ret, step_pattern, ws, threshold, overlap_tol = 0L, kNNk = 0L, use_ea = 1L, use_lb = 1L, debug = 0L) {
+    .Call(`_IncDTW_cpp_rundtw_znorm`, h, x, ret, step_pattern, ws, threshold, overlap_tol, kNNk, use_ea, use_lb, debug)
+}
+
+cpp_rundtw_znorm_mv <- function(h, x, ret, step_pattern, dist_method, ws, threshold, overlap_tol = 0L, kNNk = 0L, use_ea = 1L, use_lb = 1L, debug = 0L) {
+    .Call(`_IncDTW_cpp_rundtw_znorm_mv`, h, x, ret, step_pattern, dist_method, ws, threshold, overlap_tol, kNNk, use_ea, use_lb, debug)
 }
 

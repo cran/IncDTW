@@ -16,7 +16,7 @@ Accelerometer: drink a glass, walk, brush teeth.
   
 }
 \details{
-list of 3-dimensional time series stored as matrix. The data is recorded with 32Hz.
+list of 3-dimensional time series stored as matrix. The data is recorded with 32Hz. The data is z-normalized.
 
 }
 \source{
