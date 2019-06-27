@@ -21,7 +21,7 @@ Dynamic Time Warping is a well known and often applied technic to measure the di
 - ([ieeexplore.org](http://ieeexplore.ieee.org/search/searchresult.jsp?newsearch=true&queryText=dynamic%20time%20warping) about 2,000 hits
 
 To learn more about DTW interested readers may also read 
-([Wikipedia DTW](https://en.wikipedia.org/wiki/Dynamic_time_warping)) or have look at this  ([Dummy Example](http://www.phon.ox.ac.uk/jcoleman/old_SLP/Lecture_5/DTW_explanation.html)). This ([tutorial](http://luthuli.cs.uiuc.edu/~daf/courses/cs-498-daf-ps/lecture%2018%20-%20time%20series,%20dtw.pdf)) also explains the main idea of DTW, described in the original paper by ([Sakoe and Chiba: Dynamic programming algorithm optimization for spoken word recognition](http://ieeexplore.ieee.org/document/1163055/))
+([Wikipedia DTW](https://en.wikipedia.org/wiki/Dynamic_time_warping)) or have look at this  ([Simple Example](http://www.phon.ox.ac.uk/jcoleman/old_SLP/Lecture_5/DTW_explanation.html)). This ([tutorial](https://www.cs.unm.edu/~mueen/DTW.pdf)) also explains the main idea of DTW, described in the original paper by ([Sakoe and Chiba: Dynamic programming algorithm optimization for spoken word recognition](http://ieeexplore.ieee.org/document/1163055/))
 
 Outline:
 
@@ -38,7 +38,7 @@ Outline:
 ```{r, echo = FALSE, message=FALSE}
 library(IncDTW)
 library(dtw)
-#TODO add new functions DBA
+#TODO add new functions dba
 #TODO add new function dtw_dismat
 #TODO add new function dtw_disvec
 
@@ -338,4 +338,4 @@ There are three more functions in _IncDTW_ that are highly useful when comparing
 
 - _dtw\_dismat()_ calculates distance matrices of pairwise DTW distances, so comparing many time series with many. Especially useful for **clustering** or **classification** of a set of time series.
 - _dtw\_disvec()_ calculates vectors of DTW distances, so comparing one time series with many distance matrices of pairwise DTW distances. Especially useful for **k-nearest neighbor** searches.
-- _DBA()_ calculates the DTW Barycenter Average of a set of time series that are non-linearly aligned. Especially useful to define a **cluster representative**. 
+- _dba()_ calculates the DTW Barycenter Average of a set of time series that are non-linearly aligned. Especially useful to define a **cluster representative**. 

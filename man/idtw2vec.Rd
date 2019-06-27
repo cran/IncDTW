@@ -52,50 +52,54 @@ no matrices are allocated, no matrices are returned
 \item{gcm_lc_new}{the last column of the new global cost matrix}
 \item{gcm_lr_new}{the last row of the new global cost matrix. Only if the input vector \code{gcm_lr} is not NUll and represents the last row of the previous global cost matrix, \code{gcm_lr_new} actually is the last row of the updated global cost matrix. Otherwise, if \code{gcm_lr} is NULL then \code{gcm_lr_new} is only the last row of the new part (concerning the new observations) of the global cost matrix.  
 }
-\item{normalized_distance}{the normalized DTW distance, see also \code{link{dtw}}}
+\item{normalized_distance}{the normalized DTW distance, see also \code{\link{dtw}}}
 }
 \references{
 Sakoe, H.; Chiba, S., Dynamic programming algorithm optimization for spoken word recognition, Acoustics, Speech, and Signal Processing [see also IEEE Transactions on Signal Processing], IEEE Transactions on , vol.26, no.1, pp. 43-49, Feb 1978. http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1163055
 }
-\author{
-Maximilian Leodolter
-}
+
 
 \examples{
+
+#--- Do the vector-based incremental DTW 
+# calculation and compare it with the basic
 Q <- cumsum(rnorm(100))
 C <- Q[11:100] + rnorm(90, 0, 0.5)
 
 # initial calculation
-res0 <- idtw2vec(Q=Q, newObs = C, gcm_lc = NULL)
+res0 <- idtw2vec(Q = Q, newObs = C, gcm_lc = NULL)
 
 # incremental calculation for new observations
-res1 <- idtw2vec(Q, newObs = rnorm(10), gcm_lc = res0$gcm_lc_new)
+nobs <- rnorm(10)
+res1 <- idtw2vec(Q, newObs = nobs, gcm_lc = res0$gcm_lc_new)
+
+# compare with result from scratch
+res2 <- dtw2vec(Q, c(C, nobs))
+res1$distance - res2$distance
 
 
 
-# perform an incremental DTW calculation with a customized distance function 
+#--- Perform an incremental DTW calculation with a 
+#  customized distance function. 
 d_cos <- function(x, y){
-   sum(x * y)/(sqrt(sum(x^2)) * sqrt(sum(y^2))) 
+   1 - sum(x * y)/(sqrt(sum(x^2)) * sqrt(sum(y^2))) 
 }
 
-x <- matrix(rnorm(100), ncol=5, nrow=20)
-y <- matrix(rnorm(150), ncol=5, nrow=30)
+x <- matrix(rnorm(100), ncol = 5, nrow = 20)
+y <- matrix(rnorm(150), ncol = 5, nrow = 30)
+cm1 <- cm(x, y, dist_method = d_cos)
 
-cm1 <- function(x,y){
-   nx <- nrow(x); ny <- nrow(y)
-   mat <- matrix(0, ncol=ny, nrow=nx)
-   for(i in 1:nx){
-      for(j in 1:ny){
-         mat[i,j] <- d_cos(x[i,], y[j, ])
-      }
-   }
-   return(mat)
-}
+# initial calculation
+res0 <- idtw2vec(Q = cm(x, y[1:20,], dist_method = d_cos), 
+                 newObs =  "cm")
 
-dtw2vec(Q = cm1(x,y), C = "cm")$distance
-res0 <- idtw2vec(Q = cm1(x,y[1:20,]), newObs =  "cm")
-idtw2vec(Q = cm1(x,y[21:30,]), newObs =  "cm", 
-                 gcm_lc = res0$gcm_lc_new)$distance
+# incremental calculation for new observations
+res1 <- idtw2vec(Q = cm(x, y[21:30,], d_cos), newObs =  "cm", 
+         gcm_lc = res0$gcm_lc_new)$distance
+
+# compare with result from scratch
+res2 <- dtw2vec(Q = cm1, C = "cm")$distance
+res1 - res2
 
 }
 

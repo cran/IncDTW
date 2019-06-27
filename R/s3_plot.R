@@ -1,4 +1,172 @@
 
+plot.rundtw <- function(x, knn = TRUE, minima = TRUE, 
+                        normalize = c("none", "01", "z"), 
+                        selDim = 1, lix = 1, Q = NULL, C = NULL, ...){
+                        
+   if(is.list(x$dist)){
+      
+      x$dist <- x$dist[[lix]]
+      if(!is.null(x$knn_indices)){
+         x$knn_values  <- x$knn_values [x$knn_list_indices == lix]
+         x$knn_indices <- x$knn_indices[x$knn_list_indices == lix]
+         if(length(x$knn_values) == 0){
+            x$knn_values  <- NULL
+            x$knn_indices <- NULL
+         }
+      }
+      if(!is.null(x$C)) x$C <- x$C[[lix]]
+      
+      return(
+         plot(x, knn = knn, minima = minima, normalize = normalize, 
+              selDim = selDim, lix = 1, Q = Q, C = C)
+      )
+      
+   }
+   if(!is.null(Q) & !is.null(x$Q)){
+      if(!identical(Q, x$Q)){
+         warning("Q is set and x$Q is not NULL, the set Q is plotted and x$Q ignored")
+      }
+   }
+   if(!is.null(C) & !is.null(x$C)){
+      if(!identical(C, x$C)){
+         warning("C is set and x$C is not NULL, the set C is plotted and x$C ignored")
+      }
+   }
+   if(is.null(Q) & !is.null(x$Q)) Q <- x$Q
+   if(is.null(C) & !is.null(x$C)) C <- x$C
+   group <- fct <- x_time <- y_value <- categ <- NULL
+   
+   normalize <- match.arg(normalize)
+   
+   dfp1 <- data.frame(x_time = 1:length(x$dist),
+                      y_value = x$dist,
+                      categ = "dist",
+                      fct = "DTW",
+                      stringsAsFactors = FALSE)
+   
+   if(!is.null(C) & is.list(C)){
+      warning("plot() for rundtw() with C as list is not supported yet")
+      C <- NULL
+   }
+         
+   mycols <- c("C, no fit" = "#000000", "kNN" =  "#FF3333", "minimum" = "#3399FF", 
+               "dist" = "#808080")
+   
+   
+   if(!is.null(Q)) nQ <- ifelse(is.matrix(Q), nrow(Q), length(Q))
+   if(!is.null(C) & !is.list(C)){
+      nC <- ifelse(is.matrix(C), nrow(C), length(C))
+   }
+   
+   if(minima & !is.null(Q)){
+      ix_minima <- find_peaks(x$dist, w = nQ, get_min = TRUE)   
+      dfp1[ix_minima, "categ"] <- "minimum"
+   }else{
+      minima <- FALSE
+   }
+   
+   if(!is.null(x$knn_indices) & knn){
+      dfp1[x$knn_indices, "categ"] <- "kNN"
+   }else{
+      knn <- FALSE
+   }
+   
+   
+   
+   if(is.null(C)){
+      
+      gg <- ggplot(dfp1, ...) + 
+         geom_line(aes_string(x = 'x_time', y = 'y_value', col = "'dist'"), na.rm=TRUE, ...) +
+         geom_point(aes_string(x = 'x_time', y = 'y_value', col = 'categ'), na.rm=TRUE, ...) +
+         guides(col = guide_legend(title = NULL))+
+         scale_color_manual(values = mycols) + 
+         ylab("Value") + xlab("Time")
+      
+      
+   }else{
+      
+      C <- as.matrix(C)
+      if(is.null(selDim)) selDim <- 1:ncol(C)
+      C <- C[, selDim]
+      # C_norm <- C
+      C <- as.data.frame(C)
+      C$x_time <- 1:nrow(C)
+      C$categ <- "C, no fit"
+      
+      # colour the peaks
+      if(minima & !is.null(Q)){
+         for(mm in ix_minima){
+            C[C$x_time >= mm & C$x_time <= (mm + nQ -2), "categ"] <- "minimum"       
+         }
+      }
+      
+      # colour the kNN
+      if(knn & !is.null(Q)){
+         for(ix_knn in x$knn_indices){
+            C[C$x_time >= ix_knn & C$x_time <= (ix_knn + nQ -2), "categ"] <- "kNN"
+         }
+      }
+      C <- as.data.table(C)
+      dfp2 <- data.table::melt(C, id.vars = c("x_time", "categ"), value.name = "y_value")
+      data.table::setnames(dfp2, "variable", "group")
+      dfp1 <- data.table::as.data.table(dfp1)
+      dfp1[, group := "DTW"]
+      dfp2[, fct := "Time series C"]
+      
+      dfp <- rbind(dfp1[, list(x_time, y_value, group, categ, fct)],
+                   dfp2[, list(x_time, y_value, group, categ, fct)])
+      
+      if(normalize != "none"){
+         dfp3 <- dfp2
+         dfp3[,fct:= "Normed fits"]
+         dfp3[categ == "C, no fit", y_value:= NA]
+         if(minima & !is.null(Q)){
+            for(mm in ix_minima){
+               dfp3[x_time >= mm & x_time <= (mm + nQ -1) & categ == "minimum", 
+                    y_value:= IncDTW::norm(.SD[, y_value], normalize), by = "group"]       
+            }
+         }
+         
+         # colour the kNN
+         if(knn & !is.null(Q)){
+            for(ix_knn in x$knn_indices){
+               dfp3[x_time >= ix_knn & x_time <= (ix_knn + nQ -1) & categ == "kNN", 
+                    y_value:= IncDTW::norm(.SD[, y_value], normalize), by = "group"]       
+            }
+         }
+         
+         dfp <- rbind(dfp[, list(x_time, y_value, group, categ, fct)],
+                      dfp3[, list(x_time, y_value, group, categ, fct)])
+         
+      }
+      
+      
+      dfp[, y_value := as.numeric(y_value)]
+      # dfp_DTW <- dfp[fct == "DTW"]
+      dfp <- as.data.frame(dfp)
+      # dfp_DTW <- as.data.frame(dfp_DTW)
+      
+      gg <- ggplot(dfp, ...) + 
+         geom_line(aes_string(x = 'x_time', y = 'y_value', 
+                              group = 'group', col = 'categ'), na.rm=TRUE, ...) +
+         geom_point(data = dfp,#[fct == "DTW"], 
+                    aes_string(x = 'x_time', y = 'y_value', col = 'categ'), na.rm=TRUE, ...) +
+         facet_grid(fct~., scales = "free_y")+ 
+         guides(col = guide_legend(title = NULL))+
+         scale_color_manual(values = mycols) + 
+         ylab("Value") + xlab("Time")
+      
+      
+      
+   }
+   
+   return(gg)
+}
+
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 
 plot.idtw <- function(x, type = c("QC", "warp"), partial = NULL, selDim = 1, ...) {
    
@@ -10,6 +178,20 @@ plot.idtw <- function(x, type = c("QC", "warp"), partial = NULL, selDim = 1, ...
           plotWarp(x, partial = partial, selDim = selDim, ...)
    )
 }
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+plot.planedtw <- function(x, type = c("QC", "warp"), partial = NULL, selDim = 1, ...) {
+   
+   y <- dtw(x$Q, x$C, dist_method = x$control$dist_method,
+            ws = x$control$ws, step_pattern = x$control$step_pattern, 
+            return_QC = TRUE, return_wp = TRUE)
+   
+   plot(y, type = type, parital = partial, selDim = selDim, ...)
+}
+
 
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -32,8 +214,10 @@ plot.dba <- function(x, type = c("barycenter", "m2m", "m2lot"), ...) {
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-## an alias
+## all aliases
+plot_rundtw <- plot.rundtw;
 plot_idtw <- plot.idtw;
+plot_planedtw <- plot.planedtw;
 plot_dba <- plot.dba;
 
 
@@ -45,7 +229,8 @@ plotM2m <- function(x, ...){
    gg  <- ggplot(dfp, ...) + 
       geom_line(aes_string(x = 'Iterations', y = 'y')) + 
       geom_point(aes_string(x = 'Iterations', y = 'y')) +
-      ylab("Distance of iterations")
+      ylab(bquote('Distances of' ~m[n]~to~m[n-1]))
+           
    return(gg)
 }
 
@@ -74,9 +259,10 @@ plotM2lot <- function(x, ...){
       xlab("Iterations")
    
    if(x$input$step_pattern == "symmetric1"){
-      gg <- gg + ylab("Average distance of iterations\nto list of time series")
+      gg <- gg + ylab(bquote('Avg. dist of '~m[n]~'to lot'))
+      ylab(bquote('Distances of' ~m[n]~to~m[n-1]))
    }else{
-      gg <- gg + ylab("Average normalized distance of iterations\nto list of time series")
+      gg <- gg + ylab(bquote('Avg. normalized dist of '~m[n]~'to lot'))
    }
    return(gg)
 }
@@ -89,12 +275,13 @@ plotM2lot <- function(x, ...){
 plotBary <- function(x, ...){
    dfp <- x$iterations
    dfp <- lapply(seq_along(dfp), function(i){
-      cbind(dfp[[i]], i = i, j = 1:nrow(dfp[[i]]))
+      cbind(dfp[[i]], Iter = i, j = 1:nrow(dfp[[i]]))
    })
-   dfp <- melt(as.data.table(do.call(rbind, dfp)), id.vars = c("i", "j"))
+   dfp <- melt(as.data.table(do.call(rbind, dfp)), id.vars = c("Iter", "j"))
    
    gg <- ggplot(dfp, ...) + 
-      geom_line(aes_string(x = 'j', y = 'value', group = 'variable', col = 'i')) +
+      geom_line(aes_string(x = 'j', y = 'value', group = 'variable', col = 'Iter')) +
+      xlab("Time") + ylab("Value")+
       facet_grid( ~variable)
    return(gg)
    
@@ -221,8 +408,8 @@ plotWarp <- function(x, Q = NULL, C = NULL, partial = NULL, selDim = 1, ...){
             axis.ticks.x = element_blank(),
             axis.title.x = element_blank(),
             axis.title.y = element_blank())+
-      geom_text(label="Warping Path: ii", aes(y=1, x = text_xwp), hjust = 1, vjust = 1) +
-      geom_text(label="Warping Path: jj", aes(x=1, y = text_ywp), hjust = 0, vjust = 1, angle = 90)
+      geom_text(label="Warping path: ii", aes(y=1, x = text_xwp), hjust = 1, vjust = 1) +
+      geom_text(label="Warping path: jj", aes(x=1, y = text_ywp), hjust = 0, vjust = 1, angle = 90)
    
    gg_Q <- ggplot(tmp1[tmp1$id == "Q", ]) + 
       geom_line(aes_string(x = 'x', y = 'val')) + ylab("")+

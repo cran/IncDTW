@@ -1,4 +1,4 @@
-\name{plot_dba}
+\name{plot.dba}
 \alias{plot_dba}
 \alias{plot.dba}
 \alias{plotBary}
@@ -9,10 +9,10 @@
 Plot the results from Dynamic Time Warping Barycenter Averaging
 }
 \description{
-Plot function for objects of type \code{dba}, the output of \code{DBA()}.}
+Plot function for objects of type \code{dba}, the output of \code{dba()}.}
 \usage{
 \method{plot}{dba}(x, type = c("barycenter", "m2m", "m2lot"), ...)
-# an alias for plot_idtw
+# an alias for plot_dba
 plot_dba(x, type = c("barycenter", "m2m", "m2lot"), ...)
 
 plotBary(x, ...)
@@ -23,23 +23,25 @@ plotM2lot(x, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
- \item{x}{output from \code{DBA()}}
+ \item{x}{output from \code{dba()}}
  \item{type}{character, one of c('barycenter', 'm2m', 'm2lot')}
-\item{...}{Other arguments passed on to methods. Not currently used.}
+\item{...}{Other arguments passed on to methods. Currently not used.}
 }
 \details{
 \itemize{
 \item{\code{'barycenter'} plots the iterations of the barycenter per dimension.}
-\item{\code{'m2m'} plots the distances (distance method set by \code{iter_dist_method}, see \code{\link{DBA}}) of one barycenter-iteration to the former iteration step.}
+\item{\code{'m2m'} plots the distances (distance method set by \code{iter_dist_method}, see \code{\link{dba}}) of one barycenter-iteration to the former iteration step.}
 \item{\code{'m2lot'} plots the distances (if \code{step_pattern == 'symmetric2'} the normalized distances are plotted) of the barycenter to the list of time series per iteration.}
 }
  
 }
-\author{
-Maximilian Leodolter
+
+
+\examples{
+# see examples of dba()
 }
 
 
 \seealso{
-\code{DBA}
+\code{\link{dba}}
 }

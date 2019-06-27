@@ -1,6 +1,10 @@
-\name{DBA}
+\name{dba}
+\alias{dba}
 \alias{DBA}
 \alias{centroid}
+\alias{print.dba}
+\alias{summary.dba}
+\alias{is.dba}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Dynamic Time Warping Barycenter Averaging
@@ -9,6 +13,15 @@ Dynamic Time Warping Barycenter Averaging
 Average multiple time series that are non-linearly aligned by Dynamic Time Warping. Find the centroid of a list of time series.
 }
 \usage{
+dba(lot, m0 = NULL, iterMax = 10, eps = NULL, 
+                dist_method = c("norm1", "norm2", "norm2_square"),
+                step_pattern = c("symmetric2", "symmetric1"),
+                ws = NULL,
+                iter_dist_method = c("dtw_norm1", "dtw_norm2",
+                                     "norm1","norm2", "max", "min"), 
+                plotit = FALSE)
+                
+# deprecated
 DBA(lot, m0 = NULL, iterMax = 10, eps = NULL, 
                 dist_method = c("norm1", "norm2", "norm2_square"),
                 step_pattern = c("symmetric2", "symmetric1"),
@@ -21,6 +34,15 @@ centroid(lot, dist_method = c("norm1", "norm2", "norm2_square"),
               step_pattern = c("symmetric2", "symmetric1"),
               normalize = TRUE, ws = NULL, ncores = NULL,
               useRcppParallel = TRUE)
+
+
+              
+\method{print}{dba}(x, digits = getOption("digits"),  ...)
+
+\method{summary}{dba}(object, ...)              
+
+is.dba(x)             
+              
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -38,6 +60,19 @@ integer, describes the window size for the sakoe chiba window. If NULL, then no 
 \item{normalize}{logical, default is TRUE, passed to \code{\link{dtw_dismat}}}
 \item{ncores}{integer, default = NULL,  passed to \code{\link{dtw_dismat}}}
 \item{useRcppParallel}{logical, default is TRUE, passed to \code{\link{dtw_dismat}}}
+\item{x}{
+output from \code{dba}
+}
+\item{object}{
+any R object
+}
+\item{digits}{
+passed to \code{round} and \code{print}
+}
+\item{...}{
+additional arguments, e.g. passed to \code{print} or \code{summary}
+}
+
 }
 
 
@@ -87,33 +122,32 @@ Sakoe, H.; Chiba, S., Dynamic programming algorithm optimization for spoken word
 
 Petitjean, F; Ketterlin, A; Gancarski, P, A global averaging method for dynamic time warping, with applications to clustering, Pattern Recognition, Volume 44, Issue 3, 2011, Pages 678-693, ISSN 0031-3203
 }
-\author{
-Maximilian Leodolter
-}
+
 
 \examples{
 \dontrun{
 data("drink_glass")
 # initialize with any time series 
-m1 <- DBA(lot = drink_glass[1:10], m0 = drink_glass[[1]], 
+m1 <- dba(lot = drink_glass[1:10], m0 = drink_glass[[1]], 
           dist_method = "norm2", iterMax = 20)
 
 # initialize with the centroid
 
 tmp <- centroid(drink_glass)
 cent <- drink_glass[[tmp$centroid_index]]
-m1 <- DBA(lot = drink_glass[1:10], m0 = cent, 
+m1 <- dba(lot = drink_glass[1:10], m0 = cent, 
           dist_method = "norm2", iterMax = 20)
-plot(sapply(m1$iterDist_m2lot, mean), xlab = "Iterations",
-         ylab = "mean distance", 
-         main = "Distance of updated bary center to lot")
-plot(m1$iterDist_m2m, ylab = "distance", xlab = "Iterations", 
-     main = "Distance of iterations of bary center updates")
 
+# plot all dimensions of the barycenters m_n per iteration:
 plot(m1)
-plot(m1, type = "m2m")
-plot(m1, type = "m2lot")
 
+# plot the distances of the barycenter of one iteration m_n
+# to the barycenter of the previous iteration m_n-1:
+plot(m1, type = "m2m")
+
+# plot the average distances of the barycenter m_n 
+# to the list of time series:
+plot(m1, type = "m2lot")
 
 }
 }

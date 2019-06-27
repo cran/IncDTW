@@ -537,90 +537,186 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_rundtw
-List cpp_rundtw(const NumericVector& h, const NumericVector& x, NumericVector& ret, std::string step_pattern, int ws, double threshold, int overlap_tol, int kNNk, int do_norm, int use_ea, int use_lb, int debug);
-RcppExport SEXP _IncDTW_cpp_rundtw(SEXP hSEXP, SEXP xSEXP, SEXP retSEXP, SEXP step_patternSEXP, SEXP wsSEXP, SEXP thresholdSEXP, SEXP overlap_tolSEXP, SEXP kNNkSEXP, SEXP do_normSEXP, SEXP use_eaSEXP, SEXP use_lbSEXP, SEXP debugSEXP) {
+List cpp_rundtw(const NumericVector& h, const NumericVector& x, std::string step_pattern, List& kNN_inf_list, int ws, double threshold, int overlap_tol, int do_norm, int use_ea, int use_lb, int debug);
+RcppExport SEXP _IncDTW_cpp_rundtw(SEXP hSEXP, SEXP xSEXP, SEXP step_patternSEXP, SEXP kNN_inf_listSEXP, SEXP wsSEXP, SEXP thresholdSEXP, SEXP overlap_tolSEXP, SEXP do_normSEXP, SEXP use_eaSEXP, SEXP use_lbSEXP, SEXP debugSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const NumericVector& >::type h(hSEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericVector& >::type ret(retSEXP);
     Rcpp::traits::input_parameter< std::string >::type step_pattern(step_patternSEXP);
+    Rcpp::traits::input_parameter< List& >::type kNN_inf_list(kNN_inf_listSEXP);
     Rcpp::traits::input_parameter< int >::type ws(wsSEXP);
     Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
     Rcpp::traits::input_parameter< int >::type overlap_tol(overlap_tolSEXP);
-    Rcpp::traits::input_parameter< int >::type kNNk(kNNkSEXP);
     Rcpp::traits::input_parameter< int >::type do_norm(do_normSEXP);
     Rcpp::traits::input_parameter< int >::type use_ea(use_eaSEXP);
     Rcpp::traits::input_parameter< int >::type use_lb(use_lbSEXP);
     Rcpp::traits::input_parameter< int >::type debug(debugSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_rundtw(h, x, ret, step_pattern, ws, threshold, overlap_tol, kNNk, do_norm, use_ea, use_lb, debug));
+    rcpp_result_gen = Rcpp::wrap(cpp_rundtw(h, x, step_pattern, kNN_inf_list, ws, threshold, overlap_tol, do_norm, use_ea, use_lb, debug));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_rundtw_lot
+List cpp_rundtw_lot(const NumericVector& h, const NumericVector& x, NumericVector kNN_val_in, IntegerVector kNN_ix_in, IntegerVector kNN_lot_ix_in, List& kNN_inf_list_in, int lot_ix, std::string step_pattern, int ws, double threshold, int overlap_tol, int do_norm, int use_ea, int use_lb, int debug);
+RcppExport SEXP _IncDTW_cpp_rundtw_lot(SEXP hSEXP, SEXP xSEXP, SEXP kNN_val_inSEXP, SEXP kNN_ix_inSEXP, SEXP kNN_lot_ix_inSEXP, SEXP kNN_inf_list_inSEXP, SEXP lot_ixSEXP, SEXP step_patternSEXP, SEXP wsSEXP, SEXP thresholdSEXP, SEXP overlap_tolSEXP, SEXP do_normSEXP, SEXP use_eaSEXP, SEXP use_lbSEXP, SEXP debugSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type h(hSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type kNN_val_in(kNN_val_inSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type kNN_ix_in(kNN_ix_inSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type kNN_lot_ix_in(kNN_lot_ix_inSEXP);
+    Rcpp::traits::input_parameter< List& >::type kNN_inf_list_in(kNN_inf_list_inSEXP);
+    Rcpp::traits::input_parameter< int >::type lot_ix(lot_ixSEXP);
+    Rcpp::traits::input_parameter< std::string >::type step_pattern(step_patternSEXP);
+    Rcpp::traits::input_parameter< int >::type ws(wsSEXP);
+    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
+    Rcpp::traits::input_parameter< int >::type overlap_tol(overlap_tolSEXP);
+    Rcpp::traits::input_parameter< int >::type do_norm(do_normSEXP);
+    Rcpp::traits::input_parameter< int >::type use_ea(use_eaSEXP);
+    Rcpp::traits::input_parameter< int >::type use_lb(use_lbSEXP);
+    Rcpp::traits::input_parameter< int >::type debug(debugSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_rundtw_lot(h, x, kNN_val_in, kNN_ix_in, kNN_lot_ix_in, kNN_inf_list_in, lot_ix, step_pattern, ws, threshold, overlap_tol, do_norm, use_ea, use_lb, debug));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_rundtw_mv
-List cpp_rundtw_mv(const NumericMatrix& h, const NumericMatrix& x, NumericVector& ret, std::string step_pattern, std::string dist_method, int ws, double threshold, int overlap_tol, int kNNk, int do_norm, int use_ea, int use_lb, int debug);
-RcppExport SEXP _IncDTW_cpp_rundtw_mv(SEXP hSEXP, SEXP xSEXP, SEXP retSEXP, SEXP step_patternSEXP, SEXP dist_methodSEXP, SEXP wsSEXP, SEXP thresholdSEXP, SEXP overlap_tolSEXP, SEXP kNNkSEXP, SEXP do_normSEXP, SEXP use_eaSEXP, SEXP use_lbSEXP, SEXP debugSEXP) {
+List cpp_rundtw_mv(const NumericMatrix& h, const NumericMatrix& x, std::string step_pattern, std::string dist_method, List& kNN_inf_list, int ws, double threshold, int overlap_tol, int do_norm, int use_ea, int use_lb, int debug);
+RcppExport SEXP _IncDTW_cpp_rundtw_mv(SEXP hSEXP, SEXP xSEXP, SEXP step_patternSEXP, SEXP dist_methodSEXP, SEXP kNN_inf_listSEXP, SEXP wsSEXP, SEXP thresholdSEXP, SEXP overlap_tolSEXP, SEXP do_normSEXP, SEXP use_eaSEXP, SEXP use_lbSEXP, SEXP debugSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const NumericMatrix& >::type h(hSEXP);
     Rcpp::traits::input_parameter< const NumericMatrix& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericVector& >::type ret(retSEXP);
+    Rcpp::traits::input_parameter< std::string >::type step_pattern(step_patternSEXP);
+    Rcpp::traits::input_parameter< std::string >::type dist_method(dist_methodSEXP);
+    Rcpp::traits::input_parameter< List& >::type kNN_inf_list(kNN_inf_listSEXP);
+    Rcpp::traits::input_parameter< int >::type ws(wsSEXP);
+    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
+    Rcpp::traits::input_parameter< int >::type overlap_tol(overlap_tolSEXP);
+    Rcpp::traits::input_parameter< int >::type do_norm(do_normSEXP);
+    Rcpp::traits::input_parameter< int >::type use_ea(use_eaSEXP);
+    Rcpp::traits::input_parameter< int >::type use_lb(use_lbSEXP);
+    Rcpp::traits::input_parameter< int >::type debug(debugSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_rundtw_mv(h, x, step_pattern, dist_method, kNN_inf_list, ws, threshold, overlap_tol, do_norm, use_ea, use_lb, debug));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_rundtw_mv_lot
+List cpp_rundtw_mv_lot(const NumericMatrix& h, const NumericMatrix& x, NumericVector kNN_val_in, IntegerVector kNN_ix_in, IntegerVector kNN_lot_ix_in, List& kNN_inf_list_in, int lot_ix, std::string step_pattern, std::string dist_method, int ws, double threshold, int overlap_tol, int do_norm, int use_ea, int use_lb, int debug);
+RcppExport SEXP _IncDTW_cpp_rundtw_mv_lot(SEXP hSEXP, SEXP xSEXP, SEXP kNN_val_inSEXP, SEXP kNN_ix_inSEXP, SEXP kNN_lot_ix_inSEXP, SEXP kNN_inf_list_inSEXP, SEXP lot_ixSEXP, SEXP step_patternSEXP, SEXP dist_methodSEXP, SEXP wsSEXP, SEXP thresholdSEXP, SEXP overlap_tolSEXP, SEXP do_normSEXP, SEXP use_eaSEXP, SEXP use_lbSEXP, SEXP debugSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type h(hSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type kNN_val_in(kNN_val_inSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type kNN_ix_in(kNN_ix_inSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type kNN_lot_ix_in(kNN_lot_ix_inSEXP);
+    Rcpp::traits::input_parameter< List& >::type kNN_inf_list_in(kNN_inf_list_inSEXP);
+    Rcpp::traits::input_parameter< int >::type lot_ix(lot_ixSEXP);
     Rcpp::traits::input_parameter< std::string >::type step_pattern(step_patternSEXP);
     Rcpp::traits::input_parameter< std::string >::type dist_method(dist_methodSEXP);
     Rcpp::traits::input_parameter< int >::type ws(wsSEXP);
     Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
     Rcpp::traits::input_parameter< int >::type overlap_tol(overlap_tolSEXP);
-    Rcpp::traits::input_parameter< int >::type kNNk(kNNkSEXP);
     Rcpp::traits::input_parameter< int >::type do_norm(do_normSEXP);
     Rcpp::traits::input_parameter< int >::type use_ea(use_eaSEXP);
     Rcpp::traits::input_parameter< int >::type use_lb(use_lbSEXP);
     Rcpp::traits::input_parameter< int >::type debug(debugSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_rundtw_mv(h, x, ret, step_pattern, dist_method, ws, threshold, overlap_tol, kNNk, do_norm, use_ea, use_lb, debug));
+    rcpp_result_gen = Rcpp::wrap(cpp_rundtw_mv_lot(h, x, kNN_val_in, kNN_ix_in, kNN_lot_ix_in, kNN_inf_list_in, lot_ix, step_pattern, dist_method, ws, threshold, overlap_tol, do_norm, use_ea, use_lb, debug));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_rundtw_znorm
-List cpp_rundtw_znorm(const NumericVector& h, const NumericVector& x, NumericVector& ret, std::string step_pattern, int ws, double threshold, int overlap_tol, int kNNk, int use_ea, int use_lb, int debug);
-RcppExport SEXP _IncDTW_cpp_rundtw_znorm(SEXP hSEXP, SEXP xSEXP, SEXP retSEXP, SEXP step_patternSEXP, SEXP wsSEXP, SEXP thresholdSEXP, SEXP overlap_tolSEXP, SEXP kNNkSEXP, SEXP use_eaSEXP, SEXP use_lbSEXP, SEXP debugSEXP) {
+List cpp_rundtw_znorm(const NumericVector& h, const NumericVector& x, std::string step_pattern, List& kNN_inf_list, int ws, double threshold, int overlap_tol, int use_ea, int use_lb, int debug);
+RcppExport SEXP _IncDTW_cpp_rundtw_znorm(SEXP hSEXP, SEXP xSEXP, SEXP step_patternSEXP, SEXP kNN_inf_listSEXP, SEXP wsSEXP, SEXP thresholdSEXP, SEXP overlap_tolSEXP, SEXP use_eaSEXP, SEXP use_lbSEXP, SEXP debugSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const NumericVector& >::type h(hSEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericVector& >::type ret(retSEXP);
+    Rcpp::traits::input_parameter< std::string >::type step_pattern(step_patternSEXP);
+    Rcpp::traits::input_parameter< List& >::type kNN_inf_list(kNN_inf_listSEXP);
+    Rcpp::traits::input_parameter< int >::type ws(wsSEXP);
+    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
+    Rcpp::traits::input_parameter< int >::type overlap_tol(overlap_tolSEXP);
+    Rcpp::traits::input_parameter< int >::type use_ea(use_eaSEXP);
+    Rcpp::traits::input_parameter< int >::type use_lb(use_lbSEXP);
+    Rcpp::traits::input_parameter< int >::type debug(debugSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_rundtw_znorm(h, x, step_pattern, kNN_inf_list, ws, threshold, overlap_tol, use_ea, use_lb, debug));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_rundtw_znorm_lot
+List cpp_rundtw_znorm_lot(const NumericVector& h, const NumericVector& x, NumericVector kNN_val_in, IntegerVector kNN_ix_in, IntegerVector kNN_lot_ix_in, List& kNN_inf_list_in, int lot_ix, std::string step_pattern, int ws, double threshold, int overlap_tol, int use_ea, int use_lb, int debug);
+RcppExport SEXP _IncDTW_cpp_rundtw_znorm_lot(SEXP hSEXP, SEXP xSEXP, SEXP kNN_val_inSEXP, SEXP kNN_ix_inSEXP, SEXP kNN_lot_ix_inSEXP, SEXP kNN_inf_list_inSEXP, SEXP lot_ixSEXP, SEXP step_patternSEXP, SEXP wsSEXP, SEXP thresholdSEXP, SEXP overlap_tolSEXP, SEXP use_eaSEXP, SEXP use_lbSEXP, SEXP debugSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type h(hSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type kNN_val_in(kNN_val_inSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type kNN_ix_in(kNN_ix_inSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type kNN_lot_ix_in(kNN_lot_ix_inSEXP);
+    Rcpp::traits::input_parameter< List& >::type kNN_inf_list_in(kNN_inf_list_inSEXP);
+    Rcpp::traits::input_parameter< int >::type lot_ix(lot_ixSEXP);
     Rcpp::traits::input_parameter< std::string >::type step_pattern(step_patternSEXP);
     Rcpp::traits::input_parameter< int >::type ws(wsSEXP);
     Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
     Rcpp::traits::input_parameter< int >::type overlap_tol(overlap_tolSEXP);
-    Rcpp::traits::input_parameter< int >::type kNNk(kNNkSEXP);
     Rcpp::traits::input_parameter< int >::type use_ea(use_eaSEXP);
     Rcpp::traits::input_parameter< int >::type use_lb(use_lbSEXP);
     Rcpp::traits::input_parameter< int >::type debug(debugSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_rundtw_znorm(h, x, ret, step_pattern, ws, threshold, overlap_tol, kNNk, use_ea, use_lb, debug));
+    rcpp_result_gen = Rcpp::wrap(cpp_rundtw_znorm_lot(h, x, kNN_val_in, kNN_ix_in, kNN_lot_ix_in, kNN_inf_list_in, lot_ix, step_pattern, ws, threshold, overlap_tol, use_ea, use_lb, debug));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_rundtw_znorm_mv
-List cpp_rundtw_znorm_mv(const NumericMatrix& h, const NumericMatrix& x, NumericVector& ret, std::string step_pattern, std::string dist_method, int ws, double threshold, int overlap_tol, int kNNk, int use_ea, int use_lb, int debug);
-RcppExport SEXP _IncDTW_cpp_rundtw_znorm_mv(SEXP hSEXP, SEXP xSEXP, SEXP retSEXP, SEXP step_patternSEXP, SEXP dist_methodSEXP, SEXP wsSEXP, SEXP thresholdSEXP, SEXP overlap_tolSEXP, SEXP kNNkSEXP, SEXP use_eaSEXP, SEXP use_lbSEXP, SEXP debugSEXP) {
+List cpp_rundtw_znorm_mv(const NumericMatrix& h, const NumericMatrix& x, std::string step_pattern, std::string dist_method, List& kNN_inf_list, int ws, double threshold, int overlap_tol, int use_ea, int use_lb, int debug);
+RcppExport SEXP _IncDTW_cpp_rundtw_znorm_mv(SEXP hSEXP, SEXP xSEXP, SEXP step_patternSEXP, SEXP dist_methodSEXP, SEXP kNN_inf_listSEXP, SEXP wsSEXP, SEXP thresholdSEXP, SEXP overlap_tolSEXP, SEXP use_eaSEXP, SEXP use_lbSEXP, SEXP debugSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const NumericMatrix& >::type h(hSEXP);
     Rcpp::traits::input_parameter< const NumericMatrix& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericVector& >::type ret(retSEXP);
+    Rcpp::traits::input_parameter< std::string >::type step_pattern(step_patternSEXP);
+    Rcpp::traits::input_parameter< std::string >::type dist_method(dist_methodSEXP);
+    Rcpp::traits::input_parameter< List& >::type kNN_inf_list(kNN_inf_listSEXP);
+    Rcpp::traits::input_parameter< int >::type ws(wsSEXP);
+    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
+    Rcpp::traits::input_parameter< int >::type overlap_tol(overlap_tolSEXP);
+    Rcpp::traits::input_parameter< int >::type use_ea(use_eaSEXP);
+    Rcpp::traits::input_parameter< int >::type use_lb(use_lbSEXP);
+    Rcpp::traits::input_parameter< int >::type debug(debugSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_rundtw_znorm_mv(h, x, step_pattern, dist_method, kNN_inf_list, ws, threshold, overlap_tol, use_ea, use_lb, debug));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_rundtw_znorm_mv_lot
+List cpp_rundtw_znorm_mv_lot(const NumericMatrix& h, const NumericMatrix& x, NumericVector kNN_val_in, IntegerVector kNN_ix_in, IntegerVector kNN_lot_ix_in, List& kNN_inf_list_in, int lot_ix, std::string step_pattern, std::string dist_method, int ws, double threshold, int overlap_tol, int use_ea, int use_lb, int debug);
+RcppExport SEXP _IncDTW_cpp_rundtw_znorm_mv_lot(SEXP hSEXP, SEXP xSEXP, SEXP kNN_val_inSEXP, SEXP kNN_ix_inSEXP, SEXP kNN_lot_ix_inSEXP, SEXP kNN_inf_list_inSEXP, SEXP lot_ixSEXP, SEXP step_patternSEXP, SEXP dist_methodSEXP, SEXP wsSEXP, SEXP thresholdSEXP, SEXP overlap_tolSEXP, SEXP use_eaSEXP, SEXP use_lbSEXP, SEXP debugSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type h(hSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type kNN_val_in(kNN_val_inSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type kNN_ix_in(kNN_ix_inSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type kNN_lot_ix_in(kNN_lot_ix_inSEXP);
+    Rcpp::traits::input_parameter< List& >::type kNN_inf_list_in(kNN_inf_list_inSEXP);
+    Rcpp::traits::input_parameter< int >::type lot_ix(lot_ixSEXP);
     Rcpp::traits::input_parameter< std::string >::type step_pattern(step_patternSEXP);
     Rcpp::traits::input_parameter< std::string >::type dist_method(dist_methodSEXP);
     Rcpp::traits::input_parameter< int >::type ws(wsSEXP);
     Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
     Rcpp::traits::input_parameter< int >::type overlap_tol(overlap_tolSEXP);
-    Rcpp::traits::input_parameter< int >::type kNNk(kNNkSEXP);
     Rcpp::traits::input_parameter< int >::type use_ea(use_eaSEXP);
     Rcpp::traits::input_parameter< int >::type use_lb(use_lbSEXP);
     Rcpp::traits::input_parameter< int >::type debug(debugSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_rundtw_znorm_mv(h, x, ret, step_pattern, dist_method, ws, threshold, overlap_tol, kNNk, use_ea, use_lb, debug));
+    rcpp_result_gen = Rcpp::wrap(cpp_rundtw_znorm_mv_lot(h, x, kNN_val_in, kNN_ix_in, kNN_lot_ix_in, kNN_inf_list_in, lot_ix, step_pattern, dist_method, ws, threshold, overlap_tol, use_ea, use_lb, debug));
     return rcpp_result_gen;
 END_RCPP
 }

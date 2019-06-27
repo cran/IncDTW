@@ -32,5 +32,36 @@ test_that("Bub: dtw normalized mv", {
 })
 
 
+test_that("custom dist function",{
+   rw <- function(nn) sample(1:64, nn, replace=T)
+   
+   h <- rw(100)
+   wc <- log2(3)
+   card <- 64
+   
+   
+   x <- rw(100)
+   logp <- -c(63:1, 0, 1:63)
+   
+   
+   
+   d_mdl <- function(x, y, log_prob){
+      as.numeric(-log_prob[x-y + 64])
+   }
+   
+   d_mdl(x[1], h[1], logp)
+   
+   tmp <- IncDTW::cm(x, h, dist_method = d_mdl, log_prob = logp)
+   counter <- 0
+   for(i in 1:nrow(tmp)){
+      for(j in 1:ncol(tmp)){
+         if(tmp[i,j] == d_mdl(x[i], h[j], logp)) counter <- counter + 1
+      }
+   }
+   
+   test_that(counter, prod(dim(tmp)))
+})
+
+
 
 

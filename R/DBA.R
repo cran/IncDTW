@@ -26,6 +26,21 @@ DBA <- function(lot, m0 = NULL, iterMax = 10, eps = NULL,
                 iter_dist_method = c("dtw_norm1", "dtw_norm2", 
                                      "norm1","norm2", "max", "min"), 
                 plotit = FALSE){
+   
+   .Deprecated("dba")
+   return(
+      dba(lot = lot, m0 = m0, iterMax = iterMax, eps = eps, dist_method = dist_method,
+       step_pattern = step_pattern, ws = ws, iter_dist_method = iter_dist_method, plotit = plotit)
+   )
+}
+
+dba <- function(lot, m0 = NULL, iterMax = 10, eps = NULL, 
+                dist_method = c("norm1", "norm2", "norm2_square"),
+                step_pattern = c("symmetric2", "symmetric1"),
+                ws = NULL,
+                iter_dist_method = c("dtw_norm1", "dtw_norm2", 
+                                     "norm1","norm2", "max", "min"), 
+                plotit = FALSE){
    # implementation of the paper:
    # "A global averaging method for dynamic time warping, 
    # with applications to clustering"
@@ -34,7 +49,9 @@ DBA <- function(lot, m0 = NULL, iterMax = 10, eps = NULL,
    
    dist_method <- match.arg(dist_method)
    step_pattern <- match.arg(step_pattern)
+   iter_dist_method <- match.arg(iter_dist_method)
    iter_dist_foo <- match_idm(iter_dist_method)
+   
    
    input <- list(iterMax = iterMax, eps = eps, step_pattern = step_pattern,
                  dist_method = dist_method, ws = ws, 
@@ -95,7 +112,7 @@ DBA <- function(lot, m0 = NULL, iterMax = 10, eps = NULL,
    }#end iter for
    
    results$m1 <- results$iterations[[length(results$iterations)]]
-   class(results) <- append(class(results), "dba")
+   class(results) <- append(class(results), "dba", 0)
    return(results)
 }
 

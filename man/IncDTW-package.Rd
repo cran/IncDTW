@@ -13,14 +13,33 @@ The Dynamic Time Warping (DTW) distance for time series allows non-linear alignm
 \details{
 Main features:
 \itemize{
-\item{C++ in the heart thanks to Rcpp}
-\item{Incremental Calculation, \code{idtw()} and \code{idtw2vec()}}
-\item{Matrix-based \code{dtw()} and Vector-based \code{dtw2vec()} implementation of the DTW algorithm}
-\item{Sakoe Chiba Warping Window}
-\item{Early abandoning}
-\item{support for multivariate time series}
-\item{\code{distDTW()} for fast calculation of a Distance Matrix of pairwise DTW distances for clustering or classification of many multivariate time series}
-\item{\code{DBA()} for averaging a centroid of a found cluster}
+\item{
+Incremental Calculation, \code{\link{idtw}}, \code{\link{idtw2vec}} and \code{\link{increment}}
+}
+\item{
+Detect k-nearest subsequences in longer time series, \code{\link{rundtw}}
+}
+\item{
+Matrix-based \code{\link{dtw}} and Vector-based \code{\link{dtw2vec}} implementation of the DTW algorithm
+}
+\item{
+Sakoe Chiba warping window
+}
+\item{
+Early abandoning and lower bounding
+}
+\item{
+Support for multivariate time series
+}
+\item{
+Fast calculation of a distance matrix of pairwise DTW distances for clustering or classification of many multivariate time series, \code{\link{dtw_dismat}}
+}
+\item{
+Aggregate cluster members with \code{\link{dba}} or get the centroid with \code{\link{centroid}}
+}
+\item{
+C++ in the heart thanks to Rcpp
+}
 }
 
 }

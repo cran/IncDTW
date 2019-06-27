@@ -153,19 +153,35 @@ cpp_local_min <- function(x, w, strict) {
     .Call(`_IncDTW_cpp_local_min`, x, w, strict)
 }
 
-cpp_rundtw <- function(h, x, ret, step_pattern, ws, threshold, overlap_tol = 0L, kNNk = 0L, do_norm = 1L, use_ea = 1L, use_lb = 1L, debug = 0L) {
-    .Call(`_IncDTW_cpp_rundtw`, h, x, ret, step_pattern, ws, threshold, overlap_tol, kNNk, do_norm, use_ea, use_lb, debug)
+cpp_rundtw <- function(h, x, step_pattern, kNN_inf_list, ws, threshold, overlap_tol = 0L, do_norm = 1L, use_ea = 1L, use_lb = 1L, debug = 0L) {
+    .Call(`_IncDTW_cpp_rundtw`, h, x, step_pattern, kNN_inf_list, ws, threshold, overlap_tol, do_norm, use_ea, use_lb, debug)
 }
 
-cpp_rundtw_mv <- function(h, x, ret, step_pattern, dist_method, ws, threshold, overlap_tol = 0L, kNNk = 0L, do_norm = 1L, use_ea = 1L, use_lb = 1L, debug = 0L) {
-    .Call(`_IncDTW_cpp_rundtw_mv`, h, x, ret, step_pattern, dist_method, ws, threshold, overlap_tol, kNNk, do_norm, use_ea, use_lb, debug)
+cpp_rundtw_lot <- function(h, x, kNN_val_in, kNN_ix_in, kNN_lot_ix_in, kNN_inf_list_in, lot_ix, step_pattern, ws, threshold, overlap_tol = 0L, do_norm = 1L, use_ea = 1L, use_lb = 1L, debug = 0L) {
+    .Call(`_IncDTW_cpp_rundtw_lot`, h, x, kNN_val_in, kNN_ix_in, kNN_lot_ix_in, kNN_inf_list_in, lot_ix, step_pattern, ws, threshold, overlap_tol, do_norm, use_ea, use_lb, debug)
 }
 
-cpp_rundtw_znorm <- function(h, x, ret, step_pattern, ws, threshold, overlap_tol = 0L, kNNk = 0L, use_ea = 1L, use_lb = 1L, debug = 0L) {
-    .Call(`_IncDTW_cpp_rundtw_znorm`, h, x, ret, step_pattern, ws, threshold, overlap_tol, kNNk, use_ea, use_lb, debug)
+cpp_rundtw_mv <- function(h, x, step_pattern, dist_method, kNN_inf_list, ws, threshold, overlap_tol = 0L, do_norm = 1L, use_ea = 1L, use_lb = 1L, debug = 0L) {
+    .Call(`_IncDTW_cpp_rundtw_mv`, h, x, step_pattern, dist_method, kNN_inf_list, ws, threshold, overlap_tol, do_norm, use_ea, use_lb, debug)
 }
 
-cpp_rundtw_znorm_mv <- function(h, x, ret, step_pattern, dist_method, ws, threshold, overlap_tol = 0L, kNNk = 0L, use_ea = 1L, use_lb = 1L, debug = 0L) {
-    .Call(`_IncDTW_cpp_rundtw_znorm_mv`, h, x, ret, step_pattern, dist_method, ws, threshold, overlap_tol, kNNk, use_ea, use_lb, debug)
+cpp_rundtw_mv_lot <- function(h, x, kNN_val_in, kNN_ix_in, kNN_lot_ix_in, kNN_inf_list_in, lot_ix, step_pattern, dist_method, ws, threshold, overlap_tol = 0L, do_norm = 1L, use_ea = 1L, use_lb = 1L, debug = 0L) {
+    .Call(`_IncDTW_cpp_rundtw_mv_lot`, h, x, kNN_val_in, kNN_ix_in, kNN_lot_ix_in, kNN_inf_list_in, lot_ix, step_pattern, dist_method, ws, threshold, overlap_tol, do_norm, use_ea, use_lb, debug)
+}
+
+cpp_rundtw_znorm <- function(h, x, step_pattern, kNN_inf_list, ws, threshold, overlap_tol = 0L, use_ea = 1L, use_lb = 1L, debug = 0L) {
+    .Call(`_IncDTW_cpp_rundtw_znorm`, h, x, step_pattern, kNN_inf_list, ws, threshold, overlap_tol, use_ea, use_lb, debug)
+}
+
+cpp_rundtw_znorm_lot <- function(h, x, kNN_val_in, kNN_ix_in, kNN_lot_ix_in, kNN_inf_list_in, lot_ix, step_pattern, ws, threshold, overlap_tol = 0L, use_ea = 1L, use_lb = 1L, debug = 0L) {
+    .Call(`_IncDTW_cpp_rundtw_znorm_lot`, h, x, kNN_val_in, kNN_ix_in, kNN_lot_ix_in, kNN_inf_list_in, lot_ix, step_pattern, ws, threshold, overlap_tol, use_ea, use_lb, debug)
+}
+
+cpp_rundtw_znorm_mv <- function(h, x, step_pattern, dist_method, kNN_inf_list, ws, threshold, overlap_tol = 0L, use_ea = 1L, use_lb = 1L, debug = 0L) {
+    .Call(`_IncDTW_cpp_rundtw_znorm_mv`, h, x, step_pattern, dist_method, kNN_inf_list, ws, threshold, overlap_tol, use_ea, use_lb, debug)
+}
+
+cpp_rundtw_znorm_mv_lot <- function(h, x, kNN_val_in, kNN_ix_in, kNN_lot_ix_in, kNN_inf_list_in, lot_ix, step_pattern, dist_method, ws, threshold, overlap_tol = 0L, use_ea = 1L, use_lb = 1L, debug = 0L) {
+    .Call(`_IncDTW_cpp_rundtw_znorm_mv_lot`, h, x, kNN_val_in, kNN_ix_in, kNN_lot_ix_in, kNN_inf_list_in, lot_ix, step_pattern, dist_method, ws, threshold, overlap_tol, use_ea, use_lb, debug)
 }
 

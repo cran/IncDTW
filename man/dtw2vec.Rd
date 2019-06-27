@@ -38,9 +38,7 @@ no matrices are allocated, no matrices are returned
 \references{
 Sakoe, H.; Chiba, S., Dynamic programming algorithm optimization for spoken word recognition, Acoustics, Speech, and Signal Processing [see also IEEE Transactions on Signal Processing], IEEE Transactions on , vol.26, no.1, pp. 43-49, Feb 1978. http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1163055
 }
-\author{
-Maximilian Leodolter
-}
+
 
 \examples{
 Q <- cumsum(rnorm(100))

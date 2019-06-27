@@ -112,7 +112,7 @@ idtw <- function(Q, C, newObs, gcm, dm, dist_method = c("norm1", "norm2", "norm2
    #Normalization
    if(step_pattern == "symmetric2"){
       ret <- c(ret, normalized_distance = 
-                  ret$distance/(nrow(gcm) + ncol(gcm) + nrow(newObs)) )
+                  ret$distance/(nrow(gcm) + ncol(gcm) + o) )
    }else{
       ret <- c(ret, normalized_distance = NA )
    }
@@ -120,12 +120,367 @@ idtw <- function(Q, C, newObs, gcm, dm, dist_method = c("norm1", "norm2", "norm2
    if(return_cm) ret <- c(ret, list(cm = cm_add))
    if(return_diffM) ret <- c(ret, list(diffM = diffM))
    if(return_QC) ret <- c(ret, list(Q = Q, C = c(C, newObs)))
-   class(ret) <- append(class(ret), "idtw")
+   class(ret) <- append(class(ret), "idtw", 0)
    return(ret)
 }
 
 
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+
+initialize_plane <- function(Q, C, dist_method = c("norm1", "norm2", "norm2_square"),
+                     step_pattern = c("symmetric2", "symmetric1"), ws = NULL){
+   
+   dist_method <- match.arg(dist_method)
+   step_pattern <- match.arg(step_pattern)
+   
+   
+   if(is.vector(Q)){
+      if(dist_method != "norm1"){
+         dist_method <- "norm1"
+         warning("dist_method is set to 'norm1' for the univariate case")
+      }
+      nQ <- length(Q)
+      nC <- length(C)   
+      
+   }else if(is.matrix(Q)){
+      if(ncol(Q) != ncol(C)){
+         stop("C and Q must be vectors or matrices having the same number of columns.")
+      }
+      nQ <- nrow(Q)
+      nC <- nrow(C)   
+   }else{
+      stop("C and Q must be vectors or matrices having the same number of columns.")
+   }
+
+   ret <- idtw2vec(Q = Q,
+                   newObs = C, 
+                   dist_method = dist_method, 
+                   step_pattern = step_pattern, 
+                   gcm_lc = NULL, 
+                   gcm_lr = NULL, 
+                   nC = NULL,
+                   ws = ws)
+   
+   control <- list(dist_method = dist_method, step_pattern = step_pattern,
+                   nQ = nQ, nC = nC, ws = ws, reverse = FALSE)
+   
+   ret$control <- control
+   ret$Q <- Q
+   ret$C <- C
+   # ret$normalized_distance <- ret$distance/(ret$control$nC + ret$control$nQ)
+   class(ret) <- append(class(ret), "planedtw", 0)
+   return(ret)
+}
+
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+reverse <- function(x, ...) {
+   UseMethod("reverse")
+}
+
+reverse.planedtw <- function(x, ...){
+   
+   
+   if(is.vector(x$Q)){
+      ret <- idtw2vec(Q = x$Q[x$control$nQ:1],
+                      newObs = x$C[x$control$nC:1], 
+                      dist_method = x$control$dist_method, 
+                      step_pattern = x$control$step_pattern, 
+                      gcm_lc = NULL, 
+                      gcm_lr = NULL, 
+                      nC = NULL,
+                      ws = x$control$ws)
+      ret$Q <- x$Q[x$control$nQ:1]
+      ret$C <- x$C[x$control$nC:1]
+      
+   }else if(is.matrix(x$Q)){
+      ret <- idtw2vec(Q = x$Q[x$control$nQ:1, ,drop = FALSE],
+                      newObs = x$C[x$control$nC:1, ,drop = FALSE], 
+                      dist_method = x$control$dist_method, 
+                      step_pattern = x$control$step_pattern, 
+                      gcm_lc = NULL, 
+                      gcm_lr = NULL, 
+                      nC = NULL,
+                      ws = x$control$ws)
+      ret$Q <- x$Q[x$control$nQ:1, ,drop = FALSE]
+      ret$C <- x$C[x$control$nC:1, ,drop = FALSE]
+      
+   }else{
+      stop("C and Q must be vectors or matrices having the same number of columns.")
+   }
+   
+   
+   ret$control <- x$control
+   ret$control$reverse <- as.logical(1 - x$control$reverse)
+   # ret$normalized_distance <- ret$distance/(ret$control$nC + ret$control$nQ)
+   
+   class(ret) <- append(class(ret), "planedtw", 0)
+   return(ret)
+}
+
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+refresh <- function(x, ...) {
+   UseMethod("refresh")
+}
+
+refresh.planedtw <- function(x, ...){
+   
+   ret <- idtw2vec(Q = x$Q,
+                   newObs = x$C,
+                   dist_method = x$control$dist_method, 
+                   step_pattern = x$control$step_pattern, 
+                   gcm_lc = NULL, 
+                   gcm_lr = NULL, 
+                   nC = NULL,
+                   ws = x$control$ws)
+   ret$Q <- x$Q
+   ret$C <- x$C
+
+   ret$control <- x$control
+   # ret$normalized_distance <- ret$distance/(ret$control$nC + ret$control$nQ)
+   class(ret) <- append(class(ret), "planedtw", 0)
+   return(ret)
+}
+
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+increment <- function(x, newObs, direction = c("C", "Q"), ...){
+   UseMethod("increment")
+}
+
+
+increment.planedtw <- function(x, newObs, direction = c("C", "Q"), ...){
+   direction <- match.arg(direction)
+
+   #initial check
+   if(is.matrix(newObs)){
+      if(is.matrix(x$Q)){
+         if(ncol(x$Q) != ncol(newObs)){
+            stop("newObs must have same number of columns as Q and C.")
+         }
+      }else{
+         stop("Q and C are vectors but newObs is a matrix.")
+      }
+   }
+
+
+   if(direction == "C"){
+      #--- increment C
+      ret <- idtw2vec(Q = x$Q,
+                      newObs = newObs,
+                      dist_method = x$control$dist_method,
+                      step_pattern = x$control$step_pattern,
+                      gcm_lc = x$gcm_lc_new,
+                      gcm_lr = x$gcm_lr_new,
+                      nC = x$control$nC,
+                      ws = x$control$ws)
+
+      if(is.matrix(x$Q)){
+         nC_new <- x$control$nC + nrow(newObs)
+         ret$C <- rbind(x$C, newObs)
+      }else{
+         nC_new <- x$control$nC + length(newObs)
+         ret$C <- c(x$C, newObs)
+      }
+      ret$Q <- x$Q
+      ret$control <- x$control
+      ret$control$nQ <- x$control$nQ
+      ret$control$nC <- nC_new
+
+   }else if(direction == "Q"){
+      #--- increment Q
+      ret <- idtw2vec(Q = x$C,
+                      newObs = newObs,
+                      dist_method = x$control$dist_method,
+                      step_pattern = x$control$step_pattern,
+                      gcm_lc = x$gcm_lr_new,
+                      gcm_lr = x$gcm_lc_new,
+                      nC = x$control$nQ,
+                      ws = x$control$ws)
+
+      if(is.matrix(x$Q)){
+         nQ_new <- x$control$nQ + nrow(newObs)
+         ret$Q <- rbind(x$Q, newObs)
+      }else{
+         nQ_new <- x$control$nQ + length(newObs)
+         ret$Q <- c(x$Q, newObs)
+      }
+      ret$C <- x$C
+      ret$control <- x$control
+      ret$control$nC <- x$control$nC
+      ret$control$nQ <- nQ_new
+
+      nms <- names(ret)
+      nms <- switch_names(nms, "gcm_lr_new", "gcm_lc_new")
+      names(ret) <- nms
+   }
+
+   # ret$normalized_distance <- ret$distance/(ret$control$nC + ret$control$nQ)
+   class(ret) <- append(class(ret), "planedtw", 0)
+   return(ret)
+}
+
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+decrement <- function(x, direction = c("C", "Q", "both"), refresh_dtw = FALSE, nC = NULL, nQ = NULL, ...) {
+   UseMethod("decrement")
+}
+
+decrement.planedtw <- function(x, direction = c("C", "Q", "both"), refresh_dtw = FALSE, nC = NULL, nQ = NULL, ...){
+   
+   # primitive decrement 
+   if(!is.null(nC) | !is.null(nQ)){
+     
+       if(!is.null(nC)){
+         if(is.matrix(x$C)){
+            x$C <- x$C[1:nC, ,drop = FALSE]
+         }else{
+            x$C <- x$C[1:nC]
+         }
+         x$control$nC <- nC
+      }
+      
+      if(!is.null(nQ)){
+         if(is.matrix(x$Q)){
+            x$C <- x$Q[1:nQ, ,drop = FALSE]
+         }else{
+            x$C <- x$Q[1:nQ]
+         }
+         x$control$nQ <- nQ
+      }
+      
+      
+      x$distance <- NA
+      x$normalized_distance <- NA   
+      
+      # try to keep the normalized 
+      if(!is.null(nC) & is.null(nQ)){
+         if(!is.null(x$gcm_lr_new)){
+            x$distance <- x$gcm_lr_new[nC]
+            x$normalized_distance <- x$distance/(x$control$nC + x$control$nQ)
+         }
+      } else if (is.null(nC) & !is.null(nQ)){
+         if(!is.null(x$gcm_lc_new)){
+            x$distance <- x$gcm_lc_new[nQ]
+            x$normalized_distance <- x$distance/(x$control$nC + x$control$nQ)
+         }
+      }
+      
+      # delete invalid parts
+      x$gcm_lr_new <- NULL
+      x$gcm_lc_new <- NULL
+      
+       
+   } else{
+      
+      # decrement with help of dtw_partial
+      direction <- match.arg(direction)
+      
+      if(direction %in% c("both", "C")){
+         partial_C <- TRUE
+      }else{
+         partial_C <- FALSE   
+      }
+      if(direction %in% c("both", "Q")){
+         partial_Q <- TRUE
+      }else{
+         partial_Q <- FALSE   
+      }
+      
+      if(is.null(x$gcm_lc_new) | is.null(x$gcm_lr_new)){
+         return(x)
+      }
+      
+      y <- dtw_partial(x, partial_Q = partial_Q, 
+                       partial_C = partial_C, reverse = x$control$reverse)
+      
+      nQ_new <- y$rangeQ[2] - y$rangeQ[1] + 1
+      nC_new <- y$rangeC[2] - y$rangeC[1] + 1
+      
+      if(nQ_new == x$control$nQ & nC_new == x$control$nC){
+         
+         # no changes: full alignment is best
+         return(x)
+         
+      }else if(nQ_new != x$control$nQ & nC_new == x$control$nC){
+      
+         if(is.matrix(x$Q)){
+            x$Q <- x$Q[y$rangeQ[1]:y$rangeQ[2], , drop = FALSE]
+         }else{
+            x$Q <- x$Q[y$rangeQ[1]:y$rangeQ[2]]
+         }  
+         x$distance <- x$gcm_lc_new[nQ_new]
+            
+      }else if(nQ_new == x$control$nQ & nC_new != x$control$nC){
+         
+         if(is.matrix(x$C)){
+            x$C <- x$C[y$rangeC[1]:y$rangeC[2], , drop = FALSE]
+         }else{
+            x$C <- x$C[y$rangeC[1]:y$rangeC[2]]
+         }
+         x$distance <- x$gcm_lr_new[nC_new]
+      }
+      
+      x$control$nQ <- nQ_new
+      x$control$nC <- nC_new
+      x$gcm_lr_new <- NULL
+      x$gcm_lc_new <- NULL
+      x$normalized_distance <- y$normalized_distance
+   }
+   
+   
+   if(refresh_dtw){
+      return(refresh(x))
+   }else{
+      return(x)   
+   }
+   
+   # if(refresh_dtw){
+   #    return(refresh(x))
+   #    ret <- idtw2vec(Q = x$Q,
+   #                    newObs = x$C,
+   #                    dist_method = x$control$dist_method,
+   #                    step_pattern = x$control$step_pattern,
+   #                    gcm_lc = NULL,
+   #                    gcm_lr = NULL,
+   #                    nC = NULL,
+   #                    ws = x$control$ws)
+   # 
+   #    ret$Q <- x$Q
+   #    ret$C <- x$C
+   #    ret$control <- x$control
+   #    ret$control$nQ <- nQ_new
+   #    ret$control$nC <- nC_new
+   #    # ret$normalized_distance <- ret$distance/(ret$control$nC + ret$control$nQ)
+   #    class(ret) <- append(class(ret), "planedtw", 0)
+   #    return(ret)
+   #    
+   # }else{
+   #    x$control$nQ <- nQ_new
+   #    x$control$nC <- nC_new
+   #    x$gcm_lr_new <- NULL
+   #    x$gcm_lc_new <- NULL
+   #    x$distance <- NA
+   #    x$normalized_distance <- y$normalized_distance
+   #    return(x)
+   # }
+   
+}
 
 
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -141,33 +496,37 @@ idtw2vec <- function(Q, newObs, dist_method = c("norm1", "norm2", "norm2_square"
    initial_dim_check(Q = Q, C = newObs)
    
    if(is.character(newObs)){
+      
+      #--- precalculated cost matrix
       if(newObs != "cm"){
          stop("If Q is the costmatrix, C needs to be equal 'cm'.")
       }
       return(idtw2vec_cm(cm = Q, step_pattern = step_pattern,
-                         gcm_lc = gcm_lc, gcm_lr = gcm_lr, nC = nC, ws = ws))      
-   }
-   
-   
-   if(is.vector(Q)){
-      if(dist_method != "norm1"){
-         warning("dist_method is set to 'norm1' for the univariate case")
-      }
-      return(idtw2vec_univ(Q = Q, newObs = newObs, gcm_lc = gcm_lc,
-                           gcm_lr = gcm_lr, nC = nC, ws = ws, 
-                           step_pattern = step_pattern))
+                         gcm_lc = gcm_lc, gcm_lr = gcm_lr, nC = nC, ws = ws))
+      
    }else{
-      if(ncol(Q) == 1 & ncol(newObs) == 1){
+      
+      #--- regular case - no precalc cost matrix
+      if(is.vector(Q)){
          if(dist_method != "norm1"){
             warning("dist_method is set to 'norm1' for the univariate case")
          }
-         return(idtw2vec_univ(Q = Q, newObs = newObs, gcm_lc = gcm_lc, 
+         return(idtw2vec_univ(Q = Q, newObs = newObs, gcm_lc = gcm_lc,
                               gcm_lr = gcm_lr, nC = nC, ws = ws, 
                               step_pattern = step_pattern))
       }else{
-         return(idtw2vec_multiv(Q = Q, newObs = newObs, dist_method = dist_method,
-                                gcm_lc = gcm_lc, gcm_lr = gcm_lr, 
-                                nC = nC, ws = ws, step_pattern = step_pattern))
+         if(ncol(Q) == 1 & ncol(newObs) == 1){
+            if(dist_method != "norm1"){
+               warning("dist_method is set to 'norm1' for the univariate case")
+            }
+            return(idtw2vec_univ(Q = Q, newObs = newObs, gcm_lc = gcm_lc, 
+                                 gcm_lr = gcm_lr, nC = nC, ws = ws, 
+                                 step_pattern = step_pattern))
+         }else{
+            return(idtw2vec_multiv(Q = Q, newObs = newObs, dist_method = dist_method,
+                                   gcm_lc = gcm_lc, gcm_lr = gcm_lr, 
+                                   nC = nC, ws = ws, step_pattern = step_pattern))
+         }
       }
    }
 }
@@ -247,13 +606,14 @@ idtw2vec_univ <- function(Q, newObs, step_pattern = c("symmetric2", "symmetric1"
    initial_dim_check(Q = Q, C = newObs)
    
    #--- initial checking
+   nQ <- length(Q)
    if(!is.null(ws)){
       if(is.null(gcm_lc)){
-         if(abs(length(Q) - (length(newObs) + 0)) > ws){
+         if(abs(nQ - (length(newObs) + 0)) > ws){
             stop("window size is too small, no warping path can be found")
          }  
       }else{
-         if(abs(length(Q) - (length(newObs) + nC)) > ws){
+         if(abs(nQ - (length(newObs) + nC)) > ws){
             stop("window size is too small, no warping path can be found")
          }
       }
@@ -275,6 +635,7 @@ idtw2vec_univ <- function(Q, newObs, step_pattern = c("symmetric2", "symmetric1"
          
       }else {
          # sakoe chiba warping window
+         if(nQ > ws + 1) init_gcm_lc[(ws + 2):nQ] <- NA
          ret <- cpp_dtw2vec_inc_ws(x=Q, newObs = newObs[-1], 
                                    gcm_lc = init_gcm_lc, 
                                    ws = ws, ny = 1, step_pattern = step_pattern)
@@ -409,3 +770,19 @@ idtw2vec_multiv <- function(Q, newObs, dist_method = c("norm1", "norm2", "norm2_
 }
 
 
+
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+switch_names <- function(nms, name1, name2){
+   nms <- gsub(x = nms, pattern = name1,replacement = "tmp")
+   nms <- gsub(x = nms, pattern = name2, replacement = name1)
+   nms <- gsub(x = nms, pattern = "tmp", replacement = name2)
+   return(nms)
+}
+
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

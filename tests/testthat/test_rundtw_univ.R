@@ -125,7 +125,6 @@ test_that("rundtw and find_peaks", {
 })
 
 
-
 test_that("kNN rundtw", {
    noise <- function(nr) cumsum(rnorm(nr))
    
@@ -159,7 +158,6 @@ test_that("kNN rundtw", {
    
    expect_equal(ist, soll)
 })
-
 
 
 test_that("kNN rundtw", {
@@ -458,7 +456,7 @@ test_that("run time univ", {
    NH <- c(0.05, 0.1, 0.15, 0.2)
    NX <- c(100, 200)
    
-   NH <- seq(0.1, 0.5, 0.05)
+   NH <- seq(0.1, 0.5, 0.1)
    NX <- c(100, 200, 300, 500, 1000)
    
    df <- data.frame(expr = character(),
@@ -474,15 +472,15 @@ test_that("run time univ", {
                     )
    
    nhh <- NH[1]
-   nx <- NX[1]
+   nx <- NX[5]
    
-   data.table::fwrite(df, file = "comp_time_test_univ.txt")
+   data.table::fwrite(df, file = "build_ignore/comp_time_test_univ.txt")
    tic <- Sys.time()
    for(nhh in NH){
-      print(nhh)
+      print(c(nhh))
       print(Sys.time())
       for(nx in NX){
-         print(c(nhh, nx))
+         print(c(nhh,  nx))
          print(Sys.time())
          
          nh <- nhh*nx
@@ -511,7 +509,7 @@ test_that("run time univ", {
                                                rundtw(hnorm, x, dm, sp, 0, "z", WS, Inf),
                                                rundtw(hnorm, x, dm, sp, 0, "none", WS, NULL),
                                                rundtw(hnorm, x, dm, sp, 0, "none", WS, Inf),
-                                               times = 3)
+                                               times = 30)
          df0 <- maxaR::rel_microbenchmark(mic, 
                      cols = c("expr", "min", "mean", "median", "max", "neval"), 
                      rel_expr = "rundtw(hnorm, x, dm, sp, 0, \"01\", WS, Inf)")$df
@@ -519,7 +517,7 @@ test_that("run time univ", {
          df0$nx <- nx
          df0$nfits <- nfits
          
-         data.table::fwrite(df0, file = "comp_time_test_univ.txt", append = T, row.names = F, col.names = F)
+         data.table::fwrite(df0, file = "build_ignore/comp_time_test_univ.txt", append = T, row.names = F, col.names = F)
          df <- rbind(df, df0)
          
       }
@@ -528,7 +526,7 @@ test_that("run time univ", {
    
    require(ggplot2)
    
-   df <- data.table::fread(file = "comp_time_test_univ.txt")
+   df <- data.table::fread(file = "build_ignore/comp_time_test_univ.txt")
    df <- df[grep("foo_",df$expr, invert = TRUE), ]
    df <- df[grep("none",df$expr, invert = TRUE), ]
    ggplot(df) + geom_line(aes(x = nh/nx, y = rel, group = expr, col = expr), size = 2)+
@@ -537,6 +535,16 @@ test_that("run time univ", {
    
    
    
+   x <- matrix(cumsum(rnorm(3 * 1000)), ncol = 3)
+   hnorm <- matrix(cumsum(rnorm(3 * 100)), ncol = 3)
+   
+   
+   mic <- microbenchmark::microbenchmark(rundtw(hnorm, x, step_pattern = "symmetric1", normalize = '01'  , dist_method = "norm2_square", k = 0, ws = NULL, threshold = NULL, lower_bound = FALSE ),
+                                         rundtw(hnorm, x, step_pattern = "symmetric1", normalize = 'z'   , dist_method = "norm2_square", k = 0, ws = NULL, threshold = NULL, lower_bound = FALSE ),
+                                         rundtw(hnorm, x, step_pattern = "symmetric1", normalize = 'none', dist_method = "norm2_square", k = 0, ws = NULL, threshold = NULL, lower_bound = FALSE ),
+                                         times = 5)
+   levels(mic$expr) <- c("f(01)", "f(z)", "f(none)")
+   mic
 
 })
 

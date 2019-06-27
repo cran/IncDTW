@@ -1,5 +1,9 @@
 \name{rundtw}
 \alias{rundtw}
+\alias{print.rundtw}
+\alias{summary.rundtw}
+\alias{is.rundtw}
+
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 rundtw
@@ -10,8 +14,14 @@ Detect recurring patterns similar to given query pattern by measuring the distan
 \usage{
 rundtw(Q, C, dist_method = c("norm1", "norm2", "norm2_square"), 
       step_pattern = c("symmetric1", "symmetric2"), k = NULL, 
-      normalize = c("01", "z", "none"), 
-      ws = NULL, threshold = NULL, lower_bound = TRUE, overlap_tol = 0)
+      normalize = c("01", "z", "none"), ws = NULL, threshold = NULL, 
+      lower_bound = TRUE, overlap_tol = 0, return_QC = FALSE)
+      
+\method{print}{rundtw}(x, ...)
+
+\method{summary}{rundtw}(object, ...)
+
+is.rundtw(x) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -45,6 +55,15 @@ logical, (default = TRUE) If TRUE (default) then lower bounding is applied (see 
 \item{overlap_tol}{
 integer between 0 and length of Q, (default = 0) gives the number of observations that two consecutive fits are accepted to overlap. 
 }
+\item{return_QC}{logical, default = FALSE. If TRUE then \code{Q} and \code{C} are appended to the return list.
+}
+\item{x}{the output object from \code{\link{rundtw}}.
+}
+\item{object}{any R object
+}
+\item{...}{further arguments passed to print or summary.
+}
+
 }
 
 
@@ -54,17 +73,18 @@ integer between 0 and length of Q, (default = 0) gives the number of observation
 \item{knn_indices}{indices of the found kNN}
 \item{knn_values}{DTW distances of the found kNN}
 \item{knn_list_indices}{indices of list entries of C, where to find the kNN. Only returned if C is a list of time series. See examples.}
+\item{Q, C}{input time series}
 }
 
 
 \details{
-This function and algorithm was inspired by the work of [3] and refined for running min-max normalization and lower bounding.
+This function and algorithm was inspired by the work of Sakurai et al. (2007) and refined for running min-max normalization and lower bounding.
 
 Lower Bounding: The following methods are implemented:
 \itemize{
-\item \code{LB_Keogh} [1] for univariate time series 
-\item \code{LB_MV} [2] for multivariate time series with the \code{dist_method = "norm2_square"}
-\item Adjusted for different distance methods "norm1" and "norm2", inspired by [2].
+\item \code{LB_Keogh} for univariate time series (Keogh et al. 2005)
+\item \code{LB_MV} for multivariate time series with the \code{dist_method = "norm2_square"}, (Rath et al. 2002)
+\item Adjusted for different distance methods "norm1" and "norm2", inspired by (Rath et al. 2002).
 }
 
 
@@ -89,119 +109,143 @@ If C is a list of time series, the algorithm concatenates the list to one long t
 
 
 
+
 \references{
 \itemize{
-\item [1] Keogh, Eamonn, and Chotirat Ann Ratanamahatana. "Exact indexing of dynamic time warping." Knowledge and information systems 7.3 (2005): 358-386.
-\item [2] Rath, Toni M., and R. Manmatha. "Lower-bounding of dynamic time warping distances for multivariate time series." University of Massachusetts Amherst Technical Report MM 40 (2002).
-\item [3] Sakurai, Yasushi, Christos Faloutsos, and Masashi Yamamuro. "Stream monitoring under the time warping distance." Data Engineering, 2007. ICDE 2007. IEEE 23rd International Conference on. IEEE, 2007.
+\item Keogh, Eamonn, and Chotirat Ann Ratanamahatana. "Exact indexing of dynamic time warping." Knowledge and information systems 7.3 (2005): 358-386.
+\item Rath, Toni M., and R. Manmatha. "Lower-bounding of dynamic time warping distances for multivariate time series." University of Massachusetts Amherst Technical Report MM 40 (2002).
+\item Sakurai, Yasushi, Christos Faloutsos, and Masashi Yamamuro. "Stream monitoring under the time warping distance." Data Engineering, 2007. ICDE 2007. IEEE 23rd International Conference on. IEEE, 2007.
 }
 
 }
-\author{
-Maximilian Leodolter
-}
+
 
 \examples{
 
 \dontrun{
-#--- univariate case
+#--- Simulate a query pattern Q and a longer time series C with
+# distorted instances of Q within C. Apply rundtw() do detect 
+# these instances of C. 
 
-noise <- function(nr) cumsum(rnorm(nr))
-set.seed(123)
-nx <- 500
-nh <- 40
+rw <- function(nr) cumsum(rnorm(nr))
+noise <- function(nr) rnorm(nr)
+set.seed(1234)
+nC <- 500
+nQ <- 40
 nfits <- 5
 
-nn <- nx - nfits * nh# nnoise
-nn <- nn/nfits
+nn <- nC - nfits * nQ # length of noise
+nn <- nn/nfits + 1
 
-h <- sin(1:nh)
-hnorm <- IncDTW::norm( h , type="01")
-x <- noise(0)
+Q <- sin(seq(from = 1, to = 4 * pi, length.out = nQ))
+Qnorm <- IncDTW::norm(Q, type = "01")
+C <- rw(0)
 for(i in 1:nfits){
-   x <- c(x, noise(nn)  , 
-          h * abs(rnorm(1, 10,10))+ rnorm(1, 0, 10))
+   C <- c(C, rw(nn)  , 
+          Q * abs(rnorm(1, 10, 10)) + 
+            rnorm(1, 0, 10) + noise(nQ))
 }
 
-# DO norm and DO lower bound
-result <- rundtw(h, x, normalize = '01', ws = 10, threshold = Inf, lower_bound = TRUE)
+# Apply running min-max normalization and allow lower 
+# bounding to find the 3 NN
+x <- rundtw(Q, C, normalize = '01', ws = 10, k = 3, 
+            lower_bound = TRUE, return_QC = TRUE)
 
-## have a look into the result and get best indices with lowest distance
-minima <- find_peaks(result$dist, w = nh, get_min = TRUE)
-par(mfrow=c(2,1))
-plot(x, type = "l")
-for(i in minima) lines(x = i:(i+nh-1), y = x[i:(i+nh-1)], col="red")
-plot(result$dist, xlim=c(1, nx))
-points(x = minima, y = result$dist[minima], col="red", pch=16)
+# Have a look at the result and get the best indices 
+# with lowest distance.
+x
+summary(x)
+find_peaks(x$dist, nQ)
+plot(x, normalize = "01")
+
+# The fourth and fifth simuated fits are not returned, 
+# since the DTW distances are higher than the other found 3 NN. 
+# The algorithm early abandons and returns NA for these 
+# indices. Get all distances by the following command:
+x_all <- rundtw(Q, C, normalize = '01', ws = 10, 
+                k = 0, lower_bound = FALSE)
+plot(x_all)
+
+# Do min-max-norm and lower bound
+rundtw(Q, C, normalize = '01', ws = 10, lower_bound = TRUE)
+
+# Do z-norm and lower bound
+rundtw(Q, C, normalize = 'z', ws = 10, lower_bound = TRUE)
+
+# Don't norm and don't lower bound
+rundtw(Q, C, normalize = 'none', ws = 10, lower_bound = FALSE)
+
+# kNN: Do z-norm and lower bound 
+rundtw(Q, C, normalize = 'z', ws = 10, k = 3)
 
 
-# DO min-max-norm and DO lower bound
-rundtw(h, x, normalize = '01', ws = 10, threshold = Inf, lower_bound = TRUE)
 
+#--- For multivariate time series
+rw <- function(nr, nco) {
+        matrix(cumsum(rnorm(nr * nco)), nrow = nr, ncol = nco)
+}
 
-# DO z-norm and DO lower bound
-rundtw(h, x, normalize = 'z', ws = 10, threshold = NULL, lower_bound = TRUE)
-
-# DONT norm and DONT lower bound
-rundtw(h, x, normalize = 'none', ws = 10, threshold = NULL, lower_bound = FALSE)
-
-
-# kNN: DO z-norm and DO lower bound 
-rundtw(h, x, normalize = '01', ws = 10, k = 3)
-
-
-#--- multivariate case
-noise <- function(nr, nc) matrix(cumsum(rnorm(nr * nc)), nrow = nr, ncol = nc)
-
-nx <- 500
-nh <- 50
-nc <- 2
+nC <- 500
+nQ <- 50
+nco <- 2
 nfits <- 5
 
-nn <- nx - nfits * nh# nnoise
+nn <- nC - nfits * nQ# length of noise
 nn <- nn/nfits
 
-h <- noise(nh, nc)
-hnorm <- IncDTW::norm( h , type="01")
-x <- matrix(numeric(), ncol=nc)
+Q <- rw(nQ, nco)
+Qnorm <- IncDTW::norm(Q, type="01")
+C <- matrix(numeric(), ncol=nco)
 for(i in 1:nfits){
-   x <- rbind(x, noise(nn, nc), h)
+   C <- rbind(C, rw(nn, nco), Q)
 }
 
-# DO min-max-norm and DO lower bound
-rundtw(h, x, normalize = '01', ws = 10, threshold = Inf, lower_bound = TRUE)
+# Do min-max-norm and lower bound
+rundtw(Q, C, normalize = '01', ws = 10, threshold = Inf, 
+       lower_bound = TRUE)
+
+# Do z-norm and lower bound
+rundtw(Q, C, normalize = 'z', ws = 10, threshold = NULL, 
+       lower_bound = TRUE)
+
+# Don't norm and don't lower bound
+rundtw(Q, C, normalize = 'none', ws = 10, threshold = NULL, 
+       lower_bound = FALSE)
 
 
-# DO z-norm and DO lower bound
-rundtw(h, x, normalize = 'z', ws = 10, threshold = NULL, lower_bound = TRUE)
 
-# DONT norm and DONT lower bound
-rundtw(h, x, normalize = 'none', ws = 10, threshold = NULL, lower_bound = FALSE)
+#--- C can also be a list of (multivariate) time series. 
+# So rundtw() detects the closest fits of a query pattern
+# across all time series in C.
+nC <- 500
+nQ <- 50
+nco <- 2
+rw <- function(nr, nco){
+        matrix(cumsum(rnorm(nr * nco)), nrow = nr, ncol = nco)
+}
 
+Q <- rw(nQ, nco)
+C1 <- rbind(rw(100, nco), Q, rw(20, nco))
+C2 <- rbind(rw(10, nco), Q, rw(50, nco))
+C3 <- rbind(rw(200, nco), Q, rw(30, nco))
+C_list <- list(C1, C2, C3)
 
+# Do min-max-norm and lower bound
+x <- rundtw(Q, C_list, normalize = '01', ws = 10, threshold = Inf, 
+            lower_bound = TRUE, k = 3, return_QC = TRUE)
+x
+# Plot the kNN fit of the 2nd or 3rd list entry of C
+plot(x, lix = 2)
+plot(x, lix = 3)
 
-#--- C is a list of multivariate time series
-noise <- function(nr, nc) matrix(cumsum(rnorm(nr * nc)), nrow = nr, ncol = nc)
+# Do z-norm and lower bound
+rundtw(Q, C_list, normalize = 'z', ws = 10, threshold = Inf, 
+       lower_bound = TRUE, k = 3)
 
-nx <- 500
-nh <- 50
-nc <- 2
-
-h <- noise(nh, nc)
-hnorm <- IncDTW::norm( h , type="01")
-x1 <- rbind(noise(100, nc), h, noise(20, nc))
-x2 <- rbind(noise(10, nc), h, noise(50, nc))
-x3 <- rbind(noise(200, nc), h, noise(30, nc))
-x <- list(x1, x2, x3)
-
-# DO min-max-norm and DO lower bound
-rundtw(h, x, normalize = '01', ws = 10, threshold = Inf, lower_bound = TRUE, k = 3)
-
-# DO z-norm and DO lower bound
-rundtw(h, x, normalize = 'z', ws = 10, threshold = Inf, lower_bound = TRUE, k = 3)
-
-# DONT norm and DONT lower bound
-rundtw(h, x, normalize = 'none', ws = 10, threshold = Inf, lower_bound = TRUE, k = 3)
-
+# Don't norm and don't lower bound
+x <- rundtw(Q, C_list, normalize = 'none', ws = 10, 
+            lower_bound = FALSE, k = 0, return_QC = TRUE)
+x
+plot(x)
 }
 }

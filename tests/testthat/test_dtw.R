@@ -399,3 +399,22 @@ test_that("dtw_partial() reverse", {
    expect_equal(ret$rangeQ[1], 101)
    
 })
+
+
+test_that("dec_dm", {
+   Q <- cos(1:100)
+   C <- cumsum(rnorm(80))
+   # the ordinary calculation
+   result_base <- dtw(Q=Q, C=C, return_wp = TRUE) 
+   
+   # the ordinary calculation without the last 4 observations
+   result_decr <- dtw(Q=Q, C=C[1:(length(C) - 4)], return_wp = TRUE) 
+   # the decremental step: reduce C for 4 observation
+   result_decr2 <- dec_dm(result_base$dm, Ndec = 4) 
+   
+   # compare ii, jj and wp of result_decr and those of 
+   expect_equal(result_decr$ii, result_decr2$ii)
+   expect_equal(result_decr$jj, result_decr2$jj)
+   expect_equal(result_decr$wp, result_decr2$wp)
+
+})

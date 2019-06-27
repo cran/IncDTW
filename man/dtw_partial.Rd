@@ -43,20 +43,24 @@ If Q and C are in reverse order, then the optimal solution for the reverse probl
 \item{normalized_distance}{the normalized DTW distance (see details in \code{\link{dtw}}).}
 }
 
-\author{
-Maximilian Leodolter
-}
+
 
 \examples{
-# open-end alignment for multivariate time series
-# first simulate a 2-dim time series Q
-Q <- matrix(cumsum(rnorm(100)), ncol=2)
+#--- Open-end alignment for multivariate time series.
+# First simulate a 2-dim time series Q
+Q <- matrix(cumsum(rnorm(50 * 2)), ncol = 2)
 
-# simulate C as noisy and warped version of Q, and append noise at the end
-C <- Q[sort(sample(50, 40, replace=FALSE)), ] + rnorm(80)
-C <- rbind(C, matrix(rnorm(30), ncol=2))
+# Then simulate C as warped version of Q, 
+C <- simulate_timewarp(Q, stretch = 0.2, compress = 0.2, 
+                       preserve_length = TRUE)
 
-tmp <- dtw(Q = Q, C = C, ws = 30, return_QC = TRUE, return_wp = TRUE)
+# add some noise
+C <- C + rnorm(prod(dim(C)))
+
+# and append noise at the end
+C <- rbind(C, matrix(rnorm(30), ncol = 2))
+
+tmp <- dtw(Q = Q, C = C, ws = 50, return_QC = TRUE, return_wp = TRUE)
 par <- dtw_partial(tmp, partial_C = TRUE)
 par
 plot(tmp, partial = par, type = "QC")
@@ -64,8 +68,7 @@ plot(tmp, partial = par, type = "warp")
 plot(tmp, partial = par, type = "QC", selDim = 2)
 
 
-
-# open-start is possible as well (open-end is the regular case) since DTW is reversible:
+#--- Open-start is possible as well:
 Q <- sin(1:100)
 C <- c(rnorm(50), Q)
 tmp <- dtw(Q = rev(Q), C = rev(C))

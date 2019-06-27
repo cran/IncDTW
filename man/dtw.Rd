@@ -1,6 +1,9 @@
 \name{dtw}
 \alias{dtw}
 \alias{cm}
+\alias{print.idtw}
+\alias{summary.idtw}
+\alias{is.idtw}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Dynamic Time Warping
@@ -17,7 +20,14 @@ dtw(Q, C, dist_method = c("norm1", "norm2", "norm2_square"),
     return_diffp = FALSE,
     return_QC = FALSE)
                      
-cm(Q, C, dist_method = c("norm1", "norm2", "norm2_square"), ws = NULL)
+cm(Q, C, dist_method = c("norm1", "norm2", "norm2_square"), 
+   ws = NULL, ...)
+   
+\method{print}{idtw}(x, digits = getOption("digits"), ...)
+
+\method{summary}{idtw}(object, ...)
+
+is.idtw(x)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,27 +36,40 @@ cm(Q, C, dist_method = c("norm1", "norm2", "norm2_square"), ws = NULL)
 \item{C}{
 Candidate time series. C needs to be one of the following: (1) a one dimensional vector, (2) a matrix where each row is one observations and each column is one dimension of the time series, or (3) if Q is a matrix of differences or costs C needs to be the respective character string 'diffM' or 'cm'.
 }
-\item{dist_method}{character, describes the method of distance measure for multivariate time series (this parameter is ignored for univariate time series). Currently supported methods are 'norm1' (default, is the Manhattan distance), 'norm2' (is the Euclidean distance) and 'norm2_square' For the function \code{cm} the parameter \code{dist_method} can also be a user defined distance function. 
+\item{dist_method}{character, describes the method of distance measure for multivariate time series (this parameter is ignored for univariate time series). Currently supported methods are 'norm1' (default, is the Manhattan distance), 'norm2' (is the Euclidean distance) and 'norm2_square' For the function \code{cm()} the parameter \code{dist_method} can also be a user defined distance function. 
 }
 \item{step_pattern}{character, describes the step pattern. Currently implemented are the patterns \code{symmetric1} and \code{symmetric2}, see details.
 }
 \item{ws}{
 integer, describes the window size for the sakoe chiba window. If NULL, then no window is applied. (default = NULL)
 }
-\item{return_cm}{boolean, if TRUE then the Matrix of costs (the absolute value) is returned. (default = FALSE)
+\item{return_cm}{logical, if TRUE then the Matrix of costs (the absolute value) is returned. (default = FALSE)
 }
 \item{return_diffM}{
-boolean, if TRUE then the Matrix of differences (not the absolute value) is returned. (default = FALSE)
+logical, if TRUE then the Matrix of differences (not the absolute value) is returned. (default = FALSE)
 }
 \item{return_wp}{
-boolean, if TRUE then the warping path is returned. (default = FALSE) If return_diffp == TRUE, then return_wp is set to TRUE as well.
+logical, if TRUE then the warping path is returned. (default = FALSE) If return_diffp == TRUE, then return_wp is set to TRUE as well.
 }
 \item{return_diffp}{
-boolean, if TRUE then the path of differences (not the absolute value) is returned. (default = FALSE)
+logical, if TRUE then the path of differences (not the absolute value) is returned. (default = FALSE)
 }
 \item{return_QC}{
-boolean, if TRUE then the input vectors Q and C are appended to the returned list. This is useful for the \code{\link{plot.idtw}} function.  (default = FALSE)
+logical, if TRUE then the input vectors Q and C are appended to the returned list. This is useful for the \code{\link{plot.idtw}} function.  (default = FALSE)
 }
+\item{x}{
+output from \code{dtw} or \code{\link{idtw}}.
+}
+\item{object}{
+any R object
+}
+\item{...}{
+additional arguments, e.g. passed to \code{print}, \code{summary}, or a user defined distance function for \code{cm()} 
+}
+\item{digits}{
+passed to \code{round} and \code{print}
+}
+
 }
 \details{
 The dynamic time warping distance is the element in the last row and last column of the global cost matrix. 
@@ -93,30 +116,27 @@ To make DTW distances comparable for many time series of different lengths use t
 \references{
 Sakoe, H.; Chiba, S., Dynamic programming algorithm optimization for spoken word recognition, Acoustics, Speech, and Signal Processing [see also IEEE Transactions on Signal Processing], IEEE Transactions on , vol.26, no.1, pp. 43-49, Feb 1978. http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1163055
 }
-\author{
-Maximilian Leodolter
-}
+
 
 \examples{
-# multivariate
-Q <- matrix(rnorm(100), ncol=2)
-C <- matrix(rnorm(80), ncol=2)
-tmp <- dtw(Q = Q, C = C, ws = 30)
 
-
-# univariate
+#--- univariate
 Q <- cumsum(rnorm(100))
 C <- Q[11:100] + rnorm(90, 0, 0.5)
-tmp <- dtw(Q = Q, C = C, ws = 15, return_diffM = FALSE)
+tmp <- dtw(Q = Q, C = C, ws = 15, return_diffM = FALSE, 
+           return_QC = TRUE, return_wp = TRUE)
 names(tmp)
-tmp$distance
+print(tmp, digits = 3)
+plot(tmp)
+plot(tmp, type = "warp")
 
 
-
-# compare different input variations
-dtw_base <- dtw(Q = Q, C = C, ws = 15, return_diffM = TRUE)
-dtw_diffM <- dtw(Q = dtw_base$diffM, C = "diffM", ws = 15, return_diffM = TRUE)
-dtw_cm <- dtw(Q = abs(dtw_base$diffM), C = "cm", ws = 15, return_diffM = TRUE)
+#--- compare different input variations
+dtw_base  <- dtw(Q = Q, C = C, ws = 15, return_diffM = TRUE)
+dtw_diffM <- dtw(Q = dtw_base$diffM, C = "diffM", ws = 15, 
+                 return_diffM = TRUE)
+dtw_cm    <- dtw(Q = abs(dtw_base$diffM), C = "cm", ws = 15, 
+                 return_diffM = TRUE)
 
 identical(dtw_base$gcm, dtw_cm$gcm)
 identical(dtw_base$gcm, dtw_diffM$gcm)
@@ -124,10 +144,12 @@ identical(dtw_base$gcm, dtw_diffM$gcm)
 # of course no diffM is returned in the 'cm'-case
 dtw_cm$diffM
 
-# multivariate case
+
+#--- multivariate case
 Q <- matrix(rnorm(100), ncol=2)
 C <- matrix(rnorm(80), ncol=2)
 dtw(Q = Q, C = C, ws = 30, dist_method = "norm2")
+
 }
 \keyword{ cluster }% use one of  RShowDoc("KEYWORDS")
 \keyword{ ts }% __ONLY ONE__ keyword per line

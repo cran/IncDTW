@@ -1,9 +1,9 @@
 \name{simulate_timewarp}
 \alias{simulate_timewarp}
-%%\alias{insert_const}
-%%\alias{insert_linear_interp}
-%%\alias{insert_norm}
-%%\alias{insert_linear_norm}
+\alias{insert_const}
+\alias{insert_linear_interp}
+\alias{insert_norm}
+\alias{insert_linear_norm}
 
 \title{
 Simulate time warp
@@ -17,11 +17,22 @@ simulate_timewarp(x, stretch = 0, compress = 0,
                   p_index = "rnorm", p_number = "rlnorm", 
                   p_index_list = NULL, p_number_list = NULL, 
                   preserve_length = FALSE, seed = NULL, ...) 
+
+
+insert_const(x, ix, N, const = NULL)
+
+insert_linear_interp(x, ix, N)
+
+insert_norm(x, ix, N, mean = 0, sd = 1)
+
+insert_linear_norm(x, ix, N, mean = 0, sd = 1)
+
+
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
 \item{x}{time series, vector or matrix}
-\item{stretch}{numeric parameter for stretching the time series. \code{stretch >= 1}, see details}
+\item{stretch}{numeric parameter for stretching the time series. \code{stretch >= 0}, see details}
 \item{compress}{numeric parameter for compressing the time series. \code{compress >= 0 & compress < 1}, see details}
 \item{stretch_method}{function, either one of (insert_const, insert_linear_interp,
 insert_norm, insert_linear_norm), or any user defined function that needs the parameters \code{x} (univariate time series as vector), \code{ix} (index where to insert), \code{N} (number of observations to insert) and any other arguments required for that function. See Details. }
@@ -32,6 +43,11 @@ insert_norm, insert_linear_norm), or any user defined function that needs the pa
 \item{preserve_length}{logical, if TRUE (default = FALSE) then the length of the return time series is the same as before the warping, so the compression and stretching do not change the length of the time series, nevertheless perform local warpings}
 \item{seed}{set a seed for reproducible results}
 \item{...}{named parameters for the \code{stretch_method}}
+\item{ix}{index of x where after which to insert}
+\item{N}{number of simulated observations to insert at index ix}
+\item{const}{the constant to be inserted, if NULL (default), then \code{const <- x[ix]}}
+\item{mean}{mean for \code{rnorm}}
+\item{sd}{sd for \code{rnorm}}
 }
 
 
@@ -76,53 +92,70 @@ For the methods with Gaussian noise the parameters \code{mean} and \code{sd} for
 \item{}{time warped time series}
 }
 
-\author{
-Maximilian Leodolter
-}
 
 \examples{
 \dontrun{
+#--- Simulate a time warped version of a time series x
 set.seed(123)
 x <- cumsum(rnorm(100))
-x_new <- simulate_timewarp(x, stretch = 0.1, compress = 0.2, seed = 123) 
+x_warp <- simulate_timewarp(x, stretch = 0.1, compress = 0.2, seed = 123) 
 plot(x, type = "l")
-lines(x_new, col = "red")
+lines(x_warp, col = "red")
 
+
+#--- Simulate a time warp of a multivariate time series
 y <- matrix(cumsum(rnorm(10^3)), ncol = 2)
+y_warp <- simulate_timewarp(y, stretch = 0.1, compress = 0.2, seed = 123) 
+plot(y[,1], type = "l")
+lines(y_warp[,1], col = "red")
 
 
-# insert NA with uniform distributions
+#--- Stretchings means to insert at new values at randomly 
+# selected points of time. Next the new values are set as constant NA,
+# and the points of time simulated uniformly:
 y_warp <- simulate_timewarp(y, stretch = 0.2, p_number = "runif", p_index = "runif",
-                          stretch_method = insert_const, 
-                          const = NA)
+                            stretch_method = insert_const, 
+                            const = NA)
 matplot(y_warp, type = "l")
 
 
-# insert NA with log-normal distribution
+# insert NA and simulate the points of time by log normal
 y_warp <- simulate_timewarp(y, stretch = 0.2, p_number = "rlnorm", 
-                          p_number_list = list(meanlog = 0, sdlog = 1),
-                          stretch_method = insert_const, 
-                          const = NA)
+                            p_number_list = list(meanlog = 0, sdlog = 1),
+                            stretch_method = insert_const, 
+                            const = NA)
 matplot(y_warp, type = "l")
 
 
 # insert linear interpolation
 y_warp <- simulate_timewarp(y, stretch = 0.2, p_number = "rlnorm", 
-                          stretch_method = insert_linear_interp)
+                            stretch_method = insert_linear_interp)
 matplot(y_warp, type = "l")
 
 
 # insert random walk with gaussian noise
 y_warp <- simulate_timewarp(y, stretch = 0.2, p_number = "rlnorm", 
-                          stretch_method = insert_norm,
-                          sd = 1, mean = 0)
+                            stretch_method = insert_norm,
+                            sd = 1, mean = 0)
 matplot(y_warp, type = "l")
 
 
 # insert constant, only 1 observation per random index
 y_warp <- simulate_timewarp(y, stretch = 0.2, p_number = "runif", p_index = "runif",
-                            p_number_list = list(min=1, max=1),   
+                            p_number_list = list(min = 1, max = 1),   
                             stretch_method = insert_const)
+matplot(y_warp, type = "l")
+
+
+# insert by customized insert function
+my_stretch_method <- function(x, ix, N, from, to){
+   c(x[1:ix], 
+     sin(seq(from = from, to = to, length.out = N)) + x[ix],
+     x[(ix + 1):length(x)])
+}
+y_warp <- simulate_timewarp(y, stretch = 0.5, p_number = "rlnorm", 
+                            stretch_method = my_stretch_method,
+                            from = 0, to = 4 * pi)
 matplot(y_warp, type = "l")
 
 }

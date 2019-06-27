@@ -1,5 +1,5 @@
 
-cm <- function(Q, C, dist_method = c("norm1", "norm2", "norm2_square"), ws = NULL){
+cm <- function(Q, C, dist_method = c("norm1", "norm2", "norm2_square"), ws = NULL, ...){
    
    if(!is.matrix(Q)){ Q <- as.matrix(Q) }
    if(!is.matrix(C)){ C <- as.matrix(C) }
@@ -10,8 +10,7 @@ cm <- function(Q, C, dist_method = c("norm1", "norm2", "norm2_square"), ws = NUL
       mat <- matrix(0, nrow = nq, ncol = nc)
       for(i in 1:nq){
          for(j in 1:nc){
-            # print(c(i,j))
-            mat[i,j] <- dist_method(Q[i,], C[j, ])
+            mat[i,j] <- dist_method(Q[i, , drop = FALSE], C[j, , drop = FALSE], ...)
          }
       }
       return(mat)   
@@ -136,7 +135,7 @@ dtw <- function(Q, C, dist_method = c("norm1", "norm2", "norm2_square"),
    if(return_cm) ret <- c(ret, list(cm = cm))
    if(return_diffM) ret <- c(ret, list(diffM = diffM))
    if(return_QC) ret <- c(ret, list(Q = Q, C = C))
-   class(ret) <- append(class(ret), "idtw")
+   class(ret) <- append(class(ret), "idtw", 0)
    return(ret)
 }
 
@@ -406,252 +405,6 @@ dtw2vec_multiv <- function(Q, C, dist_method = c("norm1", "norm2", "norm2_square
 }
 
 
-
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-
-find_peaks <- function (x, w, get_min = TRUE, strict = TRUE){
-   
-   cpp_strict <- strict * 1
-   if(get_min){
-      return( cpp_local_min(x, w = w, strict = cpp_strict) )
-   }else{
-      return( cpp_local_min(-x, w = w, strict = cpp_strict) )
-   }
-}
-
-
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-
-rundtw <- function(Q, C, dist_method = c("norm1", "norm2", "norm2_square"),
-                    step_pattern = c("symmetric1", "symmetric2"), k = NULL, 
-                    normalize = c("01", "z", "none"), ws = NULL, threshold = NULL, lower_bound = TRUE,
-                    overlap_tol = 0){
-   
-   debug <- 0#1 # either 0 or 1, if 1 then the cpp function prints computation details, in that case a sink file is recommended
-   dist_method <- match.arg(dist_method)
-   step_pattern <- match.arg(step_pattern)
-   
-   if(is.logical(normalize)){
-      warning("The values TRUE and FALSE for the parameter 'normalize' are deprecated. Use '01' or 'none' instead.")
-      if(as.logical(normalize)){
-         normalize <- "01" 
-      } else{
-         normalize <- "none"
-      }
-   }else{
-      normalize <- match.arg(normalize)   
-   }
-   
-   
-   # check for 'lot-mode'
-   if(is.list(C)){
-      lot_mode <- TRUE
-      if(is.matrix(C[[1]])){
-         tmp <- rep(Inf, ncol(C[[1]]))
-         noos <- sapply(C, nrow)# number of observations
-         C <- do.call(rbind, lapply(C, function(x){ rbind(tmp, x) }))
-         C <- C[-(1),]
-      }else{
-         noos <- lengths(C)# number of observations
-         C <- do.call(c, lapply(C, function(x){ c(Inf, x) }))
-         C <- C[-(1)]
-      }
-      
-   }else{
-      lot_mode <- FALSE
-   }
-   
-   
-   
-   initial_dim_check(Q = Q, C = C)
-   if(is.null(k)) {
-      k <- 0
-   }else{
-      k <- as.integer(k)
-   }
-   if(k < 0) k <- 0L
-   if(k > 0) lower_bound <- TRUE # k overrules lowerbound parameter
-   
-   if(is.null(threshold)){
-      threshold <- Inf
-      use_ea <- 0
-   }else{
-      if(threshold < 0){
-         stop("threshold needs to be >= 0")
-      }
-      # threshold is set to any values >= 0 and smaller Inf
-      use_ea <- 1
-   }
-   
-   
-   if(overlap_tol < 0 || overlap_tol >= length(C)/ifelse(is.null(ncol(C)), 1, ncol(C))){
-      stop("The overlap tolerance parameter needs to be between 0 and the length of C")
-   }
-   
-   if(lower_bound){
-      if(step_pattern != "symmetric1"){
-         warning("lower_bound is set to FALSE, currently only implemented for step_pattern symmetric1")
-         use_lb <- 0
-      }else{
-         use_ea <- 1
-         use_lb <- 1
-      }
-   }else{
-      use_lb <- 0
-   }
-   
-   if(normalize == "01"){
-      do_norm <- 1
-      Q <- IncDTW::norm(Q, type = "01")
-      
-   }else if(normalize == "z"){
-      Q <- IncDTW::norm(Q, type = "z")
-      
-   }else if (normalize == "none"){
-      do_norm <- 0
-   }
-   
-   
-   if(is.character(C) | is.character(Q)){
-      stop("If Q and C need to be vectors or matrices.")
-   }
-   
-   
-   if(is.vector(Q) || (ncol(Q) == 1 & ncol(C) == 1)){
-      if(is.null(ws)) ws <- length(Q)
-      if(dist_method != "norm1"){
-         warning("dist_method is set to 'norm1' for the univariate case")
-      }
-      nQ <- length(Q)
-      nC <- length(C)
-      if(lot_mode){
-         if(any(noos < nQ )){
-            stop("all time series in the list C must be at least as long as Q")
-         }
-      }
-      ret_init <- rep(-99, nC - nQ + 1)
-      if(lot_mode){
-         ix_inf <- which(C == Inf | is.na(C))
-         if(length(ix_inf) > 0){
-            ix_inf <- as.vector(sapply(ix_inf, function(x){x - (nQ - 1):0}))
-            ret_init[ix_inf] <- NA
-         }
-      }
-      
-      if(normalize == "z"){
-         ret <- cpp_rundtw_znorm(h = Q, x = C, ret = ret_init, 
-                                 step_pattern = step_pattern, 
-                                 ws = ws, threshold = threshold, overlap_tol = overlap_tol, kNNk = k, 
-                                 use_ea = use_ea, use_lb = use_lb, debug = debug) 
-         
-      }else{
-         ret <- cpp_rundtw(h = Q, x = C, ret = ret_init, step_pattern = step_pattern, 
-                           ws = ws, threshold = threshold, overlap_tol = overlap_tol, kNNk = k, 
-                           do_norm = do_norm, use_ea = use_ea, use_lb = use_lb, debug = debug) 
-      }
-      
-   }else{
-      
-      nQ <- nrow(Q)
-      nC <- nrow(C)
-      if(lot_mode){
-         if(any(noos < nQ )){
-            stop("all time series in the list C must be at least as long as Q")
-         }
-      }
-      # ret_init <- initialize_ret(nC, nQ, is_univ = FALSE, lot_mode)
-      ret_init <- rep(-99, nC - nQ + 1)
-      if(lot_mode){
-         ix_inf <- unique( which(C == Inf | is.na(C)) %% nC )
-         if(length(ix_inf) > 0){
-            ix_inf <- as.vector(sapply(ix_inf, function(x){x - (nQ - 1):0}))
-            ret_init[ix_inf] <- NA
-         }
-      }
-      
-      if(is.null(ws)) ws <- nQ
-      
-      if(normalize == "z"){
-         ret <- cpp_rundtw_znorm_mv(h = Q, x = C, ret = ret_init, step_pattern = step_pattern, 
-                                    dist_method = dist_method, ws = ws, threshold = threshold, overlap_tol = overlap_tol,
-                                    kNNk = k, use_ea = use_ea, use_lb = use_lb, debug = debug)         
-      }else{
-         ret <- cpp_rundtw_mv(h = Q, x = C, ret = ret_init, step_pattern = step_pattern, 
-                              dist_method = dist_method, ws = ws, threshold = threshold, overlap_tol = overlap_tol,
-                              kNNk = k, do_norm = do_norm, use_ea = use_ea, use_lb = use_lb, debug = debug)   
-      }
-   }
-   
-   names(ret$counter) <- c("norm_reset","norm_new_extreme", "norm_1step",
-                           "cm_reset", "cm_1step",
-                           "early_abandon", "lower_bound")
-   ret$counter["completed"] <- (nC - nQ + 1) - (ret$counter["early_abandon"] + ret$counter["lower_bound"]) 
-   
-   if(normalize == "z"){
-      ret$counter <- ret$counter[c("early_abandon", "lower_bound", "completed")]
-   }else if(normalize == "none"){
-      ret$counter <- ret$counter[c("cm_reset", "cm_1step","early_abandon", "lower_bound", "completed")]
-   }
-   
-   if(k >0) {
-      # if k > nx/nh then too many NN are initiated and returned, drop those here
-      all_best_indices <- ret$all_best_indices + 1
-      all_best_dist <- ret$dist[all_best_indices]
-      new_order <- order(all_best_dist, decreasing = FALSE)
-      
-      # k_best_indices
-      ret$knn_indices <- all_best_indices[new_order[1:k]]
-      # k_best_dist    
-      ret$knn_values <- all_best_dist[new_order[1:k]]
-      
-      # finally
-      if(debug == 1){
-         print("------all_best indices----------")
-         print(ret$all_best_indices +1)
-         print("------all_best indices end----------")
-      }
-      ret$all_best_indices <- NULL
-      ix_na <- is.na(ret$knn_values)
-      ret$knn_values <- ret$knn_values[!ix_na]
-      ret$knn_indices <- ret$knn_indices[!ix_na]
-      
-   }
-   
-   
-   # assign the found indices of nearest neighbors to 
-   # the respective time series in the list 
-   if(lot_mode){
-      tmp <- list()
-      tmpk <- ret$knn_indices
-      if(k > 0) {
-         ret$knn_list_indices <- ret$knn_indices
-      }
-      
-      i1 <- (-nQ)# for initialization of i0, since first i0 should be 1
-      for(i in 1:length(noos)){
-         i0 <- i1 + nQ + 1
-         i1 <- i0 + noos[i] -nQ 
-         tmp[[i]] <- ret$dist[i0:i1]
-         if(k > 0){
-            ix <- which(ret$knn_indices <= i1 & ret$knn_indices >= i0)
-            if(length(ix) > 0){
-               ret$knn_list_indices[ix] <- i
-               tmpk[ix] <- ret$knn_indices[ix] - i0 +1
-            }
-         }
-      }
-      ret$dist <- tmp
-      ret$knn_indices <- tmpk
-   }
-      
-   return(ret)
-}
-
-
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -659,7 +412,7 @@ rundtw <- function(Q, C, dist_method = c("norm1", "norm2", "norm2_square"),
 dtw_dismat <- function(lot, dist_method = c("norm1", "norm2", "norm2_square"),
                                 step_pattern = c("symmetric2", "symmetric1"),
                                 normalize = TRUE, ws = NULL, threshold = NULL,
-                                return_matrix = TRUE, ncores = NULL, useRcppParallel = TRUE){
+                                return_matrix = FALSE, ncores = NULL, useRcppParallel = TRUE){
    
    dist_method  <- match.arg(dist_method)
    step_pattern <- match.arg(step_pattern)
@@ -983,19 +736,3 @@ initial_ws_check <- function(nQ, nC, ws){
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-# initialize_ret <- function(nC, nQ, is_univ, lot_mode ){
-#    
-#    ret_init <- rep(-99, nC - nQ + 1)
-#    if(lot_mode){
-#       if(is_univ) {
-#          ix_inf <- which(C == Inf | is.na(C))
-#       }else{
-#          ix_inf <- unique( which(C == Inf | is.na(C)) %% nC )
-#       }
-#       if(length(ix_inf) > 0){
-#          ix_inf <- as.vector(sapply(ix_inf, function(x){x - (nQ - 1):0}))
-#          ret_init[ix_inf] <- NA
-#       }
-#    }
-#    return(ret_init)
-# }

@@ -23,20 +23,21 @@ Find negative or positive peaks of a vector in a predefined neighborhood w
 }
 \examples{
 
-# finds also the border peak maximum at index 29
+#--- Find the peaks (local minima and maxima), 
+# and also the border peak at index 29. First the local maxima:
 x <- c(1:10, 9:1, 2:11)
 peak_indices <- find_peaks(x, w=3, get_min=FALSE)
 peak_indices
 x[peak_indices]
 
-# and the border peak at index 1
+# and now the local minima
 peak_indices <- find_peaks(x, w=3, get_min=TRUE)
 peak_indices
 x[peak_indices]
 
 
-# what means the neigbohood parameter w:
-# at least w-many values need to be inbetween two consecutive peaks
+#--- What exactly does the neigbohood parameter 'w' mean?
+# At least w-many values need to be inbetween two consecutive peaks:
 x <- -c(1:10, 9, 9, 11, 9:8, 7)
 peak_indices <- find_peaks(x, w=3)
 peak_indices
@@ -48,7 +49,9 @@ peak_indices
 x[peak_indices]
 
 
-# what means the strict parameter:
+#--- What does the parameter 'strict' mean?
+# If strict = TRUE, then the peak must be '<' (or '>') 
+# then the neighbors, other wise '<=' (or '>=')
 x <- c(10:1,  1:10)
 peak_indices <-  find_peaks(x, w=3, strict = TRUE)
 peak_indices
@@ -60,6 +63,3 @@ x[peak_indices]
    
 }
 
-\author{
-Maximilian Leodolter
-}

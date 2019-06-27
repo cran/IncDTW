@@ -35,14 +35,30 @@ For a vector \code{x} the z-normalization subtracts the mean and devides by the 
 \value{
 \item{x}{the normalized vector}
 }
-\author{
-Maximilian Leodolter
-}
 
 \examples{
+
+# min-max normalization or z-normalization for a vector 
 x <- cumsum(rnorm(100, 10, 5))
 y <- norm(x, "01")
 z <- norm(x, "z")
+par(mfrow = c(1, 3))
+plot(x, type="l")
+plot(y, type="l")
+plot(z, type="l")
+par(mfrow = c(1, 1))
+
+
+# columnwise for matrices
+x <- matrix(c(1:10, sin(1:10)), ncol = 2)
+y <- norm(x, "01")
+z <- norm(x, "z")
+par(mfrow = c(1, 3))
+matplot(x, type="l")
+matplot(y, type="l")
+matplot(z, type="l")
+par(mfrow = c(1, 1))
+
 }
 
 \keyword{ classif }% use one of  RShowDoc("KEYWORDS")

@@ -1,5 +1,6 @@
 \name{idtw}
 \alias{idtw}
+
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Incremental DTW
@@ -8,7 +9,8 @@ Incremental DTW
 Update the DTW distance, cost matrices and direction matrices including the warping path for new observations of two time series.
 }
 \usage{
-idtw(Q, C, newObs, gcm, dm, dist_method = c("norm1", "norm2", "norm2_square"),
+idtw(Q, C, newObs, gcm, dm, 
+      dist_method = c("norm1", "norm2", "norm2_square"),
       step_pattern = c("symmetric2", "symmetric1"),
       diffM = NULL, ws = NULL, 
       return_cm = FALSE,
@@ -22,25 +24,25 @@ idtw(Q, C, newObs, gcm, dm, dist_method = c("norm1", "norm2", "norm2_square"),
  \item{Q}{numeric vector, or matrix (see also \code{\link{dtw}})}
 \item{C}{numeric vector, or matrix}
 \item{newObs}{vector or matrix of new observations to be appended to C}
-\item{gcm}{global cost matrix, output from dtw(Q=Q, C=C, ws=ws)}
-\item{dm}{direction matrix, output from dtw(Q=Q, C=C, ws=ws)}
+\item{gcm}{global cost matrix, output from \code{dtw(Q, C, ...)}}
+\item{dm}{direction matrix, output from \code{dtw(Q, C, ...)}}
 \item{dist_method}{character, describes the method of distance measure. See also \code{\link{dtw}}.}
 \item{step_pattern}{character, describes the step pattern. See also \code{\link{dtw}}.}
-\item{diffM}{differences matrix, output from dtw(Q=Q, C=C, ws=ws). This matrix is an optional input parameter (default = NULL) that is necessary to return the path of differences. It makes no sense in the multivariate case.}
+\item{diffM}{differences matrix, output from \code{dtw(Q, C, ...)}. This matrix is an optional input parameter (default = NULL) that is necessary to return the path of differences. Only for univariate time series Q and C.}
 \item{ws}{integer, describes the window size for the sakoe chiba window. If NULL, then no window is applied. (default = NULL)
 }
-\item{return_cm}{boolean, if TRUE then the Matrix of costs (the absolute value) is returned. (default = FALSE)
+\item{return_cm}{logical, if TRUE then the Matrix of costs (the absolute value) is returned. (default = FALSE)
 }
-\item{return_diffM}{boolean, if TRUE then the Matrix of differences (not the absolute value) is returned. (default = FALSE)
+\item{return_diffM}{logical, if TRUE then the Matrix of differences (not the absolute value) is returned. (default = FALSE)
 }
 \item{return_wp}{
-boolean, if TRUE then the warping path is returned. (default = FALSE) If return_diffp == TRUE, then return_wp is set to TRUE as well.
+logical, if TRUE then the warping path is returned. (default = FALSE) If return_diffp == TRUE, then return_wp is set to TRUE as well.
 }
 \item{return_diffp}{
-boolean, if TRUE then the path of differences (not the absolute value) is returned. (default = FALSE)
+logical, if TRUE then the path of differences (not the absolute value) is returned. (default = FALSE)
 }
 \item{return_QC}{
-boolean, if TRUE then the input vectors Q and C are appended to the returned list. This is useful for the \code{\link{plot.idtw}} function.  (default = FALSE)}
+logical, if TRUE then the input vectors Q and C are appended to the returned list. This is useful for the \code{\link{plot.idtw}} function.  (default = FALSE)}
 }
 \details{
 The dynamic time warping distance is the element in the last row and last column of the global cost matrix.
@@ -63,45 +65,35 @@ The dynamic time warping distance is the element in the last row and last column
 Sakoe, H.; Chiba, S., Dynamic programming algorithm optimization for spoken word recognition, Acoustics, Speech, and Signal Processing [see also IEEE Transactions on Signal Processing], IEEE Transactions on , vol.26, no.1, pp. 43-49, Feb 1978.
 http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1163055
 }
-\author{
-Maximilian Leodolter
-}
+
 
 \examples{
+#--- Compare the incremental calculation with the basic
+# calculation from scratch.
 Q <- cumsum(rnorm(100))
 C <- Q[11:100] + rnorm(90, 0, 0.5)
-newObs <-  c(2,3)# new observation
-base <- dtw(Q=Q, C=C, ws = 15, return_diffM = TRUE) # the ordinary calculation
+newObs <-  c(2, 3)# new observation
+base <- dtw(Q = Q, C = C, ws = 15, return_diffM = TRUE) 
+base
+
+# recalculation from scratch with new observations
+result0 <- dtw(Q = Q, C = c(C, newObs), ws = 15,  return_diffM = TRUE)
+
+# the incremental step with new observations
+result1 <- idtw(Q, C, ws = 15, newO = newObs, gcm = base$gcm, 
+                dm = base$dm, diffM = base$diffM, return_diffp = TRUE,  
+                return_diffM = TRUE, return_QC = TRUE) 
+print(result1, digits = 2)
+plot(result1)
 
 
-#--- recalculation from scratch with new observations
-result0 <- dtw(Q=Q, C=c(C, newObs), ws = 15,  return_diffM = TRUE) # the ordinary calculation
-
-#--- the incremental step with new observations
-result1 <- idtw(Q, C, ws = 15, newO = newObs, gcm=base$gcm, dm=base$dm, diffM = base$diffM, 
-               return_diffp = TRUE,  return_diffM = TRUE) 
-
-#--- the incremental step with new observations, 
-#     but already calculated additive costMatrix cm_add
-mQ <- matrix(Q, ncol = length(newObs), nrow = length(Q), byrow = FALSE)
-mC <- matrix(newObs, ncol = length(newObs), nrow = length(Q), byrow = TRUE)
-cm_add <- matrix(abs(mQ - mC), ncol = length(newObs))
-result2 <- idtw(Q=cm_add, C="cm_add", ws = 15, newO = newObs, gcm=base$gcm, dm=base$dm) 
+#--- Compare the incremental calculation with external calculated 
+# costMatrix cm_add with the basic calculation from scratch.
+cm_add <- cm(Q, newObs)
+result2 <- idtw(Q = cm_add, C = "cm_add", ws = 15, newO = newObs, 
+                gcm = base$gcm, dm = base$dm) 
 
 c(result0$distance, result1$distance, result2$distance)
-
-
-#--- now with integers
-Q <- 1:10
-C <- 2:20
-base <- dtw(Q=Q, C=C, ws = 15, return_diffM = TRUE) # the ordinary calculation
-# new observation
-newObs <-  c(2L,3L)
-# the incremental step with new observations
-tmp1 <- idtw(Q, C, newO = newObs, gcm=base$gcm, dm=base$dm, diffM = base$diffM, 
-      return_diffp = TRUE, ws = 15, return_diffM = TRUE) 
-str(tmp1)
-
 
 
 }

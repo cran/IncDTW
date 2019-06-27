@@ -1,4 +1,4 @@
-context("DBA")
+context("dba")
 # library(dtw)
 
 test_that("correct length of output", {
@@ -8,7 +8,7 @@ test_that("correct length of output", {
    })
    m0 <- lot[[1]]
    ITERMAX <- 10
-   tmp <- DBA(m0 = m0, lot = lot, iterMax = ITERMAX, eps = NULL, dist_method = "norm2", ws = WS,
+   tmp <- dba(m0 = m0, lot = lot, iterMax = ITERMAX, eps = NULL, dist_method = "norm2", ws = WS,
                 iter_dist_method = "max")
    m1 <- tmp$iterations[[ ITERMAX + 1 ]]
    
