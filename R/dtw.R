@@ -79,12 +79,8 @@ dtw <- function(Q, C, dist_method = c("norm1", "norm2", "norm2_square"),
    }
   
    #--- initial checking
-   if(!is.null(ws)){
-      if(abs(n-m)>ws){
-         stop("window size is too small, no warping path can be found")
-      }
-   }
-
+   ws <- initial_ws_check2(nQ = n, nC = m, ws = ws)
+   
    #--- preparation
    if(!is.character(C)){
       ws_cpp <- ifelse(is.null(ws), yes = -1, no = ws)
@@ -298,7 +294,8 @@ dtw2vec_cm <- function(cm, step_pattern = c("symmetric2", "symmetric1"), ws = NU
       
    }else {
       # ea and sakoe chiba
-      if(is.null(ws)) ws <- max(c(nrow(cm), ncol(cm)))
+      ws <- initial_ws_check2(nrow(cm), ncol(cm), ws)
+      if(is.null(ws)){ws <- max(c(nrow(cm), ncol(cm)))}
       if(is.null(threshold)) threshold <- Inf
       ret <- cpp_dtw2vec_cm_ws_ea(cm = cm, step_pattern = step_pattern, 
                                   ws = ws, threshold = threshold)
@@ -325,11 +322,8 @@ dtw2vec_univ <- function(Q, C, step_pattern = c("symmetric2", "symmetric1"), ws 
    initial_dim_check(Q = Q, C = C)
    # params <-  get_params(step_pattern = step_pattern,
    #                       ws = ws, threshold = threshold)
-   if(!is.null(ws)){
-      if(abs(length(Q) - length(C)) > ws){
-         stop("window size is too small, no warping path can be found")
-      }  
-   }
+   ws <- initial_ws_check2(nQ = length(Q), nC = length(C), ws = ws)
+   
    
    if(is.null(ws) & is.null(threshold)){
       # fastest implementation for unrestricted warp
@@ -375,12 +369,7 @@ dtw2vec_multiv <- function(Q, C, dist_method = c("norm1", "norm2", "norm2_square
    dist_method <- match.arg(dist_method)
    step_pattern <- match.arg(step_pattern)
    initial_dim_check(Q = Q, C = C)
-   
-   if(!is.null(ws)){
-      if(abs(nrow(Q) - nrow(C)) > ws){
-         stop("Window size is too small, no warping path can be found.")
-      }  
-   }
+   ws <- initial_ws_check2(nQ = nrow(Q), nC = nrow(C), ws = ws)
    
    if(is.null(ws) & is.null(threshold)){
       # fastest implementation for unrestricted warp
@@ -430,6 +419,8 @@ dtw_dismat <- function(lot, dist_method = c("norm1", "norm2", "norm2_square"),
    
    # initial dim check
    lapply(lot[-1], function(x){initial_dim_check(Q = lot[[1]], C = x)})
+   ws <- ws_Inf2NULL(ws)
+   
    if(is.vector(lot[[1]])){
       is_vector <- TRUE 
       lapply(lot, function(x){
@@ -585,6 +576,8 @@ dtw_disvec <- function(Q, lot, dist_method = c("norm1", "norm2", "norm2_square")
    
    # initial dim check
    lapply(lot, function(x){initial_dim_check(Q = Q, C = x)})
+   ws <- ws_Inf2NULL(ws)
+   
    if(is.vector(lot[[1]])){
       is_vector <- TRUE 
       lapply(lot, function(x){initial_ws_check(nQ = length(Q), nC = length(x), ws = ws)})
@@ -662,22 +655,32 @@ dtw_disvec <- function(Q, lot, dist_method = c("norm1", "norm2", "norm2_square")
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-
 norm <- function(x, type = c("z", "01"), 
+                 threshold = 1e-5,
                  xmean = NULL, xsd = NULL, xmin = NULL, xmax = NULL){
+   
+   .Deprecated("scale")
+   return(
+      scale(x = x, type = type, threshold = threshold, xmean = xmean, xsd = xsd, xmin = xmin, xmax = xmax)
+   )
+}
+
+scale <- function(x, type = c("z", "01"), threshold = 1e-5,
+                 xmean = NULL, xsd = NULL, xmin = NULL, xmax = NULL){
+   
    type <- match.arg(type)
    if(type == "z"){
       if(is.vector(x)){
-         return(cpp_znorm(x, mu_in = xmean, sd_in = xsd))   
+         return(cpp_znorm(x, sd_threshold = threshold, mu_in = xmean, sd_in = xsd))   
       }else{
-         return(apply(x, 2, function(y){cpp_znorm(x = y, mu_in = xmean, sd_in = xsd)}))   
+         return(apply(x, 2, function(y){cpp_znorm(x = y, sd_threshold = threshold, mu_in = xmean, sd_in = xsd)}))   
       }
       
    }else if(type == "01"){
       if(is.vector(x)){
-         return(cpp_norm01(x, min_in = xmin, max_in = xmax))
+         return(cpp_norm01(x, sd_threshold = threshold, min_in = xmin, max_in = xmax))
       }else{
-         return(apply(x, 2, function(y){cpp_norm01(x = y, min_in = xmin, max_in = xmax)}))
+         return(apply(x, 2, function(y){cpp_norm01(x = y, sd_threshold = threshold, min_in = xmin, max_in = xmax)}))
       }
       
    }else{
@@ -718,17 +721,43 @@ initial_ws_check <- function(nQ, nC, ws){
    is_error <- TRUE
    if(is.null(ws)){
       is_error <- FALSE
-      
+
    }else{
       if(abs(nQ - nC) <= ws){
-         is_error <- FALSE   
+         is_error <- FALSE
       }
    }
-   
-      
+
+
    if(is_error){
       stop("window size is too small, no warping path can be found")
    }
+}
+
+
+initial_ws_check2 <- function(nQ, nC, ws){
+   
+   if(!is.null(ws)){
+      if(ws == Inf){
+         ws <- NULL
+      }else{
+         if(abs(nQ - nC) > ws){
+            stop("window size is too small, no warping path can be found")
+         }   
+      }
+   }
+   return(ws)
+}
+
+
+ws_Inf2NULL <- function(ws){
+   
+   if(!is.null(ws)){
+      if(ws == Inf){
+         ws <- NULL
+      }
+   }
+   return(ws)
 }
 
 

@@ -31,7 +31,7 @@ extern SEXP _IncDTW_cpp_dtw2vec_ws_ea(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _IncDTW_cpp_get_tube(SEXP, SEXP);
 extern SEXP _IncDTW_cpp_kNN_rev(SEXP, SEXP, SEXP);
 extern SEXP _IncDTW_cpp_local_min(SEXP, SEXP, SEXP);
-extern SEXP _IncDTW_cpp_norm01(SEXP, SEXP, SEXP);
+extern SEXP _IncDTW_cpp_norm01(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _IncDTW_cpp_rundtw(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _IncDTW_cpp_rundtw_lot(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _IncDTW_cpp_rundtw_mv(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -42,7 +42,7 @@ extern SEXP _IncDTW_cpp_rundtw_znorm_mv(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP
 extern SEXP _IncDTW_cpp_rundtw_znorm_mv_lot(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _IncDTW_cpp_set_tube(SEXP, SEXP, SEXP);
 extern SEXP _IncDTW_cpp_set_tube_mv(SEXP, SEXP, SEXP);
-extern SEXP _IncDTW_cpp_znorm(SEXP, SEXP, SEXP);
+extern SEXP _IncDTW_cpp_znorm(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _IncDTW_GCM_cpp(SEXP, SEXP);
 extern SEXP _IncDTW_GCM_Sakoe_cpp(SEXP, SEXP, SEXP);
 extern SEXP _IncDTW_get_lb(SEXP, SEXP, SEXP, SEXP);
@@ -79,7 +79,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IncDTW_cpp_get_tube",            (DL_FUNC) &_IncDTW_cpp_get_tube,             2},
     {"_IncDTW_cpp_kNN_rev",             (DL_FUNC) &_IncDTW_cpp_kNN_rev,              3},
     {"_IncDTW_cpp_local_min",           (DL_FUNC) &_IncDTW_cpp_local_min,            3},
-    {"_IncDTW_cpp_norm01",              (DL_FUNC) &_IncDTW_cpp_norm01,               3},
+    {"_IncDTW_cpp_norm01",              (DL_FUNC) &_IncDTW_cpp_norm01,               4},
     {"_IncDTW_cpp_rundtw",              (DL_FUNC) &_IncDTW_cpp_rundtw,              11},
     {"_IncDTW_cpp_rundtw_lot",          (DL_FUNC) &_IncDTW_cpp_rundtw_lot,          15},
     {"_IncDTW_cpp_rundtw_mv",           (DL_FUNC) &_IncDTW_cpp_rundtw_mv,           12},
@@ -90,7 +90,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IncDTW_cpp_rundtw_znorm_mv_lot", (DL_FUNC) &_IncDTW_cpp_rundtw_znorm_mv_lot, 15},
     {"_IncDTW_cpp_set_tube",            (DL_FUNC) &_IncDTW_cpp_set_tube,             3},
     {"_IncDTW_cpp_set_tube_mv",         (DL_FUNC) &_IncDTW_cpp_set_tube_mv,          3},
-    {"_IncDTW_cpp_znorm",               (DL_FUNC) &_IncDTW_cpp_znorm,                3},
+    {"_IncDTW_cpp_znorm",               (DL_FUNC) &_IncDTW_cpp_znorm,                4},
     {"_IncDTW_GCM_cpp",                 (DL_FUNC) &_IncDTW_GCM_cpp,                  2},
     {"_IncDTW_GCM_Sakoe_cpp",           (DL_FUNC) &_IncDTW_GCM_Sakoe_cpp,            3},
     {"_IncDTW_get_lb",                  (DL_FUNC) &_IncDTW_get_lb,                   4},

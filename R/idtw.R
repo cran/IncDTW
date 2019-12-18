@@ -61,11 +61,8 @@ idtw <- function(Q, C, newObs, gcm, dm, dist_method = c("norm1", "norm2", "norm2
    
    #--- initial checking
    m2 <- o + m
-   if(!is.null(ws)){
-      if(abs(n-m2)>ws){
-         stop("window size is too small, no warping path can be found")
-      }
-   }
+   ws <- initial_ws_check2(nQ = n, nC = m2, ws = ws)
+   
    
    #--- preparation
    gcm <- cbind(gcm, matrix(NA, nrow = n, ncol = o))
@@ -540,6 +537,7 @@ idtw2vec_cm <- function(cm, step_pattern = c("symmetric2", "symmetric1"),
                         gcm_lc = NULL, gcm_lr = NULL, nC = NULL, ws = NULL){
    
    step_pattern <- match.arg(step_pattern)
+   ws <- ws_Inf2NULL(ws)
    
    if(is.null(gcm_lc)){
       # initial case
@@ -604,18 +602,15 @@ idtw2vec_univ <- function(Q, newObs, step_pattern = c("symmetric2", "symmetric1"
    
    step_pattern <- match.arg(step_pattern)
    initial_dim_check(Q = Q, C = newObs)
+   ws <- ws_Inf2NULL(ws)
    
    #--- initial checking
    nQ <- length(Q)
    if(!is.null(ws)){
       if(is.null(gcm_lc)){
-         if(abs(nQ - (length(newObs) + 0)) > ws){
-            stop("window size is too small, no warping path can be found")
-         }  
+         ws <- initial_ws_check2(nQ = nQ, nC = (length(newObs) + 0), ws = ws)
       }else{
-         if(abs(nQ - (length(newObs) + nC)) > ws){
-            stop("window size is too small, no warping path can be found")
-         }
+         ws <- initial_ws_check2(nQ = nQ, nC = (length(newObs) + nC), ws = ws)
       }
    } 
    
@@ -689,16 +684,13 @@ idtw2vec_multiv <- function(Q, newObs, dist_method = c("norm1", "norm2", "norm2_
    step_pattern <- match.arg(step_pattern)
    dist_method <- match.arg(dist_method)
    initial_dim_check(Q = Q, C = newObs)
+   ws <- ws_Inf2NULL(ws)
    
    if(!is.null(ws)){
       if(is.null(gcm_lc)){
-         if(abs(nrow(Q) - (nrow(newObs) + 0)) > ws){
-            stop("window size is too small, no warping path can be found")
-         }  
+         ws <- initial_ws_check2(nQ = nrow(Q), nC = (nrow(newObs) + 0), ws = ws)
       }else{
-         if(abs(nrow(Q) - (nrow(newObs) + nC)) > ws){
-            stop("window size is too small, no warping path can be found")
-         }
+         ws <- initial_ws_check2(nQ = nrow(Q), nC = (nrow(newObs) + nC), ws = ws)
       }
    }
    

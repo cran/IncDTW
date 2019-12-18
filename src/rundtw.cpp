@@ -4,6 +4,8 @@ using namespace Rcpp;
 using namespace std;
 
 
+
+
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -723,7 +725,14 @@ void set_mean_sigma_mv(NumericVector &mu,
          tmp += x(i,c) * x(i,c);
       }
       sigma2[c] = tmp/(nh-1) - mu2 * nh/(nh-1);
-      sigma[c] = sqrt(sigma2[c]);
+      
+      // if(sigma2[c] < var_precision){
+      if(sigma2[c] < 0.0000000001){
+         sigma[c] = 1; 
+      } else{
+         sigma[c] = sqrt(sigma2[c]);
+      }
+      
    }
 }
 
@@ -738,6 +747,11 @@ void cpp_norm01(const NumericVector &x, NumericVector &y,
    // cpp_norm01_noreturn
    
    double nominator = xmax - xmin;
+   
+   // double sd_precision = 0.000000001; // 1e-9
+   // if(nominator < sd_precision) nominator = 1;
+   if(nominator < 0.000000001) nominator = 1;
+   
    for(int i = i0; i < i1; i++){
       y[i] = (x[i] - xmin)/nominator ;
    }
@@ -751,7 +765,13 @@ void cpp_norm01(const NumericVector &x, NumericVector &y,
 void cpp_norm01_mv(const NumericMatrix &x, NumericMatrix &y,
                    int c, int i0, int i1, double xmin, double xmax){
    
+   
    double nominator = xmax - xmin;
+   
+   // double sd_precision = 0.000000001; // 1e-9
+   // if(nominator < sd_precision) nominator = 1;
+   if(nominator < 0.000000001) nominator = 1;
+   
    for(int i = i0; i < i1; i++){
       y(i,c) = (x(i,c) - xmin)/nominator ;
    }
@@ -3308,9 +3328,11 @@ List cpp_rundtw_znorm(const NumericVector &h,
    double mu = 0;
    double mu2 = 0;
    double sigma = 0;
+   double var_precision = 0.000000001 ; // 1e-9
    double sigma2 = 0;
    double z_j = 0; 
    NumericVector ret(nx-nh+1, 0.0); // return vetor
+   
    
    
    // set initial indices: it is possible that the first 
@@ -3326,8 +3348,11 @@ List cpp_rundtw_znorm(const NumericVector &h,
    mu = get_mean(x, j, jmax);
    mu2 = mu * mu;
    sigma2 = get_sigma2(x, j, jmax, mu2);
-   sigma = sqrt(sigma2);
-   
+   if(sigma2 < var_precision){
+      sigma = 1; 
+   } else{
+      sigma = sqrt(sigma2);
+   }
    
    if(debug == 1){
       Rcout << "j = "<< j << " ... mu: "<< mu << " "<< " sigma: "<< sigma << " sigma2: "<< sigma2 << "\n";
@@ -3519,7 +3544,6 @@ List cpp_rundtw_znorm(const NumericVector &h,
          mu += (x[jmax] - x[j-1])/nh;
          sigma2 += (x[jmax] * x[jmax] - x[j-1] * x[j-1])/(nh-1) + 
             (mu0 * mu0 - mu * mu) * nh/(nh-1);
-         sigma = sqrt(sigma2);
          
       }else{
          //  discretization of the new window from scratch
@@ -3527,8 +3551,15 @@ List cpp_rundtw_znorm(const NumericVector &h,
          mu = get_mean(x, j, jmax);
          mu2 = mu * mu;
          sigma2 = get_sigma2(x, j, jmax, mu2);
+      }
+      
+      if(sigma2 < var_precision){
+         sigma = 1; 
+      } else{
          sigma = sqrt(sigma2);
       }
+      // Rcout << "\nsigma2: "<< sigma2 << "sigma: "<< sigma << "\n";
+      
       j_prev_norm = j;
       
       if(debug == 1){
@@ -3810,6 +3841,7 @@ List cpp_rundtw_znorm_lot(const NumericVector &h,
    double mu = 0;
    double mu2 = 0;
    double sigma = 0;
+   double var_precision = 0.000000001 ; // 1e-9
    double sigma2 = 0;
    double z_j = 0; 
    NumericVector ret(nx-nh+1, 0.0); // return vetor
@@ -3828,8 +3860,11 @@ List cpp_rundtw_znorm_lot(const NumericVector &h,
    mu = get_mean(x, j, jmax);
    mu2 = mu * mu;
    sigma2 = get_sigma2(x, j, jmax, mu2);
-   sigma = sqrt(sigma2);
-   
+   if(sigma2 < var_precision){
+      sigma = 1; 
+   } else{
+      sigma = sqrt(sigma2);
+   }
    
    if(debug == 1){
       Rcout << "j = "<< j << " ... mu: "<< mu << " "<< " sigma: "<< sigma << " sigma2: "<< sigma2 << "\n";
@@ -4013,7 +4048,6 @@ List cpp_rundtw_znorm_lot(const NumericVector &h,
          mu += (x[jmax] - x[j-1])/nh;
          sigma2 += (x[jmax] * x[jmax] - x[j-1] * x[j-1])/(nh-1) + 
             (mu0 * mu0 - mu * mu) * nh/(nh-1);
-         sigma = sqrt(sigma2);
          
       }else{
          //  discretization of the new window from scratch
@@ -4021,9 +4055,15 @@ List cpp_rundtw_znorm_lot(const NumericVector &h,
          mu = get_mean(x, j, jmax);
          mu2 = mu * mu;
          sigma2 = get_sigma2(x, j, jmax, mu2);
+      }
+      
+      if(sigma2 < var_precision){
+         sigma = 1; 
+      } else{
          sigma = sqrt(sigma2);
       }
       j_prev_norm = j;
+      
       
       if(debug == 1){
          Rcout << "j = "<< j << " ... mu: "<< mu << " "<< " sigma: "<< sigma << " sigma2: "<< sigma2 << "\n";
@@ -4294,6 +4334,7 @@ List cpp_rundtw_znorm_mv(const NumericMatrix &h,
    NumericVector kNN_val (kNNk, 0.0);
    kNN_Info kNN_inf;
    
+   double var_precision = 0.000000001 ; // 1e-9
    NumericVector sigma2(nc); 
    NumericVector sigma(nc); 
    NumericVector mu(nc); 
@@ -4490,7 +4531,12 @@ List cpp_rundtw_znorm_mv(const NumericMatrix &h,
             mu[c] += ( x(jmax, c) - x(j-1, c) )/nh;
             sigma2[c] += (x(jmax, c) * x(jmax, c) - x(j-1, c) * x(j-1, c) )/(nh-1) + 
                (mu0 * mu0 - mu[c] * mu[c]) * nh/(nh-1);
-            sigma[c] = sqrt(sigma2[c]);
+            
+            if(sigma2[c] < var_precision){
+               sigma[c] = 1; 
+            } else{
+               sigma[c] = sqrt(sigma2[c]);
+            }
          }
          
       }else{
@@ -4776,6 +4822,7 @@ List cpp_rundtw_znorm_mv_lot(const NumericMatrix &h,
    int kNNk = as<int>(kNN_inf_list["nr_looking4"]);
    kNN_Info kNN_inf;
    
+   double var_precision = 0.000000001 ; // 1e-9
    NumericVector sigma2(nc); 
    NumericVector sigma(nc); 
    NumericVector mu(nc); 
@@ -4984,7 +5031,12 @@ List cpp_rundtw_znorm_mv_lot(const NumericMatrix &h,
             mu[c] += ( x(jmax, c) - x(j-1, c) )/nh;
             sigma2[c] += (x(jmax, c) * x(jmax, c) - x(j-1, c) * x(j-1, c) )/(nh-1) + 
                (mu0 * mu0 - mu[c] * mu[c]) * nh/(nh-1);
-            sigma[c] = sqrt(sigma2[c]);
+            
+            if(sigma2[c] < var_precision){
+               sigma[c] = 1; 
+            } else{
+               sigma[c] = sqrt(sigma2[c]);
+            }
          }
          
       }else{

@@ -165,7 +165,7 @@ XPtr<funcPtr_step> selectGcmStep(std::string step_pattern) {
 
 
 // [[Rcpp::export]]
-NumericVector cpp_znorm(NumericVector x,
+NumericVector cpp_znorm(NumericVector x, double sd_threshold,
                         Rcpp::Nullable< Rcpp::NumericVector > mu_in = R_NilValue,
                         Rcpp::Nullable< Rcpp::NumericVector > sd_in = R_NilValue)
  {
@@ -175,7 +175,7 @@ NumericVector cpp_znorm(NumericVector x,
    double mu;
    double sd;
    
-   if (mu_in.isNull() || sd_in.isNull()) {
+   if (mu_in.isNull() && sd_in.isNull()) {
       mu = 0;
       sd = 0;
       
@@ -190,17 +190,62 @@ NumericVector cpp_znorm(NumericVector x,
       }
       sd /= (N-1);
       sd = sqrt(sd);
-   
+      // Rcout << "\nsd: " << sd;
+      if(sd > sd_threshold){
+         for(int i = 0; i < N; i++ ){
+            y[i] /= sd;
+         }
+      }
+      
+   }else if (mu_in.isNull() && !sd_in.isNull()) {
+      mu = 0;
+      sd = Rcpp::as< Rcpp::NumericVector >(sd_in)[0];
+      
       for(int i = 0; i < N; i++ ){
-         y[i] /= sd;
+         mu += x[i];
+      }
+      mu /= N;
+      
+      if(sd > sd_threshold){
+         for(int i = 0; i < N; i++ ){
+            y[i] = (x[i] - mu)/sd;
+         }
+      }else{
+         for(int i = 0; i < N; i++ ){
+            y[i] = (x[i] - mu);
+         }
+      }
+      
+   }else if (!mu_in.isNull() && sd_in.isNull()) {
+      sd = 0;
+      mu = Rcpp::as< Rcpp::NumericVector >(mu_in)[0];
+      
+      for(int i = 0; i < N; i++ ){
+         y[i] = (x[i] - mu);
+         sd += y[i] * y[i];
+      }
+      sd /= (N-1);
+      sd = sqrt(sd);
+      
+      if(sd > sd_threshold){
+         for(int i = 0; i < N; i++ ){
+            y[i] /= sd;
+         }
       }
       
    }else{
       
       mu = Rcpp::as< Rcpp::NumericVector >(mu_in)[0];
       sd = Rcpp::as< Rcpp::NumericVector >(sd_in)[0];
-      for(int i = 0; i < N; i++ ){
-         y[i] = (x[i] - mu)/sd;
+      
+      if(sd > sd_threshold){
+         for(int i = 0; i < N; i++ ){
+            y[i] = (x[i] - mu)/sd;
+         }
+      }else{
+         for(int i = 0; i < N; i++ ){
+            y[i] = (x[i] - mu);
+         }
       }
    }
    
@@ -213,7 +258,7 @@ NumericVector cpp_znorm(NumericVector x,
 
 
 // [[Rcpp::export]]
-NumericVector cpp_norm01(NumericVector x,
+NumericVector cpp_norm01(NumericVector x, double sd_threshold,
                          Rcpp::Nullable< Rcpp::NumericVector > min_in = R_NilValue,
                          Rcpp::Nullable< Rcpp::NumericVector > max_in = R_NilValue)
 {
@@ -224,7 +269,7 @@ NumericVector cpp_norm01(NumericVector x,
    double xmin;
    double xmax;
    
-   if (min_in.isNull() || max_in.isNull()) {
+   if (min_in.isNull() && max_in.isNull()) {
       xmin = x[0];
       xmax = x[0];
       for(int i = 1; i < N; i++ ){
@@ -236,16 +281,42 @@ NumericVector cpp_norm01(NumericVector x,
          };
       }
       
-   } else{
+   } else if (min_in.isNull() && !max_in.isNull()) {
+      xmin = x[0];
+      xmax = Rcpp::as< Rcpp::NumericVector >(max_in)[0];
+      
+      for(int i = 1; i < N; i++ ){
+         if( x[i] < xmin){
+            xmin = x[i];
+         }
+      }
+      
+   }else if (!min_in.isNull() && max_in.isNull()) {
+      xmax = x[0];
+      xmin = Rcpp::as< Rcpp::NumericVector >(min_in)[0];
+      
+      for(int i = 1; i < N; i++ ){
+         if( x[i] > xmax){
+            xmax = x[i];
+         };
+      }
+      
+   }else{
       xmin = Rcpp::as< Rcpp::NumericVector >(min_in)[0];
       xmax = Rcpp::as< Rcpp::NumericVector >(max_in)[0];
    }
    
    denom = xmax - xmin;
-   
-   for(int i = 0; i < N; i++ ){
-      y[i] = (x[i] - xmin)/ denom;
+   if(denom > sd_threshold){
+      for(int i = 0; i < N; i++ ){
+         y[i] = (x[i] - xmin)/ denom;
+      }
+   }else{
+      for(int i = 0; i < N; i++ ){
+         y[i] = (x[i] - xmin);
+      }
    }
+   
    
    return y;
 }

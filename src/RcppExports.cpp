@@ -7,28 +7,30 @@
 using namespace Rcpp;
 
 // cpp_znorm
-NumericVector cpp_znorm(NumericVector x, Rcpp::Nullable< Rcpp::NumericVector > mu_in, Rcpp::Nullable< Rcpp::NumericVector > sd_in);
-RcppExport SEXP _IncDTW_cpp_znorm(SEXP xSEXP, SEXP mu_inSEXP, SEXP sd_inSEXP) {
+NumericVector cpp_znorm(NumericVector x, double sd_threshold, Rcpp::Nullable< Rcpp::NumericVector > mu_in, Rcpp::Nullable< Rcpp::NumericVector > sd_in);
+RcppExport SEXP _IncDTW_cpp_znorm(SEXP xSEXP, SEXP sd_thresholdSEXP, SEXP mu_inSEXP, SEXP sd_inSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type sd_threshold(sd_thresholdSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable< Rcpp::NumericVector > >::type mu_in(mu_inSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable< Rcpp::NumericVector > >::type sd_in(sd_inSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_znorm(x, mu_in, sd_in));
+    rcpp_result_gen = Rcpp::wrap(cpp_znorm(x, sd_threshold, mu_in, sd_in));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_norm01
-NumericVector cpp_norm01(NumericVector x, Rcpp::Nullable< Rcpp::NumericVector > min_in, Rcpp::Nullable< Rcpp::NumericVector > max_in);
-RcppExport SEXP _IncDTW_cpp_norm01(SEXP xSEXP, SEXP min_inSEXP, SEXP max_inSEXP) {
+NumericVector cpp_norm01(NumericVector x, double sd_threshold, Rcpp::Nullable< Rcpp::NumericVector > min_in, Rcpp::Nullable< Rcpp::NumericVector > max_in);
+RcppExport SEXP _IncDTW_cpp_norm01(SEXP xSEXP, SEXP sd_thresholdSEXP, SEXP min_inSEXP, SEXP max_inSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type sd_threshold(sd_thresholdSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable< Rcpp::NumericVector > >::type min_in(min_inSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable< Rcpp::NumericVector > >::type max_in(max_inSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_norm01(x, min_in, max_in));
+    rcpp_result_gen = Rcpp::wrap(cpp_norm01(x, sd_threshold, min_in, max_in));
     return rcpp_result_gen;
 END_RCPP
 }

@@ -51,7 +51,7 @@ dba <- function(lot, m0 = NULL, iterMax = 10, eps = NULL,
    step_pattern <- match.arg(step_pattern)
    iter_dist_method <- match.arg(iter_dist_method)
    iter_dist_foo <- match_idm(iter_dist_method)
-   
+   ws <- ws_Inf2NULL(ws)
    
    input <- list(iterMax = iterMax, eps = eps, step_pattern = step_pattern,
                  dist_method = dist_method, ws = ws, 
