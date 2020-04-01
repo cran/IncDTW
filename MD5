@@ -1,4 +1,4 @@
-bed8792836210111e519c84d0091862e *DESCRIPTION
+9a313e6f03528aaa8e51ea8cf3f84d33 *DESCRIPTION
 0e028bc6df8b560d09437c770f0db4da *NAMESPACE
 d7bb49a325623c3c83ef2e539ccc109e *R/DBA.R
 5747ee6331aeed0fc1ae21da5cad0c1f *R/RcppExports.R
@@ -10,11 +10,11 @@ c12b04d0172e15cc682733968cb71236 *R/idtw.R
 7f1043b1c0c38c38298443491cd24fe7 *R/s3_plot.R
 765c87d4f5cdb1044d8f16f8c9af7fdc *R/s3_print.R
 fcff7071d304aee3b11acd3f8b761d2e *R/s3_summary.R
-29075e8ce0aeb9e003bffd42ae7aea6f *build/vignette.rds
-9fdd140d9483614376b08204083c7776 *data/brush_teeth.rda
-09a357243b63e4eae091e2c3c1389331 *data/drink_glass.rda
-020d3586969444406a1a0bdf1f8f7dcb *data/walk.rda
-304b5e1ac6cd9ff65855ceca91f833d0 *inst/doc/Theory_and_Applications_for_the_R_Package_IncDTW.pdf
+df2b875c271056ac389da0ffd4660468 *build/vignette.rds
+f2656f676db597c8f429d9a3c952f710 *data/brush_teeth.rda
+faf64e479135bccf044f1ac978660b0c *data/drink_glass.rda
+f27788773534ab6d8429d95440b8347d *data/walk.rda
+800efa471e1d72eff906765e686247d2 *inst/doc/Theory_and_Applications_for_the_R_Package_IncDTW.pdf
 aa1774b6de0496b1c90056eb424d11c0 *inst/doc/Theory_and_Applications_for_the_R_Package_IncDTW.pdf.asis
 e8d8d1470a63f83825e644ac12d8e87c *man/DBA.Rd
 50f752746e173141ae1431455ae2fd0c *man/IncDTW-package.Rd
