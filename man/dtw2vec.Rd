@@ -36,8 +36,15 @@ no matrices are allocated, no matrices are returned
 \item{normalized_distance}{the normalized DTW distance, see also \code{\link{dtw}}}
 }
 \references{
-Sakoe, H.; Chiba, S., Dynamic programming algorithm optimization for spoken word recognition, Acoustics, Speech, and Signal Processing [see also IEEE Transactions on Signal Processing], IEEE Transactions on , vol.26, no.1, pp. 43-49, Feb 1978. http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1163055
+\itemize{
+\item Leodolter, M.; Pland, C.; Brändle, N; \emph{IncDTW: An R Package for Incremental Calculation of Dynamic Time Warping}. Journal of Statistical Software, 99(9), 1-23. \doi{10.18637/jss.v099.i09}
+
+\item Sakoe, H.; Chiba, S., \emph{Dynamic programming algorithm optimization for spoken word recognition, Acoustics, Speech, and Signal Processing} [see also IEEE Transactions on Signal Processing], IEEE Transactions on , vol.26, no.1, pp. 43-49, Feb 1978. http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1163055
+
+
 }
+}
+
 
 
 \examples{

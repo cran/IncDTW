@@ -113,10 +113,16 @@ Assent et al. (2009) proved that the DTW distance is reversible for the step pat
 \item{control}{list of input parameters and the lengths of the time series}
 }
 
-\references{
-Assent, Ira, et al. "Anticipatory DTW for efficient similarity search in time series databases." Proceedings of the VLDB Endowment 2.1 (2009): 826-837.
-}
 
+\references{
+\itemize{
+\item Leodolter, M.; Pland, C.; Brändle, N; \emph{IncDTW: An R Package for Incremental Calculation of Dynamic Time Warping}. Journal of Statistical Software, 99(9), 1-23. \doi{10.18637/jss.v099.i09}
+
+\item Assent, Ira, et al. "Anticipatory DTW for efficient similarity search in time series databases." Proceedings of the VLDB Endowment 2.1 (2009): 826-837.
+
+
+}
+}
 
 
 \examples{

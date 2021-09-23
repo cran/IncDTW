@@ -117,11 +117,22 @@ The parameter \code{iter_dist_method} describes the method to measure the progre
 \item{dismat_result}{list of results of \code{\link{dtw_dismat}} called by \code{centroid}}
 }
 
-\references{
-Sakoe, H.; Chiba, S., Dynamic programming algorithm optimization for spoken word recognition, Acoustics, Speech, and Signal Processing [see also IEEE Transactions on Signal Processing], IEEE Transactions on , vol.26, no.1, pp. 43-49, Feb 1978. \url{https://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1163055}
 
-Petitjean, F; Ketterlin, A; Gancarski, P, A global averaging method for dynamic time warping, with applications to clustering, Pattern Recognition, Volume 44, Issue 3, 2011, Pages 678-693, ISSN 0031-3203
+\references{
+\itemize{
+\item Leodolter, M.; Pland, C.; Brändle, N; \emph{IncDTW: An R Package for Incremental Calculation of Dynamic Time Warping}. Journal of Statistical Software, 99(9), 1-23. \doi{10.18637/jss.v099.i09}
+
+\item Sakoe, H.; Chiba, S., \emph{Dynamic programming algorithm optimization for spoken word recognition, Acoustics, Speech, and Signal Processing} [see also IEEE Transactions on Signal Processing], IEEE Transactions on , vol.26, no.1, pp. 43-49, Feb 1978. http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1163055
+
+\item Petitjean, F; Ketterlin, A; Gancarski, P, A global averaging method for dynamic time warping, with applications to clustering, Pattern Recognition, Volume 44, Issue 3, 2011, Pages 678-693, ISSN 0031-3203
+
 }
+}
+
+
+
+
+
 
 
 \examples{
