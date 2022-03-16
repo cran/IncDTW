@@ -123,6 +123,7 @@ test_that("IncDTW:dtw2vec is equal dtw::dtw, symmetric2_mv", {
 
 
 test_that("Warping paths are equal", {
+   set.seed(sample(100, 1))
    Q <- cumsum(rnorm(100))
    C <- Q[11:100] + rnorm(90, 0, 0.5)
    fooInc <- function(Q,C,ws){ IncDTW::dtw(Q = Q, C = C, ws = ws, step_pattern = 'symmetric1', return_wp = TRUE)$wp }

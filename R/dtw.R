@@ -4,7 +4,7 @@ cm <- function(Q, C, dist_method = c("norm1", "norm2", "norm2_square"), ws = NUL
    if(!is.matrix(Q)){ Q <- as.matrix(Q) }
    if(!is.matrix(C)){ C <- as.matrix(C) }
    
-   if(class(dist_method) == "function"){
+   if(inherits(dist_method, 'function')){
       
       nq <- nrow(Q); nc <- nrow(C)
       mat <- matrix(0, nrow = nq, ncol = nc)

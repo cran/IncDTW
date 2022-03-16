@@ -89,7 +89,7 @@ For the methods with Gaussian noise the parameters \code{mean} and \code{sd} for
 
 }
 \value{
-\item{}{time warped time series}
+A time warped time series
 }
 
 
