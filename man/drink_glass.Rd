@@ -21,7 +21,7 @@ list of 3-dimensional time series stored as matrix. The data is recorded with 32
 }
 \source{
 UCI Machine Learning Repository
-\url{https://archive.ics.uci.edu/ml/datasets/Dataset+for+ADL+Recognition+with+Wrist-worn+Accelerometer}
+\url{https://archive.ics.uci.edu/dataset/283/dataset+for+adl+recognition+with+wrist+worn+accelerometer}
 }
 
 \examples{
