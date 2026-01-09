@@ -1,4 +1,4 @@
-961045d5a7cc0e054d481341be59196d *DESCRIPTION
+ae231a44b13a4e1ff3cf66356b7c8f1e *DESCRIPTION
 2277f4e84db24fc5395bcf63ed545f98 *NAMESPACE
 2527f3194f8bff8c9285d4813e0d253e *NEWS.md
 d7bb49a325623c3c83ef2e539ccc109e *R/DBA.R
@@ -11,15 +11,15 @@ a9e755c15697f28a80b6333aff7104a6 *R/rundtw.R
 7f1043b1c0c38c38298443491cd24fe7 *R/s3_plot.R
 765c87d4f5cdb1044d8f16f8c9af7fdc *R/s3_print.R
 fcff7071d304aee3b11acd3f8b761d2e *R/s3_summary.R
-1bf18d9c216b8d95033f0bd2fe2906b2 *build/partial.rdb
+76e123f5dcc8dee07678412adc0a2a84 *build/partial.rdb
 8a0f6c4da87220b370a81b7c9abadc09 *build/vignette.rds
 9fdd140d9483614376b08204083c7776 *data/brush_teeth.rda
 09a357243b63e4eae091e2c3c1389331 *data/drink_glass.rda
 020d3586969444406a1a0bdf1f8f7dcb *data/walk.rda
 0c74775fc88e6699b2e88c3f1b129e59 *inst/CITATION
-800efa471e1d72eff906765e686247d2 *inst/doc/Theory_and_Applications_for_the_R_Package_IncDTW.pdf
-04ef404449615df2f907e19c6fbdbc7e *inst/doc/Theory_and_Applications_for_the_R_Package_IncDTW.pdf.asis
-0a48b67e5c6e504cc81eef98b44df157 *man/DBA.Rd
+ecbf119a28a5195b1b4f51df69344386 *inst/doc/Theory_and_Applications_for_the_R_Package_IncDTW.pdf
+8924b96b60985cfd4db20e0994fc2cde *inst/doc/Theory_and_Applications_for_the_R_Package_IncDTW.pdf.asis
+5ed168459b2619fcf5252f7fd1c63d44 *man/DBA.Rd
 31de7e656bc0ab446cc0d97b120301a7 *man/IncDTW-package.Rd
 b6e2e8a990c6f0ae0cce6ff2d8070cef *man/dec_dm.Rd
 08710e60881848bd2514bb9bbd6debc7 *man/drink_glass.Rd
@@ -40,8 +40,8 @@ aac70c0dd7afe2dcc55e138cbe5c96d9 *man/dtw2vec.Rd
 ade3783b30c0813c9fe2663a27296ead *man/simulate_timewarp.Rd
 4d4a1f9d376c73832694e31aa913a7d1 *src/GCM.cpp
 eeceb76d3c15cea0902866469def59e6 *src/IncDTW.h
-292a39a47f0030ee9acc63e340d22b26 *src/Makevars
-cde216eceaa304c0a14f6a72c4ebb090 *src/Makevars.win
+87c6bacc2e3e118d8fbdaeedc7ce69d0 *src/Makevars
+5bb30a826b45767dc66c4b30ec706440 *src/Makevars.win
 2a65fc400cad9d8da51d1cc987b7daa2 *src/RcppExports.cpp
 dab8684ee7f16f698ca2784955efdb85 *src/dtw2vec.cpp
 c5b303ea9d7d9bea94d443eb9b6028fc *src/dtw_dismat.cpp
@@ -66,4 +66,4 @@ addcf7cf5639c07e0f00f515fa8effa2 *tests/testthat/test_rundtw_multiv_znorm.R
 6d83d6a2af4ce2e7d9257165a0d818d2 *tests/testthat/test_rundtw_univ.R
 f31ce4f097924ad3d30a208ce711e57e *tests/testthat/test_rundtw_univ_znorm.R
 849aa3d4f7b3563187e5ae31e7e700da *tests/testthat/test_scale.R
-04ef404449615df2f907e19c6fbdbc7e *vignettes/Theory_and_Applications_for_the_R_Package_IncDTW.pdf.asis
+8924b96b60985cfd4db20e0994fc2cde *vignettes/Theory_and_Applications_for_the_R_Package_IncDTW.pdf.asis
